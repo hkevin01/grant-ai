@@ -77,6 +77,20 @@ matches = researcher.find_matches(coda, min_amount=10000, max_amount=100000)
 researcher.generate_report(matches, output_file="coda_grants.xlsx")
 ```
 
+## GUI Usage
+
+A Streamlit-based GUI is available for interactive grant search and management:
+
+```bash
+source venv/bin/activate
+streamlit run src/grant_ai/gui/app.py
+```
+
+This GUI allows you to:
+- Load or create an organization profile
+- Search for grants using state/federal scrapers
+- View and interact with results
+
 ## Project Structure
 
 ```
@@ -141,6 +155,14 @@ mypy src/
 # Linting
 flake8 src/ tests/
 ```
+
+## Scrapers
+
+The `src/grant_ai/scrapers/` module contains base and state/federal grant scrapers. Extend these to add more sources.
+
+## Database
+
+All grant and organization data can be stored in a SQLAlchemy database. See `src/grant_ai/db.py` for setup.
 
 ## Data Sources
 
