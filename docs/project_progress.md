@@ -96,6 +96,40 @@
 - [ ] `src/grant_ai/scrapers/`: Web scraping modules (framework ready)
 - [ ] `src/grant_ai/reports/`: Advanced report generation (basic version complete)
 
+## Progress Checklist
+
+### Infrastructure
+- [x] Python src-layout project structure
+- [x] Version control and .gitignore
+- [x] .github workflows and Copilot instructions
+- [x] Scripts and docs folders
+- [x] pyproject.toml and dependencies
+- [x] Virtual environment setup
+- [x] SQLAlchemy database integration
+
+### Core Modules
+- [x] Organization, Grant, and AICompany data models
+- [x] GrantResearcher analysis and matching
+- [x] CLI for profile and grant management
+- [x] Scrapers module for state/federal/common sources
+- [ ] Implement real grant scraping logic
+
+### GUI
+- [x] Streamlit GUI scaffolded
+- [ ] Connect GUI to database and AI search
+- [ ] Add advanced search and filtering in GUI
+
+### Testing
+- [x] Unit test suite with pytest
+- [x] Test fixtures and sample data
+- [ ] Integration tests for scrapers and GUI
+- [ ] End-to-end tests for user workflows
+
+## To Do
+- [ ] Complete application management system
+- [ ] Finalize user and technical documentation
+- [ ] Refine and expand test coverage
+
 ## Current Development Status 🚀
 
 ### ✅ Infrastructure Complete
