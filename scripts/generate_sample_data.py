@@ -9,9 +9,14 @@ import random
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-from grant_ai.models.organization import OrganizationProfile, FocusArea, ProgramType
-from grant_ai.models.grant import Grant, GrantStatus, FundingType, EligibilityType
-from grant_ai.models.ai_company import AICompany, CompanySize, AIFocusArea, ReputationRating
+from grant_ai.models.ai_company import (
+    AICompany,
+    AIFocusArea,
+    CompanySize,
+    ReputationRating,
+)
+from grant_ai.models.grant import EligibilityType, FundingType, Grant, GrantStatus
+from grant_ai.models.organization import FocusArea, OrganizationProfile, ProgramType
 
 
 def create_sample_grants() -> list[Grant]:

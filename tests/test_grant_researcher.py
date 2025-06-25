@@ -1,11 +1,12 @@
 """Unit tests for grant researcher functionality."""
 
-import pytest
 from datetime import date, timedelta
 
+import pytest
+
 from grant_ai.analysis.grant_researcher import GrantResearcher
-from grant_ai.models.grant import Grant, GrantStatus, FundingType, EligibilityType
 from grant_ai.models.ai_company import AICompany
+from grant_ai.models.grant import EligibilityType, FundingType, Grant, GrantStatus
 
 
 class TestGrantResearcher:

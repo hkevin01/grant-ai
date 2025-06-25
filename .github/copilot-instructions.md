@@ -9,16 +9,19 @@ This is a Python project for researching and managing grant applications for non
 3. **Organization Profiles**: Managing information for different organizations (CODA, NRG Development, etc.)
 
 ## Key Organizations:
+
 - **CODA**: Focuses on education programs in music, art, and robotics; offers after-school programs and summer camps
 - **Christian Pocket Community/NRG Development**: Developing affordable, efficient housing for retired people with support for struggling single mothers and others in need
 
 ## Project Structure:
+
 - Use src-layout Python project structure
 - Maintain clear separation between data collection, analysis, and application management
 - Follow Python best practices for modular, testable code
 - Include comprehensive documentation and progress tracking
 
 ## Code Guidelines:
+
 - Write clean, well-documented Python code
 - Use type hints where appropriate
 - Include docstrings for all functions and classes
@@ -27,6 +30,7 @@ This is a Python project for researching and managing grant applications for non
 - Use appropriate libraries for web scraping, data analysis, and API interactions
 
 ## Focus Areas:
+
 - Research methodologies for finding relevant grants
 - Data structures for storing grant and organization information
 - Filtering and matching algorithms

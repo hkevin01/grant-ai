@@ -7,10 +7,8 @@ name = "grant-ai"
 version = "0.1.0"
 description = "AI-powered grant research and application management for non-profit organizations"
 readme = "README.md"
-license = {text = "MIT"}
-authors = [
-    {name = "Grant Research Team", email = "contact@example.com"},
-]
+license = { text = "MIT" }
+authors = [{ name = "Grant Research Team", email = "contact@example.com" }]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Non-Profit Organizations",
@@ -47,11 +45,7 @@ dev = [
     "isort>=5.10.0",
     "pre-commit>=2.20.0",
 ]
-docs = [
-    "sphinx>=5.0.0",
-    "sphinx-rtd-theme>=1.0.0",
-    "myst-parser>=0.18.0",
-]
+docs = ["sphinx>=5.0.0", "sphinx-rtd-theme>=1.0.0", "myst-parser>=0.18.0"]
 
 [project.scripts]
 grant-ai = "grant_ai.cli:main"
@@ -126,12 +120,7 @@ markers = [
 
 [tool.coverage.run]
 source = ["src/grant_ai"]
-omit = [
-    "*/tests/*",
-    "*/test_*",
-    "*/__init__.py",
-    "*/conftest.py",
-]
+omit = ["*/tests/*", "*/test_*", "*/__init__.py", "*/conftest.py"]
 
 [tool.coverage.report]
 exclude_lines = [

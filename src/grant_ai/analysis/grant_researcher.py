@@ -1,14 +1,14 @@
 """Grant research and matching functionality."""
 
-from typing import List, Optional, Dict, Any
-import pandas as pd
-from datetime import datetime
 import logging
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from ..models.organization import OrganizationProfile
-from ..models.grant import Grant
+import pandas as pd
+
 from ..models.ai_company import AICompany
-
+from ..models.grant import Grant
+from ..models.organization import OrganizationProfile
 
 logger = logging.getLogger(__name__)
 

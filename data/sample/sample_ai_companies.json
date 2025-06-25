@@ -1,0 +1,231 @@
+[
+  {
+    "id": "openai-001",
+    "name": "OpenAI",
+    "description": "AI research and deployment company focused on ensuring AI benefits humanity",
+    "website": "https://openai.com/",
+    "size": "large",
+    "founded_year": 2015,
+    "headquarters": "San Francisco, CA",
+    "employee_count": null,
+    "ai_focus_areas": [
+      "natural_language",
+      "machine_learning"
+    ],
+    "technologies": [],
+    "has_grant_program": true,
+    "grant_program_name": "OpenAI Community Grant",
+    "grant_program_url": "https://openai.com/grants",
+    "grant_focus_areas": [
+      "education",
+      "research",
+      "social impact",
+      "AI safety"
+    ],
+    "typical_grant_amount": 75000,
+    "annual_grant_budget": null,
+    "target_demographics": [
+      "researchers",
+      "educators",
+      "nonprofits"
+    ],
+    "supported_organization_types": [
+      "nonprofit",
+      "education",
+      "research"
+    ],
+    "reputation_rating": "excellent",
+    "reputation_factors": {},
+    "social_impact_focus": [
+      "AI safety",
+      "education",
+      "research"
+    ],
+    "csr_initiatives": [],
+    "diversity_initiatives": true,
+    "revenue_range": null,
+    "funding_received": null,
+    "valuation": null,
+    "grant_contact_email": null,
+    "application_process": null,
+    "application_requirements": [],
+    "data_sources": [],
+    "last_updated": "2025-06-25 10:44:09.508906",
+    "created_at": "2025-06-25 10:44:09.508907",
+    "match_score": null,
+    "match_reasons": []
+  },
+  {
+    "id": "google-ai-002",
+    "name": "Google AI",
+    "description": "Google's artificial intelligence research division",
+    "website": "https://ai.google/",
+    "size": "enterprise",
+    "founded_year": 2017,
+    "headquarters": "Mountain View, CA",
+    "employee_count": null,
+    "ai_focus_areas": [
+      "machine_learning",
+      "computer_vision",
+      "natural_language"
+    ],
+    "technologies": [],
+    "has_grant_program": true,
+    "grant_program_name": "Google.org AI for Social Good",
+    "grant_program_url": "https://google.org/our-work/ai-for-social-good",
+    "grant_focus_areas": [
+      "social good",
+      "education",
+      "healthcare",
+      "environment"
+    ],
+    "typical_grant_amount": 100000,
+    "annual_grant_budget": null,
+    "target_demographics": [
+      "nonprofits",
+      "social organizations",
+      "researchers"
+    ],
+    "supported_organization_types": [
+      "nonprofit",
+      "research",
+      "social enterprise"
+    ],
+    "reputation_rating": "excellent",
+    "reputation_factors": {},
+    "social_impact_focus": [
+      "education",
+      "healthcare",
+      "climate",
+      "economic opportunity"
+    ],
+    "csr_initiatives": [],
+    "diversity_initiatives": true,
+    "revenue_range": null,
+    "funding_received": null,
+    "valuation": null,
+    "grant_contact_email": null,
+    "application_process": null,
+    "application_requirements": [],
+    "data_sources": [],
+    "last_updated": "2025-06-25 10:44:09.508930",
+    "created_at": "2025-06-25 10:44:09.508931",
+    "match_score": null,
+    "match_reasons": []
+  },
+  {
+    "id": "microsoft-ai-003",
+    "name": "Microsoft AI",
+    "description": "Microsoft's artificial intelligence platform and research",
+    "website": "https://microsoft.com/ai",
+    "size": "enterprise",
+    "founded_year": 2016,
+    "headquarters": "Redmond, WA",
+    "employee_count": null,
+    "ai_focus_areas": [
+      "machine_learning",
+      "natural_language",
+      "computer_vision"
+    ],
+    "technologies": [],
+    "has_grant_program": true,
+    "grant_program_name": "AI for Good",
+    "grant_program_url": "https://microsoft.com/ai-for-good",
+    "grant_focus_areas": [
+      "accessibility",
+      "humanitarian action",
+      "cultural heritage",
+      "earth"
+    ],
+    "typical_grant_amount": 150000,
+    "annual_grant_budget": null,
+    "target_demographics": [
+      "nonprofits",
+      "humanitarian organizations",
+      "researchers"
+    ],
+    "supported_organization_types": [
+      "nonprofit",
+      "humanitarian",
+      "research",
+      "education"
+    ],
+    "reputation_rating": "excellent",
+    "reputation_factors": {},
+    "social_impact_focus": [
+      "accessibility",
+      "humanitarian",
+      "sustainability",
+      "education"
+    ],
+    "csr_initiatives": [],
+    "diversity_initiatives": true,
+    "revenue_range": null,
+    "funding_received": null,
+    "valuation": null,
+    "grant_contact_email": null,
+    "application_process": null,
+    "application_requirements": [],
+    "data_sources": [],
+    "last_updated": "2025-06-25 10:44:09.508947",
+    "created_at": "2025-06-25 10:44:09.508948",
+    "match_score": null,
+    "match_reasons": []
+  },
+  {
+    "id": "anthropic-004",
+    "name": "Anthropic",
+    "description": "AI safety company focused on building reliable, interpretable, and steerable AI",
+    "website": "https://anthropic.com/",
+    "size": "medium",
+    "founded_year": 2021,
+    "headquarters": "San Francisco, CA",
+    "employee_count": null,
+    "ai_focus_areas": [
+      "natural_language",
+      "machine_learning"
+    ],
+    "technologies": [],
+    "has_grant_program": true,
+    "grant_program_name": "Anthropic Research Grants",
+    "grant_program_url": "https://anthropic.com/grants",
+    "grant_focus_areas": [
+      "AI safety",
+      "research",
+      "education",
+      "ethics"
+    ],
+    "typical_grant_amount": 50000,
+    "annual_grant_budget": null,
+    "target_demographics": [
+      "researchers",
+      "academics",
+      "safety organizations"
+    ],
+    "supported_organization_types": [
+      "research",
+      "education",
+      "nonprofit"
+    ],
+    "reputation_rating": "good",
+    "reputation_factors": {},
+    "social_impact_focus": [
+      "AI safety",
+      "research",
+      "education"
+    ],
+    "csr_initiatives": [],
+    "diversity_initiatives": true,
+    "revenue_range": null,
+    "funding_received": null,
+    "valuation": null,
+    "grant_contact_email": null,
+    "application_process": null,
+    "application_requirements": [],
+    "data_sources": [],
+    "last_updated": "2025-06-25 10:44:09.508964",
+    "created_at": "2025-06-25 10:44:09.508964",
+    "match_score": null,
+    "match_reasons": []
+  }
+]

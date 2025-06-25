@@ -1,16 +1,13 @@
 """Command line interface for Grant AI."""
 
-import click
 import json
 from pathlib import Path
 from typing import Optional
 
-from grant_ai.models.organization import (
-    OrganizationProfile,
-    FocusArea,
-    ProgramType
-)
+import click
+
 from grant_ai.analysis.grant_researcher import GrantResearcher
+from grant_ai.models.organization import FocusArea, OrganizationProfile, ProgramType
 
 
 @click.group()

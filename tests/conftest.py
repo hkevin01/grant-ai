@@ -1,11 +1,17 @@
 """Test configuration and fixtures for the Grant AI test suite."""
 
-import pytest
 from datetime import date, timedelta
 
-from grant_ai.models.organization import OrganizationProfile, FocusArea, ProgramType
-from grant_ai.models.grant import Grant, GrantStatus, FundingType, EligibilityType
-from grant_ai.models.ai_company import AICompany, CompanySize, AIFocusArea, ReputationRating
+import pytest
+
+from grant_ai.models.ai_company import (
+    AICompany,
+    AIFocusArea,
+    CompanySize,
+    ReputationRating,
+)
+from grant_ai.models.grant import EligibilityType, FundingType, Grant, GrantStatus
+from grant_ai.models.organization import FocusArea, OrganizationProfile, ProgramType
 
 
 @pytest.fixture

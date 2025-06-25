@@ -1,9 +1,10 @@
 """Unit tests for organization model."""
 
-import pytest
 from datetime import datetime
 
-from grant_ai.models.organization import OrganizationProfile, FocusArea, ProgramType
+import pytest
+
+from grant_ai.models.organization import FocusArea, OrganizationProfile, ProgramType
 
 
 class TestOrganizationProfile:

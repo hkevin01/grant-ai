@@ -4,9 +4,9 @@ Setup script for Grant AI project.
 Run this after cloning the repository to set up the development environment.
 """
 
+import os
 import subprocess
 import sys
-import os
 from pathlib import Path
 
 

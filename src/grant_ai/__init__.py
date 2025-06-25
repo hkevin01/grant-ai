@@ -7,7 +7,7 @@ analyze AI companies, and manage grant applications efficiently.
 
 __version__ = "0.1.0"
 
-from .models.organization import OrganizationProfile
 from .analysis.grant_researcher import GrantResearcher
+from .models.organization import OrganizationProfile
 
 __all__ = ["__version__", "OrganizationProfile", "GrantResearcher"]
