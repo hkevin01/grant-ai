@@ -116,14 +116,32 @@
 
 ### GUI
 - [x] Streamlit GUI scaffolded
-- [ ] Connect GUI to database and AI search
+- [x] PyQt GUI with grant search, org profile, and application tracking tabs
+- [x] Grant search tab loads grants from DB/JSON and matches to org profile
+- [ ] Connect GUI to live database for grant search and display
 - [ ] Add advanced search and filtering in GUI
+- [ ] Enable application tracking and reporting in GUI
+
+### Scrapers & Data Import
+- [x] Scraper module structure (base, state/federal, grants.gov)
+- [x] Grants.gov API scraper implemented
+- [x] CLI script to fetch grants from grants.gov API
+- [x] Script to import grants into database
+- [ ] Add/expand tests for scraper and CLI
+- [ ] Integrate additional grant sources (state, foundation, etc.)
 
 ### Testing
-- [x] Unit test suite with pytest
-- [x] Test fixtures and sample data
-- [ ] Integration tests for scrapers and GUI
+- [x] Unit tests for models, analysis, CLI
+- [x] Test for grants.gov API scraper
+- [ ] Integration tests for scraper, DB, and GUI
 - [ ] End-to-end tests for user workflows
+- [ ] Manual/Exploratory tests for GUI and edge cases
+
+### Documentation & Progress
+- [x] Project plan and progress files updated
+- [x] Test plan and progress files updated
+- [ ] Add user/technical documentation for new features
+- [ ] Update deliverables and checklists as features are completed
 
 ## To Do
 - [ ] Complete application management system

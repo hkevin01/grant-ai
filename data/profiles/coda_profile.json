@@ -1,0 +1,38 @@
+{
+  "name": "Coda Mountain Academy",
+  "description": "Coda Mountain Academy is a non-profit organization dedicated to equipping and developing young students and their families through unique and outstanding educational opportunities. We use Arts Integration to develop exposure and opportunities that promote healthy goal setting, positive identity, strong character, resiliency, and life skills. Coda hopes to change the world, one child at a time.",
+  "focus_areas": [
+    "education",
+    "art_education",
+    "robotics",
+    "youth_development"
+  ],
+  "program_types": [
+    "after_school",
+    "summer_camps",
+    "educational_workshops",
+    "community_outreach"
+  ],
+  "target_demographics": [
+    "Youth",
+    "Families",
+    "Students",
+    "Young people in crisis",
+    "Families affected by addiction"
+  ],
+  "annual_budget": null,
+  "location": "Fayetteville, West Virginia",
+  "website": "https://www.codamountain.com/",
+  "ein": null,
+  "founded_year": 2015,
+  "preferred_grant_size": [
+    25000,
+    100000
+  ],
+  "grant_history": [],
+  "contact_name": "Coda Mountain Academy Staff",
+  "contact_email": "info@codamountain.com",
+  "contact_phone": "304-900-0096",
+  "created_at": "2025-06-25 10:38:42.403624",
+  "updated_at": "2025-06-25 10:38:42.403629"
+}

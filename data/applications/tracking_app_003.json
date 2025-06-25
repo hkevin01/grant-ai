@@ -1,0 +1,53 @@
+{
+  "id": "tracking_app_003",
+  "application_id": "app_003",
+  "organization_id": "stem_robotics_academy",
+  "grant_id": "grant_2024_003",
+  "current_status": "draft",
+  "status_updated_at": "2024-06-25 14:20:00",
+  "events": [
+    {
+      "id": "event_app_003_1",
+      "application_id": "app_003",
+      "event_type": "created",
+      "status_from": null,
+      "status_to": "draft",
+      "description": "Application created",
+      "created_at": "2024-06-25 14:20:00",
+      "created_by": "emily.chen",
+      "metadata": {}
+    }
+  ],
+  "notes": [
+    {
+      "id": "note_app_003_1",
+      "application_id": "app_003",
+      "title": "Project Planning",
+      "content": "Need to finalize project scope and budget before submission.",
+      "created_at": "2024-06-25 14:20:00",
+      "created_by": "emily.chen",
+      "is_internal": true
+    }
+  ],
+  "reminders": [
+    {
+      "id": "reminder_app_003_1",
+      "application_id": "app_003",
+      "title": "Complete application draft",
+      "description": "Finish project description and budget sections",
+      "due_date": "2024-07-05 17:00:00",
+      "created_at": "2024-06-25 14:20:00",
+      "created_by": "emily.chen",
+      "is_completed": false,
+      "completed_at": null,
+      "send_email": true,
+      "send_notification": true
+    }
+  ],
+  "created_at": "2024-06-25 14:20:00",
+  "updated_at": "2024-06-25 14:20:00",
+  "assigned_to": "emily.chen",
+  "grant_deadline": "2024-08-01 23:59:59",
+  "award_date": "2024-10-01 00:00:00",
+  "funding_amount": 45000.0
+}

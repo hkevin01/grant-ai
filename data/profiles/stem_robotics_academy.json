@@ -1,0 +1,34 @@
+{
+  "name": "STEM Robotics Academy",
+  "description": "An educational organization focused on teaching robotics, programming, and STEM skills to students of all ages. We offer after-school programs, summer camps, and workshops to inspire the next generation of innovators.",
+  "focus_areas": [
+    "robotics",
+    "education"
+  ],
+  "program_types": [
+    "after_school",
+    "summer_camps",
+    "educational_workshops"
+  ],
+  "target_demographics": [
+    "students",
+    "children",
+    "teens",
+    "STEM enthusiasts"
+  ],
+  "annual_budget": 180000,
+  "location": "Austin, TX",
+  "website": "https://stemroboticsacademy.org",
+  "ein": "45-6789012",
+  "founded_year": 2020,
+  "preferred_grant_size": [
+    15000,
+    75000
+  ],
+  "grant_history": [],
+  "contact_name": "Dr. Emily Chen",
+  "contact_email": "emily.chen@stemroboticsacademy.org",
+  "contact_phone": "555-456-7890",
+  "created_at": "2025-06-25 14:12:23.115869",
+  "updated_at": "2025-06-25 14:12:23.115870"
+}

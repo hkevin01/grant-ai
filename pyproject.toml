@@ -48,7 +48,7 @@ dev = [
 docs = ["sphinx>=5.0.0", "sphinx-rtd-theme>=1.0.0", "myst-parser>=0.18.0"]
 
 [project.scripts]
-grant-ai = "grant_ai.cli:main"
+grant-ai = "grant_ai.core.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/username/grant-ai"
@@ -59,22 +59,17 @@ Repository = "https://github.com/username/grant-ai"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.ruff]
+line-length = 100
+ignore = ["E501", "W291", "W293", "E203"]
+
 [tool.black]
-line-length = 88
-target-version = ['py39']
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  # directories
-  \.eggs
-  | \.git
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | build
-  | dist
-)/
-'''
+line-length = 100
+target-version = ['py312']
+
+[tool.flake8]
+max-line-length = 100
+ignore = ["E501", "W291", "W293", "E203"]
 
 [tool.isort]
 profile = "black"

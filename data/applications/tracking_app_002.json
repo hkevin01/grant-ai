@@ -1,0 +1,75 @@
+{
+  "id": "tracking_app_002",
+  "application_id": "app_002",
+  "organization_id": "community_housing_initiative",
+  "grant_id": "grant_2024_002",
+  "current_status": "under_review",
+  "status_updated_at": "2024-06-20 11:15:00",
+  "events": [
+    {
+      "id": "event_app_002_1",
+      "application_id": "app_002",
+      "event_type": "created",
+      "status_from": null,
+      "status_to": "draft",
+      "description": "Application created",
+      "created_at": "2024-05-20 08:30:00",
+      "created_by": "michael.rodriguez",
+      "metadata": {}
+    },
+    {
+      "id": "event_app_002_2",
+      "application_id": "app_002",
+      "event_type": "status_change",
+      "status_from": "draft",
+      "status_to": "submitted",
+      "description": "Application submitted",
+      "created_at": "2024-06-10 15:45:00",
+      "created_by": "michael.rodriguez",
+      "metadata": {}
+    },
+    {
+      "id": "event_app_002_3",
+      "application_id": "app_002",
+      "event_type": "status_change",
+      "status_from": "submitted",
+      "status_to": "under_review",
+      "description": "Application under review by grant committee",
+      "created_at": "2024-06-20 11:15:00",
+      "created_by": "grant_committee",
+      "metadata": {}
+    }
+  ],
+  "notes": [
+    {
+      "id": "note_app_002_1",
+      "application_id": "app_002",
+      "title": "Additional Documentation Requested",
+      "content": "Grant committee requested additional financial statements and project timeline details.",
+      "created_at": "2024-06-22 09:30:00",
+      "created_by": "grant_committee",
+      "is_internal": false
+    }
+  ],
+  "reminders": [
+    {
+      "id": "reminder_app_002_1",
+      "application_id": "app_002",
+      "title": "Submit additional documentation",
+      "description": "Provide requested financial statements and timeline",
+      "due_date": "2024-06-29 17:00:00",
+      "created_at": "2024-06-22 09:30:00",
+      "created_by": "michael.rodriguez",
+      "is_completed": false,
+      "completed_at": null,
+      "send_email": true,
+      "send_notification": true
+    }
+  ],
+  "created_at": "2024-05-20 08:30:00",
+  "updated_at": "2024-06-22 09:30:00",
+  "assigned_to": "michael.rodriguez",
+  "grant_deadline": "2024-07-15 23:59:59",
+  "award_date": "2024-09-01 00:00:00",
+  "funding_amount": 75000.0
+}

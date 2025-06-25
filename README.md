@@ -38,24 +38,29 @@ This project helps non-profit organizations streamline their grant research and 
 ```bash
 git clone https://github.com/username/grant-ai.git
 cd grant-ai
-pip install -e .[dev]
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -e .
 ```
 
 ## Usage
 
 ### Command Line Interface
 ```bash
+# Create organization profile
+grant-ai profile create --name "Your Org" --focus-area education
+
+# View existing profiles
+grant-ai profile show data/profiles/coda_profile.json
+
 # Research AI companies
-grant-ai research companies --focus education
-
-# Search for grants
-grant-ai search grants --category education --amount 50000
-
-# Generate organization profile
-grant-ai profile create --org CODA
+grant-ai research research-companies --focus education
 
 # Match grants to organization
-grant-ai match --org CODA --output report.xlsx
+grant-ai match grants data/profiles/coda_profile.json
+
+# Match companies to organization
+grant-ai match companies data/profiles/coda_profile.json
 ```
 
 ### Python API
@@ -65,8 +70,8 @@ from grant_ai import OrganizationProfile, GrantResearcher
 # Create organization profile
 coda = OrganizationProfile(
     name="CODA",
-    focus_areas=["music education", "art education", "robotics"],
-    program_types=["after-school", "summer camps"]
+    focus_areas=["music_education", "art_education", "robotics"],
+    program_types=["after_school", "summer_camps"]
 )
 
 # Research grants
@@ -95,18 +100,28 @@ This GUI allows you to:
 
 ```
 grant-ai/
-├── src/grant_ai/           # Main package source code
-│   ├── models/            # Data models (organizations, grants, companies)
-│   ├── scrapers/          # Web scraping modules
-│   ├── analysis/          # AI company analysis algorithms
-│   ├── matching/          # Grant-organization matching logic
-│   ├── reports/           # Report generation
-│   └── cli/               # Command line interface
-├── tests/                 # Test suite
-├── scripts/               # Utility scripts
-├── docs/                  # Documentation
-├── data/                  # Data files (gitignored)
-└── config/                # Configuration files
+├── data/                          # Data storage
+│   ├── profiles/                  # Organization profiles
+│   ├── grants/                    # Grant opportunities
+│   ├── companies/                 # AI company data
+│   ├── applications/              # Application tracking
+│   └── templates/                 # Application templates
+├── src/grant_ai/                  # Source code
+│   ├── core/                      # Core functionality
+│   │   ├── cli.py                 # Command-line interface
+│   │   └── db.py                  # Database operations
+│   ├── config/                    # Configuration management
+│   ├── utils/                     # Utility functions
+│   ├── models/                    # Data models
+│   ├── analysis/                  # Analysis and matching
+│   ├── scrapers/                  # Data collection
+│   └── gui/                       # User interfaces
+├── tests/                         # Test suite
+│   ├── unit/                      # Unit tests
+│   ├── integration/               # Integration tests
+│   └── e2e/                       # End-to-end tests
+├── scripts/                       # Development scripts
+└── docs/                          # Documentation
 ```
 
 ## Development
@@ -122,10 +137,12 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install development dependencies
-pip install -e .[dev]
+pip install -e .
 
-# Install pre-commit hooks
-pre-commit install
+# Run development tools
+./scripts/dev.sh check     # Run all quality checks
+./scripts/dev.sh test      # Run test suite
+./scripts/dev.sh format    # Format code
 ```
 
 ### Running Tests
@@ -137,8 +154,9 @@ pytest
 pytest --cov=src/grant_ai --cov-report=html
 
 # Run specific test categories
-pytest -m unit        # Unit tests only
-pytest -m integration # Integration tests only
+pytest tests/unit/         # Unit tests only
+pytest tests/integration/  # Integration tests only
+pytest tests/e2e/          # End-to-end tests only
 ```
 
 ### Code Quality
@@ -156,37 +174,56 @@ mypy src/
 flake8 src/ tests/
 ```
 
-## Scrapers
+## Data Management
 
-The `src/grant_ai/scrapers/` module contains base and state/federal grant scrapers. Extend these to add more sources.
+### Sample Data
+The project includes sample data for testing and demonstration:
+- **Organization Profiles**: CODA and NRG Development profiles
+- **Grant Opportunities**: 4 sample grants with various focus areas
+- **AI Companies**: 4 major AI companies with grant programs
 
-## Database
-
-All grant and organization data can be stored in a SQLAlchemy database. See `src/grant_ai/db.py` for setup.
-
-## Data Sources
-
+### Data Sources
 The system collects data from various sources:
 - Foundation databases (Candid, etc.)
 - AI company websites and press releases
-- Government grant databases
+- Government grant databases (Grants.gov API)
 - Industry publications
 - Social media monitoring
 
 ## Configuration
 
-Create a `.env` file in the project root:
-```env
-# Database configuration
-DATABASE_URL=sqlite:///data/grants.db
+The system uses centralized configuration in `src/grant_ai/config/`:
+- Database settings
+- API endpoints and keys
+- File paths and directories
+- Default values
 
-# API keys (if needed)
-FOUNDATION_API_KEY=your_api_key_here
-
-# Scraping settings
-USER_AGENT=grant-ai-bot/1.0
-REQUEST_DELAY=1.0
+Environment variables can be set for sensitive configuration:
+```bash
+export GRANT_AI_DB_URL="sqlite:///data/grants.db"
+export GRANTS_GOV_API_KEY="your_api_key_here"
 ```
+
+## Current Status
+
+### ✅ Completed (Phases 1-3)
+- Core infrastructure and data models
+- CLI interface with profile management
+- Grant research and matching algorithms
+- Basic GUI (Streamlit and PyQt)
+- Grants.gov API scraper
+- Unit tests for core modules
+
+### 🔄 In Progress (Phase 4)
+- Application management system
+- Questionnaire system for organization profiling
+- Grant application templates
+- Application tracking
+
+### 📋 Next Steps (Phase 5)
+- Testing with real organization data
+- User interface improvements
+- Documentation and user guides
 
 ## Contributing
 
@@ -200,7 +237,7 @@ REQUEST_DELAY=1.0
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 

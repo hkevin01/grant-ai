@@ -5,6 +5,11 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, HttpUrl
+from sqlalchemy import Boolean, Column, Date, DateTime, Float, Integer, String, Text
+from sqlalchemy.dialects.sqlite import JSON as SQLiteJSON
+from sqlalchemy.orm import declarative_base
+
+from grant_ai.core.db import Base
 
 
 class GrantStatus(str, Enum):
@@ -188,3 +193,38 @@ class Grant(BaseModel):
             "relevance_score": self.relevance_score,
             "match_reasons": ", ".join(self.match_reasons)
         }
+
+class GrantORM(Base):
+    __tablename__ = "grants"
+    id = Column(String, primary_key=True)
+    title = Column(String, nullable=False)
+    description = Column(Text, default="")
+    funder_name = Column(String, nullable=False)
+    funder_type = Column(String, default="")
+    funding_type = Column(String, default="grant")
+    amount_min = Column(Integer, nullable=True)
+    amount_max = Column(Integer, nullable=True)
+    amount_typical = Column(Integer, nullable=True)
+    total_funding_available = Column(Integer, nullable=True)
+    status = Column(String, default="open")
+    application_deadline = Column(Date, nullable=True)
+    decision_date = Column(Date, nullable=True)
+    funding_start_date = Column(Date, nullable=True)
+    funding_duration_months = Column(Integer, nullable=True)
+    eligibility_types = Column(SQLiteJSON, default=list)
+    focus_areas = Column(SQLiteJSON, default=list)
+    geographic_restrictions = Column(SQLiteJSON, default=list)
+    application_requirements = Column(SQLiteJSON, default=list)
+    reporting_requirements = Column(SQLiteJSON, default=list)
+    matching_funds_required = Column(Boolean, default=False)
+    matching_percentage = Column(Float, nullable=True)
+    application_url = Column(String, nullable=True)
+    information_url = Column(String, nullable=True)
+    contact_email = Column(String, nullable=True)
+    contact_phone = Column(String, nullable=True)
+    source = Column(String, default="")
+    source_url = Column(String, nullable=True)
+    last_updated = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=True)
+    relevance_score = Column(Float, nullable=True)
+    match_reasons = Column(SQLiteJSON, default=list)

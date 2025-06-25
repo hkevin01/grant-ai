@@ -1,0 +1,176 @@
+{
+  "id": "org_profile_v1",
+  "title": "Organization Profile Questionnaire",
+  "description": "Comprehensive questionnaire to gather information about your organization for grant matching",
+  "version": "1.0",
+  "created_at": "2024-01-01T00:00:00Z",
+  "questions": [
+    {
+      "id": "org_name",
+      "text": "What is your organization's name?",
+      "question_type": "text",
+      "required": true,
+      "validation": {
+        "min_length": 2,
+        "max_length": 100
+      },
+      "field_mapping": "name"
+    },
+    {
+      "id": "org_description",
+      "text": "Please provide a brief description of your organization and its mission:",
+      "question_type": "textarea",
+      "required": true,
+      "validation": {
+        "min_length": 50,
+        "max_length": 1000
+      },
+      "field_mapping": "description"
+    },
+    {
+      "id": "focus_areas",
+      "text": "What are your organization's primary focus areas? (Select all that apply)",
+      "question_type": "checkbox",
+      "required": true,
+      "options": [
+        "education",
+        "music_education",
+        "art_education",
+        "robotics",
+        "housing",
+        "affordable_housing",
+        "community_development",
+        "social_services",
+        "youth_development",
+        "senior_services"
+      ],
+      "field_mapping": "focus_areas"
+    },
+    {
+      "id": "program_types",
+      "text": "What types of programs does your organization offer? (Select all that apply)",
+      "question_type": "checkbox",
+      "required": true,
+      "options": [
+        "after_school",
+        "summer_camps",
+        "housing_development",
+        "support_services",
+        "educational_workshops",
+        "community_outreach"
+      ],
+      "field_mapping": "program_types"
+    },
+    {
+      "id": "target_demographics",
+      "text": "Who are your primary target demographics? (Enter keywords, separated by commas)",
+      "question_type": "text",
+      "required": true,
+      "validation": {
+        "min_length": 5,
+        "max_length": 200
+      },
+      "field_mapping": "target_demographics"
+    },
+    {
+      "id": "annual_budget",
+      "text": "What is your organization's annual operating budget? (USD)",
+      "question_type": "number",
+      "required": false,
+      "validation": {
+        "min_value": 0,
+        "max_value": 10000000
+      },
+      "field_mapping": "annual_budget"
+    },
+    {
+      "id": "location",
+      "text": "Where is your organization located? (City, State)",
+      "question_type": "text",
+      "required": true,
+      "validation": {
+        "min_length": 5,
+        "max_length": 100
+      },
+      "field_mapping": "location"
+    },
+    {
+      "id": "website",
+      "text": "What is your organization's website URL?",
+      "question_type": "url",
+      "required": false,
+      "field_mapping": "website"
+    },
+    {
+      "id": "ein",
+      "text": "What is your organization's EIN (Employer Identification Number)?",
+      "question_type": "text",
+      "required": false,
+      "validation": {
+        "pattern": "^\\d{2}-\\d{7}$"
+      },
+      "field_mapping": "ein"
+    },
+    {
+      "id": "founded_year",
+      "text": "In what year was your organization founded?",
+      "question_type": "number",
+      "required": false,
+      "validation": {
+        "min_value": 1900,
+        "max_value": 2024
+      },
+      "field_mapping": "founded_year"
+    },
+    {
+      "id": "preferred_grant_min",
+      "text": "What is the minimum grant amount you typically seek? (USD)",
+      "question_type": "number",
+      "required": true,
+      "validation": {
+        "min_value": 1000,
+        "max_value": 1000000
+      },
+      "field_mapping": "preferred_grant_size_min"
+    },
+    {
+      "id": "preferred_grant_max",
+      "text": "What is the maximum grant amount you typically seek? (USD)",
+      "question_type": "number",
+      "required": true,
+      "validation": {
+        "min_value": 1000,
+        "max_value": 1000000
+      },
+      "field_mapping": "preferred_grant_size_max"
+    },
+    {
+      "id": "contact_name",
+      "text": "What is the name of your primary contact person?",
+      "question_type": "text",
+      "required": true,
+      "validation": {
+        "min_length": 2,
+        "max_length": 100
+      },
+      "field_mapping": "contact_name"
+    },
+    {
+      "id": "contact_email",
+      "text": "What is your primary contact email address?",
+      "question_type": "email",
+      "required": true,
+      "field_mapping": "contact_email"
+    },
+    {
+      "id": "contact_phone",
+      "text": "What is your primary contact phone number?",
+      "question_type": "text",
+      "required": true,
+      "validation": {
+        "pattern": "^\\d{3}-\\d{3}-\\d{4}$"
+      },
+      "field_mapping": "contact_phone"
+    }
+  ]
+} 

@@ -1,0 +1,32 @@
+{
+  "name": "Senior Care Network",
+  "description": "We provide comprehensive support services for seniors, including health monitoring, social activities, and assistance with daily living. Our goal is to help seniors maintain independence and quality of life.",
+  "focus_areas": [
+    "senior_services",
+    "social_services"
+  ],
+  "program_types": [
+    "support_services",
+    "community_outreach"
+  ],
+  "target_demographics": [
+    "seniors",
+    "elderly",
+    "aging population"
+  ],
+  "annual_budget": 320000,
+  "location": "Miami, FL",
+  "website": "https://seniorcarenetwork.org",
+  "ein": "67-8901234",
+  "founded_year": 2012,
+  "preferred_grant_size": [
+    20000,
+    80000
+  ],
+  "grant_history": [],
+  "contact_name": "Patricia Williams",
+  "contact_email": "patricia.williams@seniorcarenetwork.org",
+  "contact_phone": "555-321-0987",
+  "created_at": "2025-06-25 14:12:23.116095",
+  "updated_at": "2025-06-25 14:12:23.116096"
+}

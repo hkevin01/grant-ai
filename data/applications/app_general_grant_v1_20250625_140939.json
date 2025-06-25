@@ -1,0 +1,25 @@
+{
+  "id": "app_general_grant_v1_20250625_140939",
+  "template_id": "general_grant_v1",
+  "organization_id": "org_3",
+  "grant_id": "grant_2024_003",
+  "responses": {
+    "project_title": "Sample Project 3",
+    "project_description": "This is a sample project description for STEM Robotics Academy.",
+    "project_goals": "To improve community outcomes through innovative programming.",
+    "target_population": "Community members in need",
+    "project_duration": 12,
+    "requested_amount": 55000,
+    "budget_breakdown": "Personnel: 60%, Materials: 25%, Administrative: 15%",
+    "timeline": "Phase 1: Planning (3 months), Phase 2: Implementation (6 months), Phase 3: Evaluation (3 months)",
+    "expected_outcomes": "Improved community engagement and measurable positive impact.",
+    "evaluation_plan": "Regular assessments, surveys, and outcome tracking.",
+    "sustainability": "Long-term funding partnerships and community support."
+  },
+  "status": "draft",
+  "submitted_at": null,
+  "created_at": "2025-06-25 14:09:39.472719",
+  "updated_at": "2025-06-25 14:09:39.472719",
+  "created_by": "user_3",
+  "notes": ""
+}

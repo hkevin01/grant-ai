@@ -1,13 +1,18 @@
 # Grant Research AI Test Progress
 
-## Unit Tests
-- [x] OrganizationProfile model
-- [x] Grant model
-- [x] AICompany model
-- [x] GrantResearcher analysis
-- [x] CLI commands
-- [ ] Scrapers (base and state/federal)
-- [ ] GUI (basic workflows)
+## Phase 1: Unit Test Progress
+- [x] OrganizationProfile model: tested (fields, validation, methods)
+- [x] Grant model: tested (fields, matching, scoring)
+- [x] AICompany model: tested (fields, reputation, matching)
+- [x] GrantResearcher analysis: tested (matching, reporting)
+- [x] CLI commands: tested (profile, show, examples)
+- [ ] Scrapers (base and state/federal): test stubs created, implementation in progress
+- [ ] GUI (basic workflows): test stubs created, implementation in progress
+
+## Next Steps
+- [ ] Expand unit tests for scrapers (mock grant data)
+- [ ] Add unit tests for GUI logic (Streamlit components)
+- [ ] Begin integration tests for database and scraper pipeline
 
 ## Integration Tests
 - [ ] Database read/write
