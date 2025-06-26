@@ -1,0 +1,76 @@
+{
+  "id": "tracking_CODA_STEM_2025",
+  "application_id": "CODA_STEM_2025",
+  "organization_id": "CODA",
+  "grant_id": "NSF_STEM_YOUTH_2025",
+  "current_status": "under_review",
+  "status_updated_at": "2025-06-25 21:54:22.210294",
+  "events": [
+    {
+      "id": "event_CODA_STEM_2025_1",
+      "application_id": "CODA_STEM_2025",
+      "event_type": "created",
+      "status_from": "draft",
+      "status_to": "draft",
+      "description": "Application created",
+      "created_at": "2025-06-25 21:54:22.208515",
+      "created_by": "STEM Coordinator",
+      "metadata": {}
+    },
+    {
+      "id": "event_CODA_STEM_2025_2",
+      "application_id": "CODA_STEM_2025",
+      "event_type": "status_change",
+      "status_from": "draft",
+      "status_to": "in_progress",
+      "description": "Working on final budget details",
+      "created_at": "2025-06-25 21:54:22.209688",
+      "created_by": "STEM Coordinator",
+      "metadata": {}
+    },
+    {
+      "id": "event_CODA_STEM_2025_3",
+      "application_id": "CODA_STEM_2025",
+      "event_type": "status_change",
+      "status_from": "in_progress",
+      "status_to": "submitted",
+      "description": "Submitted with detailed STEM curriculum plan",
+      "created_at": "2025-06-25 21:54:22.209985",
+      "created_by": "STEM Coordinator",
+      "metadata": {}
+    },
+    {
+      "id": "event_CODA_STEM_2025_4",
+      "application_id": "CODA_STEM_2025",
+      "event_type": "status_change",
+      "status_from": "submitted",
+      "status_to": "under_review",
+      "description": "NSF has begun technical review process",
+      "created_at": "2025-06-25 21:54:22.210291",
+      "created_by": "STEM Coordinator",
+      "metadata": {}
+    }
+  ],
+  "notes": [],
+  "reminders": [
+    {
+      "id": "reminder_CODA_STEM_2025_1",
+      "application_id": "CODA_STEM_2025",
+      "title": "Follow up with Program Officer",
+      "description": "Check on review timeline and any additional requirements",
+      "due_date": "2025-07-02 21:54:22.210511",
+      "created_at": "2025-06-25 21:54:22.210614",
+      "created_by": "STEM Coordinator",
+      "is_completed": false,
+      "completed_at": null,
+      "send_email": true,
+      "send_notification": true
+    }
+  ],
+  "created_at": "2025-06-25 21:54:22.208504",
+  "updated_at": "2025-06-25 21:54:22.210620",
+  "assigned_to": "STEM Coordinator",
+  "grant_deadline": "2025-08-07 21:54:22.208529",
+  "award_date": null,
+  "funding_amount": 33293.0
+}

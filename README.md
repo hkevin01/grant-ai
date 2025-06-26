@@ -23,10 +23,14 @@ This project helps non-profit organizations streamline their grant research and 
 ## Features
 
 - 🔍 **AI Company Research**: Automated research and filtering of AI companies with grant programs
+- 🤖 **AI-Powered Grant Discovery**: Intelligent agent that searches the web for new grant opportunities
+- 🏔️ **West Virginia Grant Sources**: Specialized scrapers for WV state government and foundation grants
 - 📊 **Grant Database**: Comprehensive database of grant opportunities
 - 🎯 **Smart Matching**: Algorithms to match organizations with suitable grants
 - 📝 **Application Management**: Streamlined application process and tracking
 - 📈 **Analytics & Reporting**: Progress tracking and success metrics
+- 🔄 **Auto-Fill Search**: Automatically populate search fields based on organization profile
+- 📋 **Search Descriptions**: Natural language descriptions of what the search is looking for
 
 ## Installation
 
@@ -53,6 +57,10 @@ grant-ai profile create --name "Your Org" --focus-area education
 # View existing profiles
 grant-ai profile show data/profiles/coda_profile.json
 
+# Comprehensive Grant Search (AI + Location-specific)
+grant-ai discover comprehensive data/profiles/coda_profile.json --state "West Virginia" --limit 10
+grant-ai discover comprehensive data/profiles/coda_profile.json --state "All States" --limit 20
+
 # Research AI companies
 grant-ai research research-companies --focus education
 
@@ -61,6 +69,9 @@ grant-ai match grants data/profiles/coda_profile.json
 
 # Match companies to organization
 grant-ai match companies data/profiles/coda_profile.json
+
+# Launch GUI with comprehensive search
+grant-ai gui
 ```
 
 ### Python API
@@ -84,7 +95,46 @@ researcher.generate_report(matches, output_file="coda_grants.xlsx")
 
 ## GUI Usage
 
-A Streamlit-based GUI is available for interactive grant search and management:
+Two GUI options are available for interactive grant search and management:
+
+### PyQt5 GUI (Recommended)
+A native desktop application with full functionality:
+
+```bash
+# Launch via CLI command
+python -m grant_ai.core.cli gui
+
+# Or launch directly
+python -m grant_ai.gui.qt_app
+
+# Or use the launcher script
+python launch_gui.py
+```
+
+The PyQt5 GUI provides:
+- **Organization Profile Management**: Load, edit, and save organization profiles
+- **Comprehensive Grant Search**: Single button that combines AI agent and location-specific scrapers
+- **Location Selection**: Country and state dropdowns (USA/West Virginia defaults)
+- **Auto-Fill Search Fields**: Automatically populate search criteria based on organization profile
+- **Search Descriptions**: Natural language descriptions of what the search is looking for
+- **Grant Search**: Search grants by keywords, focus areas, amounts, and eligibility
+- **Smart Suggestions**: Auto-suggest grants based on organization profile
+- **Application Tracking**: Track application status and progress
+- **Crash-Free Operation**: Robust error handling prevents system crashes
+
+**Quick Start with PyQt5 GUI:**
+1. Launch the GUI: `python -m grant_ai.core.cli gui`
+2. Go to "Organization Profile" tab
+3. Select "Coda Mountain Academy" from the dropdown
+4. The profile will load automatically and auto-fill search fields
+5. Switch to "Grant Search" tab to see:
+   - Search description explaining what you're looking for
+   - Auto-filled search fields based on the profile
+   - Location dropdowns (Country: USA, State: West Virginia)
+   - Use "🔍 Comprehensive Grant Search" to find opportunities from all sources
+
+### Streamlit GUI (Alternative)
+A web-based interface for basic functionality:
 
 ```bash
 source venv/bin/activate
@@ -102,6 +152,7 @@ This GUI allows you to:
 grant-ai/
 ├── data/                          # Data storage
 │   ├── profiles/                  # Organization profiles
+│   │   └── coda_profile.json      # Example profile for CODA
 │   ├── grants/                    # Grant opportunities
 │   ├── companies/                 # AI company data
 │   ├── applications/              # Application tracking
@@ -184,11 +235,13 @@ The project includes sample data for testing and demonstration:
 
 ### Data Sources
 The system collects data from various sources:
-- Foundation databases (Candid, etc.)
-- AI company websites and press releases
-- Government grant databases (Grants.gov API)
-- Industry publications
-- Social media monitoring
+- **AI-Powered Web Search**: Intelligent agents search the web for new grant opportunities
+- **West Virginia State Sources**: WV Arts Commission, Department of Education, Commerce, and Health
+- **Federal Sources**: Grants.gov API, USAspending.gov
+- **Foundation Sources**: Benedum Foundation, Candid, Foundation Center
+- **AI Company Sources**: Company websites and press releases
+- **Government Databases**: State and federal grant databases
+- **Industry Publications**: Grant announcements and funding news
 
 ## Configuration
 
@@ -206,24 +259,33 @@ export GRANTS_GOV_API_KEY="your_api_key_here"
 
 ## Current Status
 
-### ✅ Completed (Phases 1-3)
+### ✅ Completed (Phases 1-4)
 - Core infrastructure and data models
 - CLI interface with profile management
 - Grant research and matching algorithms
 - Basic GUI (Streamlit and PyQt)
 - Grants.gov API scraper
 - Unit tests for core modules
-
-### 🔄 In Progress (Phase 4)
+- **AI-Powered Grant Discovery**: Intelligent agents for finding new grant opportunities
+- **West Virginia Grant Sources**: Specialized scrapers for WV state and foundation grants
+- **Auto-Fill Search**: Automatically populate search fields based on organization profiles
+- **Search Descriptions**: Natural language descriptions of search criteria
 - Application management system
 - Questionnaire system for organization profiling
 - Grant application templates
-- Application tracking
+- Application tracking and reporting
 
-### 📋 Next Steps (Phase 5)
+### 🔄 In Progress (Phase 5)
+- Enhanced AI agent capabilities
+- Additional grant source integrations
+- Advanced matching algorithms
+- Performance optimizations
+
+### 📋 Next Steps (Phase 6)
 - Testing with real organization data
 - User interface improvements
 - Documentation and user guides
+- Production deployment
 
 ## Contributing
 

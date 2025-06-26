@@ -118,7 +118,7 @@ def save_coda_profile_to_file(output_path: Optional[Path] = None) -> Path:
     coda_profile = create_coda_profile()
     
     with open(output_path, 'w') as f:
-        json.dump(coda_profile.dict(), f, indent=2, default=str)
+        json.dump(coda_profile.model_dump(), f, indent=2, default=str)
     
     print(f"Coda Mountain Academy profile saved to: {output_path}")
     return output_path

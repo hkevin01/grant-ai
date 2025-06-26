@@ -104,30 +104,30 @@ This project aims to create an AI-powered system for researching and managing gr
 - [x] Create matching algorithms
 
 ### Phase 4: Application Management System (Weeks 7-8)
-- [ ] Develop questionnaire system for organization profiling
-    - [ ] Research best practices for non-profit profiling
-    - [ ] Draft initial questionnaire fields (mission, programs, funding needs, etc.)
-    - [ ] Build dynamic questionnaire (web/GUI)
-    - [ ] Integrate questionnaire with organization database
-    - [ ] Test with sample organization data
-- [ ] Create grant application templates
-    - [ ] Collect common grant application requirements
-    - [ ] Design customizable template system
-    - [ ] Store templates in database for reuse
-    - [ ] Enable template selection in GUI/CLI
-    - [ ] Test template creation and usage
-- [ ] Implement application tracking
-    - [ ] Design application status workflow (draft, submitted, awarded, rejected)
-    - [ ] Build tracking dashboard (CLI/GUI)
-    - [ ] Link applications to organization and grant records
-    - [ ] Add notification/reminder system for deadlines
-    - [ ] Test end-to-end application tracking
-- [ ] Build reporting capabilities
-    - [ ] Define key reporting metrics (submissions, wins, deadlines)
-    - [ ] Implement automated report generation (PDF/Excel)
-    - [ ] Add export and visualization options
-    - [ ] Integrate reporting with application tracking
-    - [ ] Test report generation and export
+- [x] Develop questionnaire system for organization profiling
+    - [x] Research best practices for non-profit profiling
+    - [x] Draft initial questionnaire fields (mission, programs, funding needs, etc.)
+    - [x] Build dynamic questionnaire (web/GUI)
+    - [x] Integrate questionnaire with organization database
+    - [x] Test with sample organization data
+- [x] Create grant application templates
+    - [x] Collect common grant application requirements
+    - [x] Design customizable template system
+    - [x] Store templates in database for reuse
+    - [x] Enable template selection in GUI/CLI
+    - [x] Test template creation and usage
+- [x] Implement application tracking
+    - [x] Design application status workflow (draft, submitted, awarded, rejected)
+    - [x] Build tracking dashboard (CLI/GUI)
+    - [x] Link applications to organization and grant records
+    - [x] Add notification/reminder system for deadlines
+    - [x] Test end-to-end application tracking
+- [x] Build reporting capabilities
+    - [x] Define key reporting metrics (submissions, wins, deadlines)
+    - [x] Implement automated report generation (PDF/Excel)
+    - [x] Add export and visualization options
+    - [x] Integrate reporting with application tracking
+    - [x] Test report generation and export
 
 ### Phase 5: Testing & Refinement (Weeks 9-10)
 - [ ] Test with CODA and NRG Development profiles
@@ -156,8 +156,8 @@ This project aims to create an AI-powered system for researching and managing gr
 - [x] Organization profile management
 - [x] AI company reputation scoring
 - [x] Grant opportunity matching
-- [ ] Application progress tracking
-- [ ] Automated report generation
+- [x] Application progress tracking
+- [x] Automated report generation
 - [ ] Data visualization and analytics
 
 ## Deliverables Checklist

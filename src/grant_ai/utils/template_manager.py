@@ -51,7 +51,7 @@ class TemplateManager:
         try:
             template_file = self.templates_dir / f"{template.id}.json"
             with open(template_file, "w", encoding="utf-8") as f:
-                json.dump(template.dict(), f, indent=2, ensure_ascii=False, default=str)
+                json.dump(template.model_dump(), f, indent=2, ensure_ascii=False, default=str)
             return True
         except Exception as e:
             print(f"Error saving template: {e}")
@@ -95,7 +95,7 @@ class TemplateManager:
         try:
             app_file = self.applications_dir / f"{application.id}.json"
             with open(app_file, "w", encoding="utf-8") as f:
-                json.dump(application.dict(), f, indent=2, ensure_ascii=False, default=str)
+                json.dump(application.model_dump(), f, indent=2, ensure_ascii=False, default=str)
             return True
         except Exception as e:
             print(f"Error saving application: {e}")
@@ -131,7 +131,7 @@ class TemplateManager:
         profile: OrganizationProfile,
     ) -> ApplicationResponse:
         """Auto-fill application fields from organization profile."""
-        profile_data = profile.dict()
+        profile_data = profile.model_dump()
 
         for field in template.fields:
             if field.profile_field and field.profile_field in profile_data:
@@ -194,7 +194,7 @@ class TemplateManager:
     ) -> Optional[str]:
         """Export an application to various formats."""
         if format.lower() == "json":
-            return json.dumps(application.dict(), indent=2, default=str)
+            return json.dumps(application.model_dump(), indent=2, default=str)
         elif format.lower() == "text":
             lines = []
             lines.append(f"Application: {application.id}")

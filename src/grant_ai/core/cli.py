@@ -86,7 +86,7 @@ def create(
     # Save to file
     output_path = output or f"{name.lower().replace(' ', '_')}_profile.json"
     with open(output_path, "w") as f:
-        json.dump(org.dict(), f, indent=2, default=str)
+        json.dump(org.model_dump(), f, indent=2, default=str)
 
     click.echo(f"Organization profile created: {output_path}")
 
@@ -226,7 +226,7 @@ def examples():
     )
 
     with open("coda_profile.json", "w") as f:
-        json.dump(coda.dict(), f, indent=2, default=str)
+        json.dump(coda.model_dump(), f, indent=2, default=str)
 
     # Create NRG Development profile
     nrg = OrganizationProfile(
@@ -252,7 +252,7 @@ def examples():
     )
 
     with open("nrg_profile.json", "w") as f:
-        json.dump(nrg.dict(), f, indent=2, default=str)
+        json.dump(nrg.model_dump(), f, indent=2, default=str)
 
     click.echo("Sample profiles created:")
     click.echo("- coda_profile.json")
@@ -364,7 +364,7 @@ def create_profile(output: Optional[str]):
     # Save profile
     output_path = output or f"{profile.name.lower().replace(' ', '_')}_profile.json"
     with open(output_path, "w") as f:
-        json.dump(profile.dict(), f, indent=2, default=str)
+        json.dump(profile.model_dump(), f, indent=2, default=str)
 
     click.echo(f"✅ Organization profile created: {output_path}")
     click.echo(f"📊 Organization: {profile.name}")
@@ -792,6 +792,215 @@ def load_coda_profile():
         click.echo(f"❌ Error loading Coda profile: {e}")
         import traceback
         click.echo(traceback.format_exc())
+
+
+@main.command()
+def gui():
+    """Launch the PyQt5 GUI application."""
+    try:
+        click.echo("🚀 Launching Grant AI GUI...")
+        click.echo("📝 Setting up environment...")
+        
+        # Set environment variables to suppress Qt warnings
+        import os
+        os.environ['QT_LOGGING_RULES'] = '*.debug=false;qt.qpa.*=false'
+        os.environ['QT_QPA_PLATFORM'] = 'xcb'
+        
+        # Check and update grant database in background
+        click.echo("🔄 Checking for grant database updates...")
+        try:
+            from grant_ai.utils.grant_database_manager import update_grant_database
+            update_grant_database(force_update=False)  # Only update if needed
+            click.echo("✅ Grant database is up to date")
+        except Exception as e:
+            click.echo(f"⚠️  Grant database update failed: {e}")
+            click.echo("   GUI will continue without database update")
+        
+        # Import and launch GUI
+        from grant_ai.gui.qt_app import main as gui_main
+        
+        click.echo("✅ Environment configured successfully")
+        click.echo("🖥️  Starting GUI application...")
+        click.echo()
+        click.echo("💡 Tips:")
+        click.echo("   • Go to 'Organization Profile' tab")
+        click.echo("   • Select 'Coda Mountain Academy' from dropdown")
+        click.echo("   • The profile should load without crashes")
+        click.echo("   • Use Ctrl+C in terminal to close the GUI")
+        click.echo()
+        
+        # Launch the GUI
+        gui_main()
+        
+    except ImportError as e:
+        click.echo(f"❌ Import error: {e}")
+        click.echo("💡 Make sure PyQt5 is installed: pip install PyQt5")
+        return 1
+    except Exception as e:
+        click.echo(f"❌ Error launching GUI: {e}")
+        import traceback
+        click.echo(traceback.format_exc())
+        return 1
+    
+    return 0
+
+
+@main.group()
+def discover():
+    """AI-powered grant discovery and research."""
+    pass
+
+
+@discover.command()
+@click.argument("profile_file", type=click.Path(exists=True))
+@click.option("--country", default="USA", help="Country to search in")
+@click.option("--state", default="West Virginia", help="State to search in")
+@click.option("--output", "-o", help="Output file path for results")
+@click.option("--limit", default=20, help="Maximum number of results to return")
+def comprehensive(profile_file: str, country: str, state: str, output: Optional[str], limit: int):
+    """Comprehensive grant search using AI agent and location-specific scrapers."""
+    try:
+        # Load organization profile
+        with open(profile_file, "r") as f:
+            profile_data = json.load(f)
+        
+        from grant_ai.models.organization import OrganizationProfile
+        profile = OrganizationProfile(**profile_data)
+        
+        click.echo(f"🔍 Comprehensive grant search for {profile.name}...")
+        click.echo(f"Location: {state}, {country}")
+        click.echo(f"Focus areas: {', '.join([str(fa) for fa in profile.focus_areas])}")
+        click.echo()
+        
+        all_grants = []
+        
+        # AI Agent discovery (always run)
+        click.echo("🤖 Using AI Agent for web search...")
+        from grant_ai.utils.ai_grant_agent import AIGrantAgent
+        agent = AIGrantAgent()
+        ai_grants = agent.search_grants_for_profile(profile)
+        all_grants.extend(ai_grants)
+        click.echo(f"   Found {len(ai_grants)} grants via AI Agent")
+        
+        # Location-specific scrapers
+        if country == "USA":
+            if state == "West Virginia":
+                click.echo("🏔️ Searching West Virginia sources...")
+                from grant_ai.scrapers.wv_grants import WVGrantScraper
+                scraper = WVGrantScraper()
+                wv_grants = scraper.scrape_all_sources()
+                all_grants.extend(wv_grants)
+                click.echo(f"   Found {len(wv_grants)} grants via WV Scraper")
+            elif state == "All States":
+                click.echo("🏔️ Searching West Virginia sources...")
+                from grant_ai.scrapers.wv_grants import WVGrantScraper
+                scraper = WVGrantScraper()
+                wv_grants = scraper.scrape_all_sources()
+                all_grants.extend(wv_grants)
+                click.echo(f"   Found {len(wv_grants)} grants via WV Scraper")
+                # Could add other state scrapers here in the future
+        
+        # Remove duplicates
+        seen = set()
+        unique_grants = []
+        for grant in all_grants:
+            key = (grant.title.lower(), grant.funder_name.lower())
+            if key not in seen:
+                seen.add(key)
+                unique_grants.append(grant)
+        
+        # Limit results
+        unique_grants = unique_grants[:limit]
+        
+        click.echo()
+        click.echo(f"✅ Comprehensive search found {len(unique_grants)} unique grant opportunities:")
+        click.echo()
+        
+        for i, grant in enumerate(unique_grants, 1):
+            # Determine source icon
+            if "WV" in grant.source or "West Virginia" in grant.source:
+                source_icon = "🏔️"
+            elif grant.source == "AI Web Search":
+                source_icon = "🤖"
+            elif "Grants.gov" in grant.source:
+                source_icon = "🇺🇸"
+            else:
+                source_icon = "💰"
+            
+            click.echo(f"{i}. {source_icon} {grant.title}")
+            click.echo(f"   Funder: {grant.funder_name}")
+            click.echo(f"   Amount: ${grant.amount_typical:,}")
+            click.echo(f"   Source: {grant.source}")
+            click.echo(f"   Focus: {', '.join(grant.focus_areas)}")
+            click.echo(f"   Eligibility: {', '.join([str(e) for e in grant.eligibility_types])}")
+            click.echo(f"   URL: {grant.application_url}")
+            click.echo()
+        
+        # Save results if output specified
+        if output:
+            results = [grant.model_dump() for grant in unique_grants]
+            with open(output, "w") as f:
+                json.dump(results, f, indent=2, default=str)
+            click.echo(f"📄 Results saved to: {output}")
+        
+    except Exception as e:
+        click.echo(f"❌ Error during comprehensive search: {e}")
+        import traceback
+        click.echo(traceback.format_exc())
+
+
+@main.command()
+def update_database():
+    """Update the grant database with latest grants from federal, state, and foundation sources."""
+    try:
+        click.echo("🔄 Updating grant database...")
+        from grant_ai.utils.grant_database_manager import (
+            get_database_stats,
+            update_grant_database,
+        )
+
+        # Update the database
+        update_grant_database(force_update=True)
+        
+        # Show updated statistics
+        stats = get_database_stats()
+        click.echo("\n📊 Updated Database Statistics:")
+        click.echo(f"   Total grants: {stats.get('total_grants', 0)}")
+        click.echo(f"   Federal grants: {stats.get('federal_grants', 0)}")
+        click.echo(f"   State grants: {stats.get('state_grants', 0)}")
+        click.echo(f"   Foundation grants: {stats.get('foundation_grants', 0)}")
+        click.echo(f"   Last update: {stats.get('last_update', 'Unknown')}")
+        click.echo(f"   Next update: {stats.get('next_update', 'Unknown')}")
+        
+    except Exception as e:
+        click.echo(f"❌ Error updating database: {e}")
+        import traceback
+        click.echo(traceback.format_exc())
+        return 1
+    
+    return 0
+
+
+@main.command()
+def database_stats():
+    """Show current grant database statistics."""
+    try:
+        from grant_ai.utils.grant_database_manager import get_database_stats
+        
+        stats = get_database_stats()
+        click.echo("📊 Grant Database Statistics:")
+        click.echo(f"   Total grants: {stats.get('total_grants', 0)}")
+        click.echo(f"   Federal grants: {stats.get('federal_grants', 0)}")
+        click.echo(f"   State grants: {stats.get('state_grants', 0)}")
+        click.echo(f"   Foundation grants: {stats.get('foundation_grants', 0)}")
+        click.echo(f"   Last update: {stats.get('last_update', 'Never')}")
+        click.echo(f"   Next update: {stats.get('next_update', 'Unknown')}")
+        
+    except Exception as e:
+        click.echo(f"❌ Error getting database stats: {e}")
+        return 1
+    
+    return 0
 
 
 if __name__ == "__main__":
