@@ -9,24 +9,30 @@ This module provides comprehensive reporting capabilities including:
 - Visual charts and graphs
 """
 
+import base64
+from dataclasses import dataclass
+from datetime import datetime
+from io import BytesIO
+from pathlib import Path
+from typing import Dict, Optional
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, Optional
-from dataclasses import dataclass
-from io import BytesIO
-import base64
 
 try:
+    from reportlab.lib import colors
     from reportlab.lib.pagesizes import letter
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import inch
     from reportlab.platypus import (
-        SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+        Image,
+        Paragraph,
+        SimpleDocTemplate,
+        Spacer,
+        Table,
+        TableStyle,
     )
-    from reportlab.lib import colors
     REPORTLAB_AVAILABLE = True
 except ImportError:
     REPORTLAB_AVAILABLE = False

@@ -1,0 +1,71 @@
+[
+  {
+    "id": "APP_CODA_001",
+    "organization": "CODA",
+    "grant_id": "arts-music-002",
+    "grant_title": "Community Arts & Music Program Grant",
+    "funder": "National Arts Council",
+    "status": "Research",
+    "created_date": "2025-06-26T11:37:37.818106",
+    "deadline": "2025-08-09",
+    "amount_requested": 50000,
+    "match_score": 6.5,
+    "notes": [
+      "Application created during Phase 5 testing",
+      "High priority grant with match score 6.5"
+    ],
+    "reminders": [
+      {
+        "type": "deadline",
+        "date": "2025-08-09",
+        "message": "Application deadline for Community Arts & Music Program Grant"
+      }
+    ]
+  },
+  {
+    "id": "APP_CODA_002",
+    "organization": "CODA",
+    "grant_id": "federal_1750891477_1",
+    "grant_title": "Arts Education Partnership Grants",
+    "funder": "National Endowment for the Arts",
+    "status": "Draft",
+    "created_date": "2025-06-26T11:37:37.818127",
+    "deadline": null,
+    "amount_requested": 50000,
+    "match_score": 5.0,
+    "notes": [
+      "Application created during Phase 5 testing",
+      "High priority grant with match score 5.0"
+    ],
+    "reminders": [
+      {
+        "type": "deadline",
+        "date": null,
+        "message": "Application deadline for Arts Education Partnership Grants"
+      }
+    ]
+  },
+  {
+    "id": "APP_CODA_003",
+    "organization": "CODA",
+    "grant_id": "nea_1750891477_0",
+    "grant_title": "Arts Education Project Grants",
+    "funder": "National Endowment for the Arts",
+    "status": "In Review",
+    "created_date": "2025-06-26T11:37:37.818132",
+    "deadline": null,
+    "amount_requested": 50000,
+    "match_score": 5.0,
+    "notes": [
+      "Application created during Phase 5 testing",
+      "High priority grant with match score 5.0"
+    ],
+    "reminders": [
+      {
+        "type": "deadline",
+        "date": null,
+        "message": "Application deadline for Arts Education Project Grants"
+      }
+    ]
+  }
+]

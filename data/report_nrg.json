@@ -1,0 +1,85 @@
+{
+  "organization": "NRG",
+  "report_date": "2025-06-26T11:37:37.819299",
+  "summary": {
+    "total_applications": 3,
+    "total_amount_requested": 150000,
+    "status_breakdown": {
+      "Research": 1,
+      "Draft": 1,
+      "In Review": 1
+    },
+    "average_match_score": 2.0
+  },
+  "applications": [
+    {
+      "id": "APP_NRG_001",
+      "organization": "NRG",
+      "grant_id": "housing-dev-003",
+      "grant_title": "Affordable Housing Development Grant",
+      "funder": "Housing Innovation Fund",
+      "status": "Research",
+      "created_date": "2025-06-26T11:37:37.819141",
+      "deadline": "2025-09-23",
+      "amount_requested": 50000,
+      "match_score": 4,
+      "notes": [
+        "Application created during Phase 5 testing",
+        "High priority grant with match score 4.0"
+      ],
+      "reminders": [
+        {
+          "type": "deadline",
+          "date": "2025-09-23",
+          "message": "Application deadline for Affordable Housing Development Grant"
+        }
+      ]
+    },
+    {
+      "id": "APP_NRG_002",
+      "organization": "NRG",
+      "grant_id": "ed-tech-001",
+      "grant_title": "AI in Education Innovation Grant",
+      "funder": "Tech Education Foundation",
+      "status": "Draft",
+      "created_date": "2025-06-26T11:37:37.819149",
+      "deadline": "2025-08-24",
+      "amount_requested": 50000,
+      "match_score": 1,
+      "notes": [
+        "Application created during Phase 5 testing",
+        "High priority grant with match score 1.0"
+      ],
+      "reminders": [
+        {
+          "type": "deadline",
+          "date": "2025-08-24",
+          "message": "Application deadline for AI in Education Innovation Grant"
+        }
+      ]
+    },
+    {
+      "id": "APP_NRG_003",
+      "organization": "NRG",
+      "grant_id": "arts-music-002",
+      "grant_title": "Community Arts & Music Program Grant",
+      "funder": "National Arts Council",
+      "status": "In Review",
+      "created_date": "2025-06-26T11:37:37.819152",
+      "deadline": "2025-08-09",
+      "amount_requested": 50000,
+      "match_score": 1,
+      "notes": [
+        "Application created during Phase 5 testing",
+        "High priority grant with match score 1.0"
+      ],
+      "reminders": [
+        {
+          "type": "deadline",
+          "date": "2025-08-09",
+          "message": "Application deadline for Community Arts & Music Program Grant"
+        }
+      ]
+    }
+  ]
+}
