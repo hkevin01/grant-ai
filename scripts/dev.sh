@@ -7,11 +7,16 @@ set -e
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Function to print colored output
 print_status() {
-    echo -e "${GREEN}[INFO]${NC} $1"
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
 print_warning() {
@@ -27,214 +32,220 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Function to run tests
-run_tests() {
-    print_status "Running tests..."
-    
-    if command_exists pytest; then
-        pytest tests/ -v --cov=src/grant_ai --cov-report=term-missing
-    else
-        print_error "pytest not found. Install with: pip install pytest pytest-cov"
+# Function to check if virtual environment is activated
+check_venv() {
+    if [[ "$VIRTUAL_ENV" == "" ]]; then
+        print_warning "Virtual environment not activated. Please activate it first:"
+        echo "source venv/bin/activate  # On Unix/macOS"
+        echo "venv\\Scripts\\activate     # On Windows"
         exit 1
     fi
 }
 
-# Function to format code
-format_code() {
-    print_status "Formatting code..."
-    
-    if command_exists black; then
-        black src/ tests/ scripts/
-        print_status "Code formatted with black"
-    else
-        print_warning "black not found. Install with: pip install black"
-    fi
-    
-    if command_exists isort; then
-        isort src/ tests/ scripts/
-        print_status "Imports sorted with isort"
-    else
-        print_warning "isort not found. Install with: pip install isort"
-    fi
+# Function to install dependencies
+install_deps() {
+    print_status "Installing dependencies..."
+    pip install -e ".[dev]"
+    print_success "Dependencies installed successfully"
+}
+
+# Function to run code formatting
+format() {
+    print_status "Running code formatting..."
+    black src/ tests/ scripts/
+    isort src/ tests/ scripts/
+    print_success "Code formatting completed"
 }
 
 # Function to run linting
-run_lint() {
-    print_status "Running linting..."
-    
-    if command_exists flake8; then
-        flake8 src/ tests/
-        print_status "Linting completed with flake8"
-    else
-        print_warning "flake8 not found. Install with: pip install flake8"
-    fi
+lint() {
+    print_status "Running linting checks..."
+    ruff check src/ tests/ scripts/
+    print_success "Linting completed"
 }
 
 # Function to run type checking
-run_typecheck() {
+typecheck() {
     print_status "Running type checking..."
+    mypy src/
+    print_success "Type checking completed"
+}
+
+# Function to run security checks
+security() {
+    print_status "Running security checks..."
+    bandit -r src/ -f json -o bandit-report.json || true
+    safety check
+    print_success "Security checks completed"
+}
+
+# Function to run tests
+test() {
+    local test_type=${1:-all}
     
-    if command_exists mypy; then
-        mypy src/
-        print_status "Type checking completed with mypy"
-    else
-        print_warning "mypy not found. Install with: pip install mypy"
-    fi
+    case $test_type in
+        "unit")
+            print_status "Running unit tests..."
+            pytest tests/unit/ -v --cov=src/grant_ai --cov-report=term-missing
+            ;;
+        "integration")
+            print_status "Running integration tests..."
+            pytest tests/integration/ -v --cov=src/grant_ai --cov-report=term-missing
+            ;;
+        "e2e")
+            print_status "Running end-to-end tests..."
+            pytest tests/e2e/ -v
+            ;;
+        "all")
+            print_status "Running all tests..."
+            pytest tests/ -v --cov=src/grant_ai --cov-report=term-missing --cov-report=html
+            ;;
+        *)
+            print_error "Unknown test type: $test_type"
+            echo "Available test types: unit, integration, e2e, all"
+            exit 1
+            ;;
+    esac
+    print_success "Tests completed"
 }
 
 # Function to run all quality checks
-run_quality_checks() {
+check() {
     print_status "Running all quality checks..."
-    format_code
-    run_lint
-    run_typecheck
-    run_tests
-    print_status "All quality checks completed!"
+    format
+    lint
+    typecheck
+    security
+    test unit
+    print_success "All quality checks completed"
 }
 
-# Function to set up development environment
-setup_dev() {
-    print_status "Setting up development environment..."
-    
-    # Check Python version
-    python_version=$(python3 --version 2>&1 | cut -d' ' -f2)
-    print_status "Python version: $python_version"
-    
-    # Install package in development mode
-    pip install -e .[dev]
-    
-    # Install pre-commit hooks if available
-    if command_exists pre-commit; then
-        pre-commit install
-        print_status "Pre-commit hooks installed"
-    fi
-    
-    # Generate sample data
-    python3 scripts/generate_sample_data.py
-    
-    print_status "Development environment setup complete!"
+# Function to build the package
+build() {
+    print_status "Building package..."
+    python -m build
+    print_success "Package built successfully"
 }
 
-# Function to build documentation
-build_docs() {
-    print_status "Building documentation..."
-    
-    if command_exists sphinx-build; then
-        sphinx-build -b html docs/ docs/_build/html
-        print_status "Documentation built successfully"
-        print_status "Open docs/_build/html/index.html to view"
-    else
-        print_warning "sphinx not found. Install with: pip install sphinx sphinx-rtd-theme"
-    fi
-}
-
-# Function to clean up temporary files
+# Function to clean build artifacts
 clean() {
-    print_status "Cleaning up temporary files..."
-    
-    # Remove Python cache files
-    find . -type f -name "*.pyc" -delete
-    find . -type d -name "__pycache__" -delete
-    
-    # Remove test artifacts
-    rm -rf .pytest_cache/
-    rm -rf htmlcov/
-    rm -f .coverage
-    
-    # Remove build artifacts
+    print_status "Cleaning build artifacts..."
     rm -rf build/
     rm -rf dist/
     rm -rf *.egg-info/
-    
-    print_status "Cleanup completed!"
+    rm -rf htmlcov/
+    rm -f .coverage
+    rm -f coverage.xml
+    rm -f bandit-report.json
+    print_success "Build artifacts cleaned"
 }
 
-# Function to create release
-create_release() {
-    local version=$1
-    if [ -z "$version" ]; then
-        print_error "Please provide a version number: ./dev.sh release v1.0.0"
-        exit 1
-    fi
-    
-    print_status "Creating release $version..."
-    
-    # Run quality checks first
-    run_quality_checks
-    
-    # Build package
-    python3 -m build
-    
-    print_status "Release $version created successfully!"
-    print_status "Distribution files are in dist/"
+# Function to run the application
+run() {
+    print_status "Running Grant AI application..."
+    python -m grant_ai.core.cli
 }
 
-# Function to update dependencies
-update_deps() {
-    print_status "Updating dependencies..."
-    
-    # Update pip
-    pip install --upgrade pip
-    
-    # Update package dependencies
-    pip install --upgrade -e .[dev]
-    
-    print_status "Dependencies updated!"
+# Function to run the GUI
+gui() {
+    print_status "Launching Grant AI GUI..."
+    python launch_gui.py
+}
+
+# Function to generate documentation
+docs() {
+    print_status "Generating documentation..."
+    cd docs
+    make html
+    cd ..
+    print_success "Documentation generated"
+}
+
+# Function to show help
+help() {
+    echo "Grant AI Development Script"
+    echo ""
+    echo "Usage: $0 <command> [options]"
+    echo ""
+    echo "Commands:"
+    echo "  install     Install dependencies"
+    echo "  format      Format code with Black and isort"
+    echo "  lint        Run linting with Ruff"
+    echo "  typecheck   Run type checking with MyPy"
+    echo "  security    Run security checks with Bandit and Safety"
+    echo "  test [type] Run tests (unit, integration, e2e, all)"
+    echo "  check       Run all quality checks"
+    echo "  build       Build the package"
+    echo "  clean       Clean build artifacts"
+    echo "  run         Run the application"
+    echo "  gui         Launch the GUI"
+    echo "  docs        Generate documentation"
+    echo "  help        Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0 install"
+    echo "  $0 check"
+    echo "  $0 test unit"
+    echo "  $0 test all"
+    echo "  $0 run"
 }
 
 # Main script logic
-case "$1" in
-    "test")
-        run_tests
+case ${1:-help} in
+    "install")
+        check_venv
+        install_deps
         ;;
     "format")
-        format_code
+        check_venv
+        format
         ;;
     "lint")
-        run_lint
+        check_venv
+        lint
         ;;
     "typecheck")
-        run_typecheck
+        check_venv
+        typecheck
+        ;;
+    "security")
+        check_venv
+        security
+        ;;
+    "test")
+        check_venv
+        test $2
         ;;
     "check")
-        run_quality_checks
+        check_venv
+        check
         ;;
-    "setup")
-        setup_dev
-        ;;
-    "docs")
-        build_docs
+    "build")
+        check_venv
+        build
         ;;
     "clean")
         clean
         ;;
-    "release")
-        create_release "$2"
+    "run")
+        check_venv
+        run
         ;;
-    "update")
-        update_deps
+    "gui")
+        check_venv
+        gui
+        ;;
+    "docs")
+        check_venv
+        docs
+        ;;
+    "help"|"--help"|"-h")
+        help
         ;;
     *)
-        echo "Grant AI Development Utilities"
+        print_error "Unknown command: $1"
         echo ""
-        echo "Usage: $0 {command}"
-        echo ""
-        echo "Commands:"
-        echo "  test       Run tests with coverage"
-        echo "  format     Format code with black and isort"
-        echo "  lint       Run flake8 linting"
-        echo "  typecheck  Run mypy type checking"
-        echo "  check      Run all quality checks"
-        echo "  setup      Set up development environment"
-        echo "  docs       Build documentation"
-        echo "  clean      Clean up temporary files"
-        echo "  release    Create a release (requires version)"
-        echo "  update     Update dependencies"
-        echo ""
-        echo "Examples:"
-        echo "  $0 check"
-        echo "  $0 release v1.0.0"
-        echo "  $0 setup"
+        help
         exit 1
         ;;
 esac

@@ -136,3 +136,134 @@ logs/
 *.log
 .DS_Store
 .vscode/settings.json
+
+# Modern development tools
+# Ruff
+.ruff_cache/
+
+# Black
+.black_cache/
+
+# Pre-commit
+.pre-commit-config.yaml.bak
+
+# Bandit
+bandit-report.json
+
+# Safety
+safety-report.json
+
+# Docker
+.dockerignore
+
+# Kubernetes
+*.kubeconfig
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Ansible
+*.retry
+
+# Node.js (if using frontend tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Configuration files with secrets
+.env.local
+.env.production
+.env.staging
+config/secrets.yaml
+config/local_config.yaml
+
+# Log files
+logs/
+*.log
+*.log.*
+
+# Cache directories
+.cache/
+cache/
+
+# Test artifacts
+test-results/
+test-output/
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+
+# Security reports
+bandit-report.json
+safety-report.json
+trivy-results.sarif
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Documentation builds
+docs/_build/
+docs/build/
+
+# Backup files
+backup-*.tar.gz
+*.backup
+
+# Data files (keep structure but ignore large files)
+data/raw/
+data/processed/
+data/temp/
+data/cache/
+
+# Reports (keep structure but ignore generated files)
+reports/temp/
+reports/cache/
+
+# Application specific
+grant_ai.db
+*.db-journal
+
+# API keys and secrets
+api_keys.txt
+secrets.json
+credentials.json
+
+# Local development files
+local_*
+dev_*
+test_*

@@ -1,0 +1,48 @@
+# Global owners
+* @project-maintainer
+
+# Core application code
+/src/grant_ai/core/ @core-team
+/src/grant_ai/models/ @core-team
+/src/grant_ai/config/ @core-team
+
+# Data processing and analysis
+/src/grant_ai/analysis/ @data-team
+/src/grant_ai/scrapers/ @data-team
+
+# User interface
+/src/grant_ai/gui/ @ui-team
+/src/grant_ai/cli.py @core-team
+
+# Utilities and services
+/src/grant_ai/utils/ @core-team
+/src/grant_ai/services/ @core-team
+
+# Tests
+/tests/ @qa-team
+/test_*.py @qa-team
+
+# Documentation
+/docs/ @docs-team
+README.md @docs-team
+*.md @docs-team
+
+# Configuration files
+pyproject.toml @core-team
+requirements*.txt @core-team
+.github/ @project-maintainer
+
+# Scripts and tools
+/scripts/ @devops-team
+run.sh @devops-team
+launch_gui.py @core-team
+
+# Data files
+/data/ @data-team
+
+# Reports
+/reports/ @data-team
+
+# Security and compliance
+SECURITY.md @security-team
+.github/SECURITY.md @security-team 
