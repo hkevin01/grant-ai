@@ -147,7 +147,7 @@ python -m grant_ai.core.cli gui
 python -m grant_ai.gui.qt_app
 
 # Or use the launcher script
-python launch_gui.py
+python scripts/launchers/launch_gui.py
 
 # Or use make command
 make gui
@@ -185,18 +185,21 @@ grant-ai/
 │   ├── scrapers/          # Data collection
 │   ├── services/          # Business logic services
 │   └── gui/               # User interfaces
-├── tests/                 # Test suite
-│   ├── unit/              # Unit tests
-│   ├── integration/       # Integration tests
-│   └── e2e/               # End-to-end tests
-├── docs/                  # Documentation
-├── scripts/               # Development scripts
-├── data/                  # Data storage
-│   ├── profiles/          # Organization profiles
+├── scripts/               # Utility scripts (organized)
+│   ├── setup/            # Setup and installation scripts
+│   ├── launchers/        # GUI and application launchers
+│   └── fixes/            # Emergency fix scripts
+├── tests/                 # Test suite (organized)
+│   ├── integration/       # Integration and E2E tests
+│   ├── scrapers/         # Scraper-specific tests
+│   └── unit/             # Unit tests
+├── data/                  # Data storage (organized)
+│   ├── profiles/          # Organization profile files
 │   ├── grants/            # Grant opportunities
 │   ├── companies/         # AI company data
 │   ├── applications/      # Application tracking
 │   └── templates/         # Application templates
+├── docs/                  # Documentation
 ├── reports/               # Generated reports
 ├── .github/               # GitHub workflows and templates
 ├── .copilot/              # Copilot configuration

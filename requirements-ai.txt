@@ -1,0 +1,30 @@
+# AI/ML Dependencies for Grant Research AI Project
+# These packages enable intelligent grant matching and form auto-fill
+
+# Core NLP and similarity matching
+sentence-transformers>=2.2.0
+spacy>=3.4.0
+textblob>=0.17.0
+
+# Additional NLP utilities
+nltk>=3.8
+scikit-learn>=1.1.0
+
+# For advanced text processing
+beautifulsoup4>=4.11.0
+lxml>=4.9.0
+
+# Web scraping enhancements
+requests>=2.28.0
+urllib3>=1.26.0
+
+# Data processing
+pandas>=1.5.0
+numpy>=1.21.0
+
+# Optional: For GPU acceleration (uncomment if you have CUDA GPU)
+# torch>=1.12.0
+# transformers>=4.20.0
+
+# Note: After installing, download spaCy English model with:
+# python -m spacy download en_core_web_sm

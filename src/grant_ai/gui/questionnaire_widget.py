@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import (
     QTextEdit,
     QVBoxLayout,
     QWidget,
+    QGroupBox,
 )
 
 from grant_ai.models.questionnaire import (
@@ -29,6 +30,7 @@ from grant_ai.models.questionnaire import (
     QuestionType,
 )
 from grant_ai.services.questionnaire_manager import QuestionnaireManager
+from grant_ai.services.ai_questionnaire_filler import AIQuestionnaireFiller
 
 
 class QuestionWidget(QWidget):
@@ -188,6 +190,7 @@ class QuestionnaireWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.manager = QuestionnaireManager()
+        self.ai_filler = AIQuestionnaireFiller()
         self.questionnaire = None
         self.response = None
         self.question_widgets = {}
@@ -198,27 +201,99 @@ class QuestionnaireWidget(QWidget):
         """Set up the questionnaire widget UI."""
         layout = QVBoxLayout()
         
-        # Title and description
-        self.title_label = QLabel("Organization Profile Questionnaire")
-        self.title_label.setStyleSheet("font-size: 16pt; font-weight: bold;")
-        layout.addWidget(self.title_label)
+        # Header
+        header_label = QLabel("📋 Organization Profile Questionnaire")
+        header_label.setStyleSheet("font-size: 16px; font-weight: bold; margin: 10px;")
+        layout.addWidget(header_label)
         
-        self.description_label = QLabel()
-        self.description_label.setWordWrap(True)
-        layout.addWidget(self.description_label)
+        # Description
+        desc_label = QLabel(
+            "Complete this questionnaire to create a comprehensive organization profile. "
+            "This information will be used to match you with relevant grants and funding opportunities."
+        )
+        desc_label.setWordWrap(True)
+        desc_label.setStyleSheet("color: #666; margin: 5px;")
+        layout.addWidget(desc_label)
+        
+        # AI Auto-fill section
+        ai_group = QGroupBox("🤖 AI-Powered Auto-Fill")
+        ai_layout = QVBoxLayout()
+        
+        ai_desc = QLabel(
+            "Enter basic organization information below and let AI intelligently fill out the entire questionnaire for you!"
+        )
+        ai_desc.setWordWrap(True)
+        ai_desc.setStyleSheet("color: #666; margin: 5px;")
+        ai_layout.addWidget(ai_desc)
+        
+        # Basic info inputs for AI
+        basic_info_layout = QFormLayout()
+        
+        self.ai_org_name = QLineEdit()
+        self.ai_org_name.setPlaceholderText("e.g., Coda Mountain Academy")
+        basic_info_layout.addRow("Organization Name:", self.ai_org_name)
+        
+        self.ai_org_description = QTextEdit()
+        self.ai_org_description.setMaximumHeight(80)
+        self.ai_org_description.setPlaceholderText("Brief description of your organization (optional)")
+        basic_info_layout.addRow("Description:", self.ai_org_description)
+        
+        self.ai_location = QLineEdit()
+        self.ai_location.setPlaceholderText("e.g., Charleston, WV")
+        basic_info_layout.addRow("Location:", self.ai_location)
+        
+        self.ai_website = QLineEdit()
+        self.ai_website.setPlaceholderText("https://www.example.org")
+        basic_info_layout.addRow("Website:", self.ai_website)
+        
+        ai_layout.addLayout(basic_info_layout)
+        
+        # AI Auto-fill button
+        self.ai_fill_btn = QPushButton("🤖 AI Auto-Fill Questionnaire")
+        self.ai_fill_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+            QPushButton:disabled {
+                background-color: #cccccc;
+            }
+        """)
+        self.ai_fill_btn.clicked.connect(self.ai_auto_fill_questionnaire)
+        ai_layout.addWidget(self.ai_fill_btn)
+        
+        # AI status label
+        self.ai_status_label = QLabel("")
+        self.ai_status_label.setStyleSheet("color: #666; font-style: italic;")
+        ai_layout.addWidget(self.ai_status_label)
+        
+        ai_group.setLayout(ai_layout)
+        layout.addWidget(ai_group)
+        
+        # Manual questionnaire section
+        manual_group = QGroupBox("✏️ Manual Questionnaire")
+        manual_layout = QVBoxLayout()
         
         # Scroll area for questions
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         
         self.questions_widget = QWidget()
-        self.questions_layout = QFormLayout()
+        self.questions_layout = QVBoxLayout()
         self.questions_widget.setLayout(self.questions_layout)
         
         scroll_area.setWidget(self.questions_widget)
-        layout.addWidget(scroll_area)
+        manual_layout.addWidget(scroll_area)
         
-        # Buttons
+        # Action buttons
         button_layout = QHBoxLayout()
         
         self.save_draft_btn = QPushButton("💾 Save Draft")
@@ -229,34 +304,127 @@ class QuestionnaireWidget(QWidget):
         self.load_draft_btn.clicked.connect(self.load_draft)
         button_layout.addWidget(self.load_draft_btn)
         
-        button_layout.addStretch()
-        
-        self.validate_btn = QPushButton("✅ Validate")
-        self.validate_btn.clicked.connect(self.validate_responses)
-        button_layout.addWidget(self.validate_btn)
-        
-        self.create_profile_btn = QPushButton("🎯 Create Profile")
+        self.create_profile_btn = QPushButton("✅ Create Profile")
+        self.create_profile_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #1976D2;
+            }
+        """)
         self.create_profile_btn.clicked.connect(self.create_profile)
         button_layout.addWidget(self.create_profile_btn)
         
-        layout.addLayout(button_layout)
+        manual_layout.addLayout(button_layout)
+        
+        # Status label
+        self.status_label = QLabel("")
+        self.status_label.setStyleSheet("color: #666; font-style: italic;")
+        manual_layout.addWidget(self.status_label)
+        
+        manual_group.setLayout(manual_layout)
+        layout.addWidget(manual_group)
+        
         self.setLayout(layout)
+    
+    def ai_auto_fill_questionnaire(self):
+        """Use AI to automatically fill out the entire questionnaire."""
+        org_name = self.ai_org_name.text().strip()
+        if not org_name:
+            self.ai_status_label.setText("Please enter an organization name first.")
+            return
+        
+        # Update UI
+        self.ai_fill_btn.setEnabled(False)
+        self.ai_fill_btn.setText("🤖 AI is filling questionnaire...")
+        self.ai_status_label.setText("AI is analyzing your organization and filling out the questionnaire...")
+        
+        try:
+            # Get basic info
+            org_description = self.ai_org_description.toPlainText().strip()
+            location = self.ai_location.text().strip()
+            website = self.ai_website.text().strip()
+            
+            # Use AI to fill questionnaire
+            ai_responses = self.ai_filler.fill_questionnaire(
+                org_name=org_name,
+                org_description=org_description,
+                location=location,
+                website=website
+            )
+            
+            # Apply AI responses to questionnaire
+            self._apply_ai_responses(ai_responses)
+            
+            self.ai_status_label.setText("✅ AI has successfully filled out the questionnaire! Review and adjust as needed.")
+            
+        except Exception as e:
+            self.ai_status_label.setText(f"❌ Error: {str(e)}")
+        finally:
+            self.ai_fill_btn.setEnabled(True)
+            self.ai_fill_btn.setText("🤖 AI Auto-Fill Questionnaire")
+    
+    def _apply_ai_responses(self, ai_responses: Dict[str, Any]):
+        """Apply AI responses to the questionnaire widgets."""
+        if not self.questionnaire:
+            return
+        
+        # Map AI responses to questionnaire fields
+        field_mapping = {
+            'org_name': 'org_name',
+            'org_description': 'org_description',
+            'focus_areas': 'focus_areas',
+            'program_types': 'program_types',
+            'target_demographics': 'target_demographics',
+            'annual_budget': 'annual_budget',
+            'location': 'location',
+            'website': 'website',
+            'ein': 'ein',
+            'founded_year': 'founded_year',
+            'preferred_grant_min': 'preferred_grant_min',
+            'preferred_grant_max': 'preferred_grant_max',
+            'contact_name': 'contact_name',
+            'contact_email': 'contact_email',
+            'contact_phone': 'contact_phone'
+        }
+        
+        # Apply responses to each question
+        for question in self.questionnaire.questions:
+            question_id = question.id
+            field_name = question.field_mapping
+            
+            if field_name in ai_responses:
+                value = ai_responses[field_name]
+                
+                # Set the value in the question widget
+                if question_id in self.question_widgets:
+                    widget = self.question_widgets[question_id]
+                    widget.set_value(value)
+                    
+                    # Update the response
+                    if self.response:
+                        self.response.responses[question_id] = value
+        
+        # Update status
+        self.status_label.setText("✅ Questionnaire filled with AI-generated responses. Review and adjust as needed.")
     
     def load_questionnaire(self):
         """Load the default questionnaire."""
         self.questionnaire = self.manager.get_questionnaire()
         self.response = self.manager.create_response("org_profile_v1")
         
-        # Update UI
-        self.title_label.setText(self.questionnaire.title)
-        self.description_label.setText(self.questionnaire.description)
-        
         # Create question widgets
         for question in self.questionnaire.questions:
             question_widget = QuestionWidget(question)
             question_widget.responseChanged.connect(self.on_response_changed)
             self.question_widgets[question.id] = question_widget
-            self.questions_layout.addRow(question_widget)
+            self.questions_layout.addWidget(question_widget)
     
     def on_response_changed(self, question_id: str, response: Any):
         """Handle response changes."""

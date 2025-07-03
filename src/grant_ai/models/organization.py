@@ -31,6 +31,18 @@ class ProgramType(str, Enum):
     COMMUNITY_OUTREACH = "community_outreach"
 
 
+class PastGrant(BaseModel):
+    """Model representing a past grant awarded or applied for by the organization."""
+    grant_id: str = Field(..., description="Unique identifier for the grant (e.g., federal award ID)")
+    name: str = Field(..., description="Grant name or title")
+    funder: str = Field(..., description="Funder or awarding agency")
+    year: int = Field(..., description="Year the grant was awarded or applied for")
+    amount: float = Field(..., description="Amount awarded or applied for")
+    status: str = Field(..., description="Status: 'won', 'applied', 'pending', etc.")
+    url: Optional[str] = Field(None, description="URL to grant details")
+    next_estimated_open: Optional[str] = Field(None, description="Estimated next open date/cycle")
+
+
 class OrganizationProfile(BaseModel):
     """Model representing a non-profit organization profile."""
     
@@ -71,6 +83,11 @@ class OrganizationProfile(BaseModel):
     contact_name: str = Field("", description="Primary contact name")
     contact_email: str = Field("", description="Primary contact email")
     contact_phone: str = Field("", description="Primary contact phone")
+    
+    past_grants: List[PastGrant] = Field(
+        default_factory=list,
+        description="List of past grants awarded or applied for"
+    )
     
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)

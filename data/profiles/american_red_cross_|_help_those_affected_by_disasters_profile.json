@@ -1,0 +1,32 @@
+{
+  "name": "American Red Cross | Help Those Affected by Disasters",
+  "description": "Every 8 minutes the American Red Cross responds to an emergency. Support the Red Cross. Join us today by making a donation.",
+  "focus_areas": [
+    "education",
+    "art_education",
+    "housing",
+    "community_development",
+    "social_services",
+    "youth_development",
+    "senior_services"
+  ],
+  "program_types": [
+    "educational_workshops"
+  ],
+  "target_demographics": [],
+  "annual_budget": null,
+  "location": "2025  The American National Red Cross\n Accessibility\n Ter",
+  "website": "https://www.redcross.org",
+  "ein": null,
+  "founded_year": 20,
+  "preferred_grant_size": [
+    10000,
+    100000
+  ],
+  "grant_history": [],
+  "contact_name": "",
+  "contact_email": "",
+  "contact_phone": "",
+  "created_at": "2025-06-30 14:52:27.835643",
+  "updated_at": "2025-06-30 14:52:27.835645"
+}

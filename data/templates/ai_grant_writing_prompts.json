@@ -1,0 +1,53 @@
+{
+    "clarity": {
+        "enhance": "As a non-native English speaker, kindly help me revise the following text for improved understanding and clarity. Please check for spelling and sentence structure errors and suggest alternatives.\n\nText to improve: {text}\n\nPlease provide:\n1. Corrected version with improved clarity\n2. Specific suggestions for improvement\n3. Alternative phrasings for complex sentences",
+        "identify_difficult": "Please identify any parts of my writing that may be difficult for a lay audience to understand.\n\nText to analyze: {text}\n\nPlease highlight:\n1. Technical jargon that needs simplification\n2. Complex sentences that could be broken down\n3. Assumptions that may not be clear to reviewers\n4. Suggestions for making the text more accessible"
+    },
+    "compelling": {
+        "persuasive": "Please provide feedback on my writing style and how I can make it more persuasive and compelling for the grant reviewer.\n\nText to improve: {text}\n\nPlease suggest:\n1. Ways to strengthen the argument\n2. More compelling language choices\n3. Better hooks and transitions\n4. Emotional appeals that could be added",
+        "strong_intro": "I'm trying to hook my reader with a strong introduction. Can you suggest a more captivating first sentence to draw them in from the start?\n\nCurrent introduction: {text}\n\nPlease provide:\n1. 3-5 alternative opening sentences\n2. Explanation of why each is effective\n3. Suggestions for building on the chosen opening"
+    },
+    "structure": {
+        "specific_aims": "I want to improve the overall structure of my Specific Aims. What tips do you have to structure it more effectively?\n\nCurrent Specific Aims: {text}\n\nPlease suggest:\n1. Better organization of aims\n2. Logical flow improvements\n3. Clear connections between aims\n4. Effective transitions",
+        "significance": "Can you recommend an effective way to organize my Significance section to highlight the innovative aspects of our approach?\n\nCurrent Significance section: {text}\n\nPlease suggest:\n1. Better structure for impact presentation\n2. Ways to emphasize innovation\n3. Logical progression of arguments\n4. Stronger conclusion statements"
+    },
+    "alignment": {
+        "mission": "I'm working on a grant application. Can you please review my text and suggest ways to better align it with {agency}'s mission?\n\nText to review: {text}\n\nPlease suggest:\n1. Specific mission alignment points\n2. Language that reflects the agency's priorities\n3. Ways to emphasize shared goals\n4. Examples that resonate with the agency's mission",
+        "review_criteria": "I am applying to {grant_name}. Please provide me feedback on how well I am addressing this review criteria: {criteria}, and suggestions for what I am missing and how I can improve.\n\nText to evaluate: {text}\n\nPlease provide:\n1. Assessment of criteria coverage\n2. Missing elements\n3. Specific improvement suggestions\n4. Examples of stronger responses"
+    },
+    "titles": {
+        "generate": "Suggest five potential titles for a grant proposal that will attract readers while encompassing the research question and key elements from the provided abstract.\n\nAbstract summary: {abstract}\n\nPlease provide:\n1. 5 compelling title options\n2. Explanation of each title's strengths\n3. Keywords that should be included\n4. Length and style recommendations"
+    },
+    "challenges": {
+        "identify": "Help identify potential challenges that may arise with my proposed aims and suggest strategies to address them.\n\nSpecific aims: {aims}\n\nPlease identify:\n1. Potential technical challenges\n2. Feasibility concerns\n3. Timeline risks\n4. Resource limitations\n5. Mitigation strategies for each challenge",
+        "reviewer_concerns": "What are some potential questions or concerns that {grant_name} reviewers may have regarding my specific aims?\n\nSpecific aims: {aims}\n\nPlease anticipate:\n1. Technical feasibility questions\n2. Innovation concerns\n3. Impact questions\n4. Methodology concerns\n5. Suggested responses to each concern"
+    },
+    "timeline": {
+        "project": "Assist in developing a detailed project timeline and milestones for my grant proposal to demonstrate feasibility using my project summary and specific aims.\n\nProject summary: {summary}\n\nPlease create:\n1. Detailed timeline with milestones\n2. Resource allocation suggestions\n3. Risk mitigation timeline\n4. Success metrics for each milestone",
+        "career_development": "Please develop a feasible project timeline for my grant proposal relating to my career development plan using this list of activities for {duration} months starting in {start_month}.\n\nActivities: {activities}\n\nPlease create:\n1. Monthly timeline with activities\n2. Learning objectives for each period\n3. Mentorship milestones\n4. Publication and presentation goals"
+    },
+    "research_strategy": {
+        "flow": "Please provide detailed feedback on the flow and sequence of my research strategy.\n\nResearch strategy: {strategy}\n\nPlease analyze:\n1. Logical progression of methods\n2. Clear connections between steps\n3. Appropriate sequencing of activities\n4. Potential bottlenecks or gaps\n5. Suggestions for improved flow"
+    },
+    "innovation": {
+        "highlight": "How can I better highlight the innovative aspects of my proposed research in my grant application?\n\nProposed research: {research}\n\nPlease suggest:\n1. Ways to emphasize novelty\n2. Comparison with existing approaches\n3. Unique aspects to highlight\n4. Language that conveys innovation\n5. Examples that demonstrate creativity"
+    },
+    "impact": {
+        "maximize": "How can I maximize the impact statement in my grant application to make it more compelling to reviewers?\n\nCurrent impact statement: {impact}\n\nPlease suggest:\n1. Ways to quantify impact\n2. Broader implications to emphasize\n3. Stakeholder benefits to highlight\n4. Long-term outcomes to describe\n5. Language that conveys significance"
+    },
+    "methodology": {
+        "strengthen": "How can I strengthen the methodology section of my grant application to demonstrate feasibility and rigor?\n\nCurrent methodology: {methodology}\n\nPlease suggest:\n1. Ways to demonstrate feasibility\n2. Methods to show rigor\n3. Alternative approaches to mention\n4. Validation strategies to include\n5. Risk mitigation to address"
+    },
+    "budget": {
+        "justify": "How can I better justify the budget in my grant application to ensure it appears reasonable and well-planned?\n\nBudget items: {budget_items}\n\nPlease suggest:\n1. Ways to justify each expense\n2. Cost-effectiveness arguments\n3. Alternative funding sources to mention\n4. Budget optimization strategies\n5. Language that demonstrates fiscal responsibility"
+    },
+    "collaboration": {
+        "describe": "How can I effectively describe the collaborative aspects of my grant proposal to demonstrate team strength?\n\nCollaboration details: {collaboration}\n\nPlease suggest:\n1. Ways to highlight team expertise\n2. Collaboration benefits to emphasize\n3. Communication plans to describe\n4. Conflict resolution strategies\n5. Language that conveys synergy"
+    },
+    "evaluation": {
+        "design": "How can I design a strong evaluation plan for my grant proposal that demonstrates accountability and success measurement?\n\nEvaluation needs: {evaluation_needs}\n\nPlease suggest:\n1. Appropriate evaluation methods\n2. Success metrics to include\n3. Data collection strategies\n4. Analysis approaches\n5. Reporting mechanisms"
+    },
+    "sustainability": {
+        "plan": "How can I demonstrate the sustainability of my proposed project beyond the grant period?\n\nProject details: {project}\n\nPlease suggest:\n1. Sustainability strategies to include\n2. Long-term funding sources to mention\n3. Institutional support to highlight\n4. Capacity building approaches\n5. Language that conveys lasting impact"
+    }
+}

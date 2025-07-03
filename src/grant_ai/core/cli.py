@@ -1,17 +1,22 @@
 """Command line interface for Grant AI."""
 
 import json
+import time
+from pathlib import Path
 from typing import Optional
 
 import click
 
-from grant_ai.analysis.grant_researcher import GrantResearcher
-from grant_ai.models.organization import FocusArea, OrganizationProfile, ProgramType
-from grant_ai.utils import load_json_file, save_json_file
-from grant_ai.utils.questionnaire_manager import QuestionnaireManager
-from grant_ai.utils.reporting import ReportGenerator
-from grant_ai.utils.template_manager import TemplateManager
-from grant_ai.utils.tracking_manager import TrackingManager
+from ..analysis.grant_researcher import GrantResearcher
+from ..models.organization import FocusArea, OrganizationProfile, ProgramType
+from ..services.grant_writing import GrantWritingAssistant
+from ..services.organization_scraper import OrganizationScraper
+from ..utils import load_json_file, save_json_file
+from ..utils.questionnaire_manager import QuestionnaireManager
+from ..utils.reporting import ReportGenerator
+from ..utils.template_manager import TemplateManager
+from ..utils.tracking_manager import TrackingManager
+from ..services.usaspending_scraper import USASpendingScraper
 
 
 @click.group()
@@ -1001,6 +1006,426 @@ def database_stats():
         return 1
     
     return 0
+
+
+@main.group()
+def writing():
+    """AI-powered grant writing assistance."""
+    pass
+
+
+@writing.command()
+def assistant():
+    """Launch interactive grant writing assistant."""
+    assistant = GrantWritingAssistant()
+    assistant.interactive_mode()
+
+
+@writing.command()
+@click.argument("text_file", type=click.Path(exists=True))
+@click.option("--enhance", is_flag=True, help="Enhance text clarity")
+@click.option("--compelling", is_flag=True, help="Make text more compelling")
+@click.option("--align", help="Align with funding agency mission")
+@click.option("--output", "-o", help="Output file path")
+def improve_text(text_file: str, enhance: bool, compelling: bool, align: Optional[str], output: Optional[str]):
+    """Improve grant writing text using AI prompts."""
+    assistant = GrantWritingAssistant()
+    
+    with open(text_file, 'r') as f:
+        text = f.read()
+    
+    result = None
+    
+    if enhance:
+        result = assistant.enhance_clarity(text)
+        click.echo("Enhanced text:")
+        click.echo(result['enhanced_text'])
+        click.echo("\nSuggestions:")
+        for suggestion in result['suggestions']:
+            click.echo(f"  - {suggestion}")
+    
+    elif compelling:
+        result = assistant.make_compelling(text)
+        click.echo("Compelling text:")
+        click.echo(result['compelling_text'])
+        click.echo("\nSuggestions:")
+        for suggestion in result['suggestions']:
+            click.echo(f"  - {suggestion}")
+    
+    elif align:
+        result = assistant.align_with_mission(text, align)
+        click.echo("Mission-aligned text:")
+        click.echo(result['aligned_text'])
+        click.echo("\nSuggestions:")
+        for suggestion in result['suggestions']:
+            click.echo(f"  - {suggestion}")
+    
+    else:
+        click.echo("Please specify an improvement type: --enhance, --compelling, or --align")
+        return
+    
+    if output and result:
+        with open(output, 'w') as f:
+            json.dump(result, f, indent=2)
+        click.echo(f"\nResults saved to: {output}")
+
+
+@writing.command()
+@click.argument("abstract", type=str)
+@click.option("--output", "-o", help="Output file path")
+def generate_title(abstract: str, output: Optional[str]):
+    """Generate compelling grant titles based on abstract."""
+    assistant = GrantWritingAssistant()
+    titles = assistant.generate_title(abstract)
+    
+    click.echo("Title options:")
+    for i, title in enumerate(titles, 1):
+        click.echo(f"\n{i}. {title['title']}")
+        click.echo(f"   Explanation: {title['explanation']}")
+        click.echo(f"   Strengths: {', '.join(title['strengths'])}")
+    
+    if output:
+        with open(output, 'w') as f:
+            json.dump(titles, f, indent=2)
+        click.echo(f"\nTitles saved to: {output}")
+
+
+@writing.command()
+@click.argument("aims", type=str)
+@click.option("--output", "-o", help="Output file path")
+def identify_challenges(aims: str, output: Optional[str]):
+    """Identify potential challenges and mitigation strategies."""
+    assistant = GrantWritingAssistant()
+    challenges = assistant.identify_challenges(aims)
+    
+    click.echo("Technical challenges:")
+    for challenge in challenges['technical_challenges']:
+        click.echo(f"  - {challenge}")
+    
+    click.echo("\nFeasibility concerns:")
+    for concern in challenges['feasibility_concerns']:
+        click.echo(f"  - {concern}")
+    
+    click.echo("\nMitigation strategies:")
+    for strategy in challenges['mitigation_strategies']:
+        click.echo(f"  - {strategy}")
+    
+    if output:
+        with open(output, 'w') as f:
+            json.dump(challenges, f, indent=2)
+        click.echo(f"\nChallenges saved to: {output}")
+
+
+@writing.command()
+@click.argument("summary", type=str)
+@click.option("--duration", default="12 months", help="Project duration")
+@click.option("--output", "-o", help="Output file path")
+def create_timeline(summary: str, duration: str, output: Optional[str]):
+    """Create detailed project timeline."""
+    assistant = GrantWritingAssistant()
+    timeline = assistant.create_timeline(summary, duration)
+    
+    click.echo("Project timeline:")
+    for period, activity in timeline['timeline'].items():
+        click.echo(f"  {period}: {activity}")
+    
+    click.echo("\nMilestones:")
+    for milestone in timeline['milestones']:
+        click.echo(f"  - {milestone}")
+    
+    if output:
+        with open(output, 'w') as f:
+            json.dump(timeline, f, indent=2)
+        click.echo(f"\nTimeline saved to: {output}")
+
+
+@writing.command()
+@click.argument("template_type", type=str)
+@click.option("--output", "-o", help="Output file path")
+def get_template(template_type: str, output: Optional[str]):
+    """Get a writing template for a specific grant section."""
+    assistant = GrantWritingAssistant()
+    
+    try:
+        template = assistant.get_template(template_type)
+        click.echo(f"{template_type.upper()} Template:")
+        click.echo(template)
+        
+        if output:
+            with open(output, 'w') as f:
+                f.write(template)
+            click.echo(f"\nTemplate saved to: {output}")
+    
+    except ValueError as e:
+        click.echo(f"Error: {e}")
+        click.echo("Available templates:")
+        for template_name in assistant.templates.keys():
+            click.echo(f"  - {template_name}")
+
+
+@writing.command()
+def list_templates():
+    """List available writing templates."""
+    assistant = GrantWritingAssistant()
+    
+    click.echo("Available writing templates:")
+    for template_name in assistant.templates.keys():
+        click.echo(f"  - {template_name}")
+
+
+@writing.command()
+def list_prompts():
+    """List available AI prompts for grant writing."""
+    assistant = GrantWritingAssistant()
+    
+    click.echo("Available prompt categories:")
+    for category, prompts in assistant.prompts.items():
+        click.echo(f"\n{category.upper()}:")
+        for prompt_name in prompts.keys():
+            click.echo(f"  - {prompt_name}")
+
+
+@main.group()
+def scrape():
+    """Web scraping tools for organization data."""
+    pass
+
+
+@scrape.command()
+@click.argument("website_url")
+@click.option("--output", "-o", help="Output file path for scraped data")
+def organization(website_url: str, output: Optional[str]):
+    """Scrape organization information from a website."""
+    scraper = OrganizationScraper()
+    
+    click.echo(f"Scraping organization data from: {website_url}")
+    
+    try:
+        scraped_data = scraper.scrape_organization(website_url)
+        
+        if not scraped_data:
+            click.echo("❌ Failed to scrape organization data")
+            return
+        
+        click.echo("✅ Successfully scraped organization data:")
+        click.echo()
+        
+        for key, value in scraped_data.items():
+            if value:
+                if isinstance(value, list):
+                    click.echo(f"{key}: {', '.join(value)}")
+                else:
+                    click.echo(f"{key}: {value}")
+        
+        if output:
+            with open(output, 'w') as f:
+                json.dump(scraped_data, f, indent=2)
+            click.echo(f"\nData saved to: {output}")
+    
+    except Exception as e:
+        click.echo(f"❌ Error scraping website: {e}")
+
+
+@scrape.command()
+@click.argument("website_url")
+@click.option("--output", "-o", help="Output file path for questionnaire response")
+def fill_questionnaire(website_url: str, output: Optional[str]):
+    """Fill organization questionnaire with data scraped from website."""
+    scraper = OrganizationScraper()
+    qm = QuestionnaireManager()
+    
+    click.echo(f"Scraping and filling questionnaire for: {website_url}")
+    
+    try:
+        # Get default questionnaire
+        questionnaire = qm.get_default_questionnaire()
+        
+        # Fill questionnaire with scraped data
+        response = scraper.fill_questionnaire_from_website(website_url, questionnaire)
+        
+        if not response.responses:
+            click.echo("❌ Failed to extract questionnaire data")
+            return
+        
+        click.echo("✅ Successfully filled questionnaire:")
+        click.echo()
+        click.echo(f"Completed: {response.completed}")
+        click.echo(f"Questions answered: {len(response.responses)}/{len(questionnaire.questions)}")
+        click.echo()
+        
+        # Show responses
+        for question in questionnaire.questions:
+            if question.id in response.responses:
+                value = response.responses[question.id]
+                if isinstance(value, list):
+                    click.echo(f"{question.text}: {', '.join(value)}")
+                else:
+                    click.echo(f"{question.text}: {value}")
+            else:
+                click.echo(f"{question.text}: [Not found]")
+        
+        if output:
+            with open(output, 'w') as f:
+                json.dump(response.dict(), f, indent=2)
+            click.echo(f"\nQuestionnaire response saved to: {output}")
+        
+        # Option to create organization profile
+        if click.confirm("\nWould you like to create an organization profile from this data?"):
+            profile = qm.convert_response_to_profile(response, questionnaire)
+            if profile:
+                profile_file = f"{profile.name.lower().replace(' ', '_')}_scraped_profile.json"
+                with open(profile_file, 'w') as f:
+                    json.dump(profile.dict(), f, indent=2, default=str)
+                click.echo(f"✅ Organization profile created: {profile_file}")
+            else:
+                click.echo("❌ Failed to create organization profile")
+    
+    except Exception as e:
+        click.echo(f"❌ Error filling questionnaire: {e}")
+
+
+@scrape.command()
+@click.argument("website_url")
+@click.option("--output", "-o", help="Output file path for organization profile")
+def create_profile(website_url: str, output: Optional[str]):
+    """Create organization profile directly from scraped website data."""
+    scraper = OrganizationScraper()
+    qm = QuestionnaireManager()
+    
+    click.echo(f"Creating organization profile from: {website_url}")
+    
+    try:
+        # Get default questionnaire
+        questionnaire = qm.get_default_questionnaire()
+        
+        # Fill questionnaire with scraped data
+        response = scraper.fill_questionnaire_from_website(website_url, questionnaire)
+        
+        if not response.responses:
+            click.echo("❌ Failed to extract organization data")
+            return
+        
+        # Convert to organization profile
+        profile = qm.convert_response_to_profile(response, questionnaire)
+        
+        if not profile:
+            click.echo("❌ Failed to create organization profile")
+            return
+        
+        click.echo("✅ Successfully created organization profile:")
+        click.echo()
+        click.echo(f"Name: {profile.name}")
+        click.echo(f"Description: {profile.description[:100]}...")
+        click.echo(f"Location: {profile.location}")
+        click.echo(f"Focus Areas: {', '.join(profile.focus_areas)}")
+        click.echo(f"Program Types: {', '.join(profile.program_types)}")
+        if profile.contact_email:
+            click.echo(f"Contact Email: {profile.contact_email}")
+        
+        # Save profile
+        output_file = output or f"{profile.name.lower().replace(' ', '_')}_profile.json"
+        with open(output_file, 'w') as f:
+            json.dump(profile.dict(), f, indent=2, default=str)
+        
+        click.echo(f"\n✅ Organization profile saved to: {output_file}")
+    
+    except Exception as e:
+        click.echo(f"❌ Error creating profile: {e}")
+
+
+@scrape.command()
+@click.argument("input_file", type=click.Path(exists=True))
+@click.option("--output-dir", "-o", help="Output directory for profiles")
+def batch_scrape(input_file: str, output_dir: Optional[str]):
+    """Scrape multiple organizations from a list of URLs."""
+    scraper = OrganizationScraper()
+    qm = QuestionnaireManager()
+    
+    # Read URLs from file
+    with open(input_file, 'r') as f:
+        urls = [line.strip() for line in f if line.strip()]
+    
+    click.echo(f"Scraping {len(urls)} organizations...")
+    
+    output_path = Path(output_dir) if output_dir else Path("scraped_profiles")
+    output_path.mkdir(exist_ok=True)
+    
+    successful = 0
+    failed = 0
+    
+    for i, url in enumerate(urls, 1):
+        click.echo(f"\n[{i}/{len(urls)}] Scraping: {url}")
+        
+        try:
+            # Get default questionnaire
+            questionnaire = qm.get_default_questionnaire()
+            
+            # Fill questionnaire with scraped data
+            response = scraper.fill_questionnaire_from_website(url, questionnaire)
+            
+            if not response.responses:
+                click.echo("  ❌ Failed to extract data")
+                failed += 1
+                continue
+            
+            # Convert to organization profile
+            profile = qm.convert_response_to_profile(response, questionnaire)
+            
+            if not profile:
+                click.echo("  ❌ Failed to create profile")
+                failed += 1
+                continue
+            
+            # Save profile
+            profile_file = output_path / f"{profile.name.lower().replace(' ', '_')}_profile.json"
+            with open(profile_file, 'w') as f:
+                json.dump(profile.dict(), f, indent=2, default=str)
+            
+            click.echo(f"  ✅ Created: {profile.name}")
+            successful += 1
+            
+            # Be respectful with requests
+            time.sleep(1)
+        
+        except Exception as e:
+            click.echo(f"  ❌ Error: {e}")
+            failed += 1
+    
+    click.echo(f"\n✅ Batch scraping complete!")
+    click.echo(f"Successful: {successful}")
+    click.echo(f"Failed: {failed}")
+    click.echo(f"Profiles saved to: {output_path}")
+
+
+@main.group()
+def past_grants():
+    """Commands for fetching and displaying past grants."""
+    pass
+
+
+@past_grants.command()
+@click.argument("org_name")
+@click.option("--ein", help="Organization EIN (optional, for more precise search)")
+@click.option("--limit", default=20, help="Max number of grants to fetch")
+def fetch(org_name, ein, limit):
+    """Fetch and display past grants for an organization from USASpending.gov."""
+    scraper = USASpendingScraper()
+    click.echo(f"Fetching past grants for: {org_name} (EIN: {ein or 'N/A'})")
+    try:
+        grants = scraper.fetch_awarded_grants(org_name=org_name, ein=ein, limit=limit)
+        if not grants:
+            click.echo("No past grants found.")
+            return
+        click.echo(f"Found {len(grants)} past grants:\n")
+        for g in grants:
+            click.echo(f"- {g.year}: {g.name} | {g.funder} | ${g.amount:,.2f} | Status: {g.status}")
+            if g.url:
+                click.echo(f"  Details: {g.url}")
+            if g.next_estimated_open:
+                click.echo(f"  Next Estimated Open: {g.next_estimated_open}")
+            click.echo("")
+    except Exception as e:
+        click.echo(f"Error fetching past grants: {e}")
 
 
 if __name__ == "__main__":

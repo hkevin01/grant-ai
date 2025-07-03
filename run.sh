@@ -38,12 +38,16 @@ show_help() {
     echo "Commands:"
     echo "  help                    Show this help message"
     echo "  setup                   Setup the environment (install dependencies)"
+    echo "  setup-ai                Setup AI features and models"
     echo "  load-data               Load sample data into the system"
     echo "  cli [command]           Run CLI commands"
-    echo "  gui                     Launch the GUI application"
+    echo "  gui                     Launch the basic GUI application"
+    echo "  gui-enhanced            Launch enhanced GUI with AI features"
     echo "  test                    Run all tests"
     echo "  test-unit               Run unit tests only"
     echo "  test-integration        Run integration tests only"
+    echo "  test-ai                 Test AI features"
+    echo "  demo-search             Run enhanced search demo"
     echo "  lint                    Run linter checks"
     echo "  format                  Format code with black"
     echo "  clean                   Clean up temporary files"
@@ -229,6 +233,94 @@ clean_up() {
     print_status "Cleanup complete!"
 }
 
+# Function to setup AI features
+setup_ai() {
+    print_status "Setting up AI features..."
+    
+    if [[ ! -f "requirements-ai.txt" ]]; then
+        print_error "requirements-ai.txt not found!"
+        return 1
+    fi
+    
+    python setup_ai.py
+    
+    if [[ $? -eq 0 ]]; then
+        print_status "AI features setup completed successfully!"
+    else
+        print_warning "AI setup completed with some issues. Basic functionality should still work."
+    fi
+}
+
+# Function to launch enhanced GUI
+launch_enhanced_gui() {
+    print_status "Launching Enhanced Grant AI GUI with AI features..."
+    
+    if [[ ! -f "launch_enhanced_gui.py" ]]; then
+        print_warning "Enhanced GUI not available, launching basic GUI..."
+        launch_gui
+        return
+    fi
+    
+    python launch_enhanced_gui.py
+}
+
+# Function to test AI features
+test_ai() {
+    print_status "Testing AI features..."
+    
+    python -c "
+from grant_ai.services.ai_assistant import AIAssistant
+from grant_ai.services.robust_scraper import RobustWebScraper
+
+# Test AI Assistant
+ai = AIAssistant()
+print(f'AI Assistant Available: {ai.is_available()}')
+print(f'AI Status: {ai.get_status()}')
+
+# Test Robust Scraper
+scraper = RobustWebScraper()
+health = scraper.health_check()
+print(f'Scraper Health: {health}')
+
+print('✅ AI feature tests completed')
+"
+}
+
+# Function to run enhanced search demo
+demo_enhanced_search() {
+    print_status "Running enhanced search demo..."
+    
+    python -c "
+import sys
+sys.path.insert(0, 'src')
+
+from grant_ai.models import OrganizationProfile
+from grant_ai.services.ai_assistant import AIAssistant
+
+# Create sample organization
+org = OrganizationProfile(
+    organization_name='Demo Organization',
+    organization_type='nonprofit',
+    mission_statement='Providing education and support for community development',
+    target_beneficiaries='low-income families, students',
+    funding_priorities='education, community development, youth programs'
+)
+
+# Test AI features
+ai = AIAssistant()
+print('AI Assistant Status:', ai.is_available())
+
+if ai.is_available():
+    terms = ai.suggest_search_terms(org)
+    print('Suggested search terms:', terms[:5])
+    
+    suggestions = ai.auto_fill_suggestions('mission statement', org)
+    print('Auto-fill suggestions:', suggestions)
+
+print('✅ Enhanced search demo completed')
+"
+}
+
 # Main script logic
 main() {
     case "${1:-gui}" in
@@ -237,6 +329,9 @@ main() {
             ;;
         "setup")
             setup_environment
+            ;;
+        "setup-ai")
+            setup_ai
             ;;
         "load-data")
             load_sample_data
@@ -248,6 +343,9 @@ main() {
         "gui")
             run_gui
             ;;
+        "gui-enhanced")
+            launch_enhanced_gui
+            ;;
         "test")
             run_tests
             ;;
@@ -256,6 +354,12 @@ main() {
             ;;
         "test-integration")
             run_tests integration
+            ;;
+        "test-ai")
+            test_ai
+            ;;
+        "demo-search")
+            demo_enhanced_search
             ;;
         "lint")
             run_lint
@@ -276,4 +380,4 @@ main() {
 }
 
 # Run main function with all arguments
-main "$@" 
+main "$@"

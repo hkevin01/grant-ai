@@ -11,7 +11,7 @@ from pathlib import Path
 os.environ['QT_LOGGING_RULES'] = '*.debug=false;qt.qpa.*=false'
 os.environ['QT_QPA_PLATFORM'] = 'xcb'  # Force X11 backend instead of Wayland
 
-from PyQt5.QtCore import QTimer, pyqtSignal
+from PyQt5.QtCore import QThread, QTimer, pyqtSignal
 from PyQt5.QtWidgets import (
     QApplication,
     QComboBox,
@@ -42,6 +42,135 @@ from grant_ai.utils.preset_organizations import preset_manager
 
 PROFILE_PATH = Path.home() / ".grant_ai_profile.json"
 GRANTS_PATH = Path.home() / ".grant_ai_grants.json"
+
+
+class GrantSearchThread(QThread):
+    """Background thread for grant searching to prevent UI freezing."""
+    
+    # Signals for communicating with the main thread
+    status_update = pyqtSignal(str)  # Status message
+    grants_found = pyqtSignal(list)  # List of grants found
+    search_complete = pyqtSignal(list)  # Final list of all grants
+    error_occurred = pyqtSignal(str)  # Error message
+    
+    def __init__(self, profile, existing_grants, selected_country, selected_state, 
+                 ai_agent, grant_researcher, db_session=None):
+        super().__init__()
+        self.profile = profile
+        self.existing_grants = existing_grants
+        self.selected_country = selected_country
+        self.selected_state = selected_state
+        self.ai_agent = ai_agent
+        self.grant_researcher = grant_researcher
+        self.db_session = db_session
+        self.all_grants = existing_grants.copy()
+        
+    def run(self):
+        """Run the grant search in the background thread."""
+        try:
+            # Step 1: Search database for new grants
+            self.status_update.emit("💾 Searching database for matching grants...")
+            try:
+                db_grants = self._search_database_for_profile()
+                new_db_grants = [g for g in db_grants if g not in self.existing_grants]
+                self.all_grants.extend(new_db_grants)
+                self.status_update.emit(f"   Found {len(new_db_grants)} new grants in database")
+                if new_db_grants:
+                    self.grants_found.emit(new_db_grants)
+            except Exception as e:
+                self.status_update.emit(f"   ⚠️ Database search failed: {str(e)[:100]}...")
+                
+            # Step 2: AI Agent discovery
+            self.status_update.emit("🤖 Using AI Agent for web search...")
+            try:
+                ai_grants = self.ai_agent.search_grants_for_profile(self.profile)
+                new_ai_grants = [g for g in ai_grants if g not in self.all_grants]
+                self.all_grants.extend(new_ai_grants)
+                self.status_update.emit(f"   Found {len(new_ai_grants)} new grants via AI Agent")
+                if new_ai_grants:
+                    self.grants_found.emit(new_ai_grants)
+            except Exception as e:
+                self.status_update.emit(f"   ⚠️ AI search failed: {str(e)[:100]}...")
+                
+            # Step 3: WV Scraper if applicable
+            if self.selected_state == "West Virginia":
+                self.status_update.emit("🏔️ Searching West Virginia specific grants...")
+                try:
+                    wv_scraper = WVGrantScraper()
+                    wv_grants = wv_scraper.scrape_all_sources()
+                    new_wv_grants = [g for g in wv_grants if g not in self.all_grants]
+                    self.all_grants.extend(new_wv_grants)
+                    self.status_update.emit(f"   Found {len(new_wv_grants)} WV grants")
+                    if new_wv_grants:
+                        self.grants_found.emit(new_wv_grants)
+                except Exception as e:
+                    self.status_update.emit(f"   ⚠️ WV search failed: {str(e)[:100]}...")
+                    
+            # Step 4: Additional scrapers based on location
+            if self.selected_country and self.selected_state:
+                self.status_update.emit(f"🌐 Searching {self.selected_country}/{self.selected_state} grants...")
+                try:
+                    location_grants = self.grant_researcher.find_grants_by_location(
+                        self.selected_country, self.selected_state
+                    )
+                    new_location_grants = [g for g in location_grants if g not in self.all_grants]
+                    self.all_grants.extend(new_location_grants)
+                    self.status_update.emit(f"   Found {len(new_location_grants)} location-based grants")
+                    if new_location_grants:
+                        self.grants_found.emit(new_location_grants)
+                except Exception as e:
+                    self.status_update.emit(f"   ⚠️ Location search failed: {str(e)[:100]}...")
+                    
+            # Emit completion signal
+            self.search_complete.emit(self.all_grants)
+            
+        except Exception as e:
+            self.error_occurred.emit(f"Search failed: {str(e)}")
+            
+    def _search_database_for_profile(self):
+        """Search database for grants matching the profile."""
+        try:
+            # Use the provided session or create a new one
+            session = self.db_session if self.db_session else SessionLocal()
+            
+            try:
+                # Search for grants that match the organization's focus areas
+                focus_areas = getattr(self.profile, 'focus_areas', [])
+                if not focus_areas:
+                    return []
+                    
+                matching_grants = []
+                for focus_area in focus_areas:
+                    grants = session.query(GrantORM).filter(
+                        GrantORM.focus_areas.contains(focus_area)
+                    ).limit(20).all()
+                    
+                    for grant_orm in grants:
+                        grant_model = GrantModel(
+                            id=grant_orm.id,
+                            title=grant_orm.title,
+                            description=grant_orm.description or "",
+                            funder_name=grant_orm.funder_name or "",
+                            funder_type=grant_orm.funder_type or "",
+                            amount_min=grant_orm.amount_min,
+                            amount_max=grant_orm.amount_max,
+                            amount_typical=grant_orm.amount_typical,
+                            focus_areas=grant_orm.focus_areas or [],
+                            source=grant_orm.source or "",
+                            source_url=grant_orm.source_url or "",
+                        )
+                        if grant_model not in matching_grants:
+                            matching_grants.append(grant_model)
+                            
+                return matching_grants[:50]  # Limit results
+                
+            finally:
+                if not self.db_session:  # Only close if we created the session
+                    session.close()
+                    
+        except Exception as e:
+            print(f"Database search error: {e}")
+            return []
 
 
 class GrantSearchTab(QWidget):
@@ -128,6 +257,14 @@ class GrantSearchTab(QWidget):
         
         # Connect profile tab to auto-fill and suggest
         self.org_profile_tab.profile_loaded.connect(self.auto_fill_and_suggest)
+        
+        # Threading support
+        self.scraping_workers = []
+        self.is_searching = False
+        self.search_thread = None
+        
+        # Initialize grant map for storing grant objects
+        self.grant_map = {}
 
     def load_grants(self):
         # Optionally load grants into the researcher for in-memory matching
@@ -282,12 +419,16 @@ class GrantSearchTab(QWidget):
         self.search_description.setPlainText(description)
 
     def intelligent_grant_search(self):
-        """Intelligent grant search that keeps existing grants and searches comprehensively."""
+        """Intelligent grant search using background thread to prevent UI freezing."""
         profile = self.org_profile_tab.get_profile()
         if not profile:
             self.results_list.clear()
             self.results_list.addItem("Please load an organization profile first.")
             return
+        
+        # Disable search button to prevent multiple simultaneous searches
+        self.intelligent_search_btn.setEnabled(False)
+        self.intelligent_search_btn.setText("Searching...")
         
         # Keep existing grants in the list
         existing_items = []
@@ -304,115 +445,113 @@ class GrantSearchTab(QWidget):
         else:
             self.results_list.addItem("🔍 Starting intelligent grant search...")
         
-        all_grants = existing_grants.copy()  # Start with existing grants
+        # Get location information
         selected_country = self.country_combo.currentText()
         selected_state = self.state_combo.currentText()
         
-        # Step 1: Search database for new grants
-        try:
-            self.results_list.addItem("💾 Searching database for matching grants...")
-            db_grants = self._search_database_for_profile(profile)
-            new_db_grants = [g for g in db_grants if g not in existing_grants]
-            all_grants.extend(new_db_grants)
-            self.results_list.addItem(f"   Found {len(new_db_grants)} new grants in database")
-        except Exception as e:
-            self.results_list.addItem(
-                f"   ⚠️ Database search failed: {str(e)[:100]}..."
-            )
-            
-        # Step 2: AI Agent discovery
-        try:
-            self.results_list.addItem("🤖 Using AI Agent for web search...")
-            ai_grants = self.ai_agent.search_grants_for_profile(profile)
-            new_ai_grants = [g for g in ai_grants if g not in all_grants]
-            all_grants.extend(new_ai_grants)
-            self.results_list.addItem(
-                f"   Found {len(new_ai_grants)} new grants via AI Agent"
-            )
-        except Exception as e:
-            self.results_list.addItem(
-                f"   ⚠️ AI Agent search failed: {str(e)[:100]}..."
-            )
+        # Create and configure the search thread
+        self.search_thread = GrantSearchThread(
+            profile=profile,
+            existing_grants=existing_grants,
+            selected_country=selected_country,
+            selected_state=selected_state,
+            ai_agent=self.ai_agent,
+            grant_researcher=self.researcher
+        )
         
-        # Step 3: Location-specific scrapers
-        if selected_country == "USA":
-            if selected_state in ["West Virginia", "All States"]:
-                try:
-                    self.results_list.addItem("🏔️ Searching West Virginia sources...")
-                    wv_grants = self.wv_scraper.scrape_all_sources()
-                    new_wv_grants = [g for g in wv_grants if g not in all_grants]
-                    all_grants.extend(new_wv_grants)
-                    self.results_list.addItem(f"   Found {len(new_wv_grants)} new grants via WV Scraper")
-                except Exception as e:
-                    self.results_list.addItem(f"   ⚠️ WV scraper failed: {str(e)[:100]}...")
+        # Connect thread signals to UI update methods
+        self.search_thread.status_update.connect(self._on_search_status_update)
+        self.search_thread.grants_found.connect(self._on_grants_found)
+        self.search_thread.search_complete.connect(self._on_search_complete)
+        self.search_thread.error_occurred.connect(self._on_search_error)
         
-        # Process results
+        # Start the background search
+        self.search_thread.start()
+        
+    def _on_search_status_update(self, message):
+        """Handle status updates from the search thread."""
+        self.results_list.addItem(message)
+        # Auto-scroll to bottom to show latest updates
+        self.results_list.scrollToBottom()
+        
+    def _on_grants_found(self, new_grants):
+        """Handle new grants found during search."""
+        for grant in new_grants:
+            self._add_grant_to_ui(grant)
+            
+    def _on_search_complete(self, all_grants):
+        """Handle search completion."""
+        # Re-enable the search button
+        self.intelligent_search_btn.setEnabled(True)
+        self.intelligent_search_btn.setText("🧠 Intelligent Search")
+        
+        # Show completion message
+        total_grants = len(all_grants)
+        self.results_list.addItem(f"✅ Search completed! Found {total_grants} total grants.")
+        self.results_list.scrollToBottom()
+        
+        # Save grants to local storage
         try:
-            # Remove duplicates while preserving order
-            unique_grants = []
-            seen_ids = set()
-            for grant in all_grants:
-                if grant.id not in seen_ids:
-                    unique_grants.append(grant)
-                    seen_ids.add(grant.id)
+            self._save_grants_to_file(all_grants)
+        except Exception as e:
+            print(f"Failed to save grants: {e}")
             
-            # Save new grants to database
-            new_grants = [g for g in unique_grants if g not in existing_grants]
-            if new_grants:
-                try:
-                    self.save_grants_to_db(new_grants)
-                except Exception as e:
-                    self.results_list.addItem(f"   ⚠️ Failed to save to database: {str(e)[:100]}...")
-            
-            # Update results list
-            if not unique_grants:
-                if existing_items:
-                    self.results_list.addItem("No new grants found. Keeping existing results.")
-                else:
-                    self.results_list.clear()
-                    self.results_list.addItem("No grants found in intelligent search.")
-                return
-            
-            # Clear and rebuild results list
-            self.results_list.clear()
-            
-            # Rebuild grant map
+    def _on_search_error(self, error_message):
+        """Handle search errors."""
+        # Re-enable the search button
+        self.intelligent_search_btn.setEnabled(True)
+        self.intelligent_search_btn.setText("🧠 Intelligent Search")
+        
+        # Show error message
+        self.results_list.addItem(f"❌ {error_message}")
+        self.results_list.scrollToBottom()
+        
+    def _add_grant_to_ui(self, grant):
+        """Add a grant to the UI list."""
+        # Create grant map if it doesn't exist
+        if not hasattr(self, 'grant_map'):
             self.grant_map = {}
             
-            # Add grants to list
-            for grant in unique_grants:
-                # Mark new grants with a different icon
-                if grant in new_grants:
-                    display_text = f"🆕 {grant.title} ({grant.funder_name})"
-                else:
-                    display_text = f"💾 {grant.title} ({grant.funder_name})"
-                
-                self.grant_map[display_text] = grant
-                self.results_list.addItem(display_text)
+        # Format grant display text
+        amount_text = ""
+        if hasattr(grant, 'amount_typical') and grant.amount_typical:
+            amount_text = f" (${grant.amount_typical:,})"
+        elif hasattr(grant, 'amount_max') and grant.amount_max:
+            amount_text = f" (up to ${grant.amount_max:,})"
             
-            # Summary
-            total_grants = len(unique_grants)
-            new_count = len(new_grants)
-            existing_count = total_grants - new_count
+        display_text = f"{grant.title}{amount_text}"
+        
+        # Add to UI if not already present
+        # Add to UI if not already present
+        if display_text not in self.grant_map:
+            self.grant_map[display_text] = grant
+            self.results_list.addItem(display_text)
             
-            if existing_count > 0:
-                self.results_list.addItem(f"\n✅ Intelligent search completed!")
-                self.results_list.addItem(f"   📊 Total grants: {total_grants}")
-                self.results_list.addItem(f"   💾 Existing grants: {existing_count}")
-                self.results_list.addItem(f"   🆕 New grants found: {new_count}")
-            else:
-                self.results_list.addItem(f"\n✅ Intelligent search found {total_grants} grant opportunities!")
+    def _save_grants_to_file(self, grants):
+        """Save grants to local file storage."""
+        try:
+            grants_data = []
+            for grant in grants:
+                grant_dict = {
+                    'id': grant.id,
+                    'title': grant.title,
+                    'description': grant.description,
+                    'funder_name': grant.funder_name,
+                    'funder_type': grant.funder_type,
+                    'amount_typical': grant.amount_typical,
+                    'amount_min': grant.amount_min,
+                    'amount_max': grant.amount_max,
+                    'focus_areas': grant.focus_areas,
+                    'source': grant.source,
+                    'source_url': grant.source_url
+                }
+                grants_data.append(grant_dict)
             
-            if new_grants:
-                self.results_list.addItem("💾 New grants have been saved to database for future searches.")
+            with open(GRANTS_PATH, 'w') as f:
+                json.dump(grants_data, f, indent=2)
                 
         except Exception as e:
-            if existing_items:
-                self.results_list.addItem(f"❌ Error processing results: {str(e)[:100]}...")
-                self.results_list.addItem("Keeping existing grants in the list.")
-            else:
-                self.results_list.clear()
-                self.results_list.addItem(f"❌ Error processing search results: {str(e)[:100]}...")
+            print(f"Error saving grants to file: {e}")
 
     def _search_database_for_profile(self, profile):
         """Search database for grants matching the profile."""
