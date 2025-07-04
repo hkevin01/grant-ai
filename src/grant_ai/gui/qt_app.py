@@ -37,6 +37,8 @@ from PyQt5.QtWidgets import (
 
 from grant_ai.analysis.grant_researcher import GrantResearcher
 from grant_ai.core.db import SessionLocal
+from grant_ai.gui.enhanced_past_grants_tab import EnhancedPastGrantsTab
+from grant_ai.gui.predictive_grants_tab import PredictiveGrantsTab
 from grant_ai.gui.questionnaire_widget import QuestionnaireWidget
 from grant_ai.models import OrganizationProfile
 from grant_ai.models.grant import Grant as GrantModel
@@ -857,8 +859,9 @@ Source: {getattr(grant, 'source', 'Unknown')}
 
 
 class OrgProfileTab(QWidget):
-    # Add signal for profile loading
+    # Add signals for profile loading and changes
     profile_loaded = pyqtSignal(object)
+    profile_changed = pyqtSignal(object)
     
     def __init__(self):
         super().__init__()
@@ -1034,6 +1037,7 @@ class OrgProfileTab(QWidget):
             profile = self.get_profile()
             if profile:
                 self.profile_loaded.emit(profile)
+                self.profile_changed.emit(profile)
             
             self.loading_indicator.setVisible(False)
             self.status_label.setText(f"✅ {profile_data.get('name', 'Organization')} profile loaded successfully!")
@@ -1111,6 +1115,7 @@ class OrgProfileTab(QWidget):
                 json.dump(profile.model_dump(), f, default=str)
             # Emit signal after saving
             self.profile_loaded.emit(profile)
+            self.profile_changed.emit(profile)
             self.status_label.setText("✅ Profile saved successfully!")
         except Exception as e:
             self.status_label.setText(f"❌ Error saving profile: {str(e)}")
@@ -1129,6 +1134,7 @@ class OrgProfileTab(QWidget):
                 profile = self.get_profile()
                 if profile:
                     self.profile_loaded.emit(profile)
+                    self.profile_changed.emit(profile)
                 
                 self.status_label.setText("✅ Profile loaded successfully!")
             else:
@@ -1162,6 +1168,7 @@ class OrgProfileTab(QWidget):
             
             # Emit signal to update search tab
             self.profile_loaded.emit(profile)
+            self.profile_changed.emit(profile)
             
         except Exception as e:
             self.status_label.setText(f"❌ Error loading questionnaire profile: {str(e)}")
@@ -2266,10 +2273,20 @@ class MainWindow(QMainWindow):
         self.questionnaire_tab = QuestionnaireWidget()
         self.reporting_tab = ReportingTab()
         self.past_grants_tab = PastGrantsTab()
+        self.predictive_grants_tab = PredictiveGrantsTab()
+        self.enhanced_past_grants_tab = EnhancedPastGrantsTab()
         
         # Connect questionnaire to profile tab
         self.questionnaire_tab.profileCreated.connect(
             self.org_profile_tab.load_questionnaire_profile
+        )
+        
+        # Connect organization profile changes to new tabs
+        self.org_profile_tab.profile_changed.connect(
+            self.predictive_grants_tab.update_organization_context
+        )
+        self.org_profile_tab.profile_changed.connect(
+            self.enhanced_past_grants_tab.update_organization_context
         )
         
         # Add tabs
@@ -2278,6 +2295,8 @@ class MainWindow(QMainWindow):
         tabs.addTab(self.questionnaire_tab, "Profile Questionnaire")
         tabs.addTab(ApplicationTab(), "Applications")
         tabs.addTab(self.past_grants_tab, "Past Grants")
+        tabs.addTab(self.enhanced_past_grants_tab, "Enhanced Past Grants")
+        tabs.addTab(self.predictive_grants_tab, "Predictive Grants")
         tabs.addTab(self.reporting_tab, "Reports")
         
         self.setCentralWidget(tabs)

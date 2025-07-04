@@ -51,6 +51,7 @@ show_help() {
     echo "  test-ai                 Test AI features"
     echo "  demo-search             Run enhanced search demo"
     echo "  analyze-performance     Analyze system performance and generate recommendations"
+    echo "  validate-integration    Validate the integration of new features"
     echo "  lint                    Run linter checks"
     echo "  format                  Format code with black"
     echo "  clean                   Clean up temporary files"
@@ -208,6 +209,17 @@ run_enhanced_tests() {
         print_status "Test results saved to test_results.txt"
         cat test_results.txt
     fi
+}
+
+# Function to validate integration
+validate_integration() {
+    print_header
+    print_status "Validating integration of new features..."
+    
+    check_venv
+    activate_venv
+    
+    python validate_integration.py
 }
 
 # Function to run linter
@@ -408,6 +420,9 @@ main() {
             ;;
         "analyze-performance")
             analyze_performance
+            ;;
+        "validate-integration")
+            validate_integration
             ;;
         "lint")
             run_lint
