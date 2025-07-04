@@ -165,6 +165,7 @@ This project aims to create an AI-powered system for researching and managing gr
 - ✅ Multi-format export (Excel, PDF, HTML)
 - ✅ Questionnaire-driven profiling
 - ✅ Template-based applications
+- ✅ **Past Grants Tracking**: Historical funding database with filtering and analytics
 
 ## Deliverables Checklist
 - ✅ AI Company Research Report: Filtered list of potential funders
@@ -295,6 +296,9 @@ This project aims to create an AI-powered system for researching and managing gr
 - ✅ `launch_enhanced_gui.py` - Enhanced GUI launcher with AI integration
 - ✅ `test_enhanced_scraping.py` - Demonstration of improved error handling
 - ✅ `test_all_enhancements.py` - Comprehensive validation of all improvements
+- ✅ **Past Grants Tab**: New GUI tab for tracking CODA's historical funding
+  - ✅ `tests/test_past_grants_tab.py` - Test suite for past grants functionality
+  - ✅ **Features**: Grant history tracking, filtering, statistics, add new grants
 
 #### 🔧 Enhanced Components
 - ✅ **Updated WV Scraper**: Enhanced `wv_grants.py` with robust error handling and better URLs

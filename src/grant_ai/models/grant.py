@@ -196,6 +196,7 @@ class Grant(BaseModel):
 
 class GrantORM(Base):
     __tablename__ = "grants"
+    __table_args__ = {'extend_existing': True}
     id = Column(String, primary_key=True)
     title = Column(String, nullable=False)
     description = Column(Text, default="")

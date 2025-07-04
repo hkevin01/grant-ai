@@ -11,19 +11,24 @@ from pathlib import Path
 os.environ['QT_LOGGING_RULES'] = '*.debug=false;qt.qpa.*=false'
 os.environ['QT_QPA_PLATFORM'] = 'xcb'  # Force X11 backend instead of Wayland
 
-from PyQt5.QtCore import QThread, QTimer, pyqtSignal
+from PyQt5.QtCore import Qt, QThread, QTimer, pyqtSignal
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import (
     QApplication,
     QComboBox,
     QDialog,
     QFormLayout,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QLineEdit,
     QListWidget,
     QMainWindow,
+    QMessageBox,
     QProgressBar,
     QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
     QTabWidget,
     QTextEdit,
     QVBoxLayout,
@@ -267,12 +272,71 @@ class GrantSearchTab(QWidget):
         self.grant_map = {}
 
     def load_grants(self):
+        """Load grants from file into the researcher for in-memory matching."""
         # Optionally load grants into the researcher for in-memory matching
         if GRANTS_PATH.exists():
-            with open(GRANTS_PATH, "r") as f:
-                grants_data = json.load(f)
-            grants = [GrantModel(**g) for g in grants_data]
+            try:
+                with open(GRANTS_PATH, "r", encoding="utf-8") as f:
+                    grants_data = json.load(f)
+                grants = [GrantModel(**g) for g in grants_data]
+                self.researcher.add_grants(grants)
+                print(f"✅ Loaded {len(grants)} grants from file")
+            except json.JSONDecodeError as e:
+                print(f"⚠️ JSON error in grants file: {e}")
+                print(f"📁 Backing up corrupted file and creating fresh grants database")
+                self.handle_corrupted_grants_file()
+            except Exception as e:
+                print(f"⚠️ Error loading grants file: {e}")
+                self.handle_corrupted_grants_file()
+    
+    def handle_corrupted_grants_file(self):
+        """Handle corrupted grants file by backing it up and creating a new one."""
+        try:
+            # Backup the corrupted file
+            backup_path = GRANTS_PATH.with_suffix('.json.backup')
+            if GRANTS_PATH.exists():
+                import shutil
+                shutil.move(str(GRANTS_PATH), str(backup_path))
+                print(f"🔄 Backed up corrupted file to {backup_path}")
+            
+            # Create a fresh grants file with empty array
+            self.create_fresh_grants_file()
+            
+        except Exception as e:
+            print(f"❌ Error handling corrupted grants file: {e}")
+    
+    def create_fresh_grants_file(self):
+        """Create a fresh grants file with sample data."""
+        try:
+            sample_grants = [
+                {
+                    "id": "sample_001",
+                    "title": "Education Innovation Grant",
+                    "description": "Support for innovative education programs",
+                    "funder_name": "Sample Foundation",
+                    "funder_type": "foundation",
+                    "funding_type": "grant",
+                    "amount_min": 10000,
+                    "amount_max": 100000,
+                    "amount_typical": 50000,
+                    "status": "open",
+                    "focus_areas": ["education", "innovation"],
+                    "source": "Sample Data",
+                    "source_url": "https://example.com/grant"
+                }
+            ]
+            
+            with open(GRANTS_PATH, "w", encoding="utf-8") as f:
+                json.dump(sample_grants, f, indent=2)
+            
+            print(f"✅ Created fresh grants file at {GRANTS_PATH}")
+            
+            # Load the new grants
+            grants = [GrantModel(**g) for g in sample_grants]
             self.researcher.add_grants(grants)
+            
+        except Exception as e:
+            print(f"❌ Error creating fresh grants file: {e}")
 
     def auto_fill_and_suggest(self, profile=None, auto_search=False):
         """Auto-fill search fields and suggest grants based on profile.
@@ -543,15 +607,18 @@ class GrantSearchTab(QWidget):
                     'amount_max': grant.amount_max,
                     'focus_areas': grant.focus_areas,
                     'source': grant.source,
-                    'source_url': grant.source_url
+                    'source_url': (str(grant.source_url)
+                                   if grant.source_url else None)
                 }
                 grants_data.append(grant_dict)
             
-            with open(GRANTS_PATH, 'w') as f:
+            with open(GRANTS_PATH, 'w', encoding='utf-8') as f:
                 json.dump(grants_data, f, indent=2)
                 
         except Exception as e:
             print(f"Error saving grants to file: {e}")
+            import traceback
+            traceback.print_exc()
 
     def _search_database_for_profile(self, profile):
         """Search database for grants matching the profile."""
@@ -625,7 +692,10 @@ class GrantSearchTab(QWidget):
                         amount_min=grant_orm.amount_min,
                         amount_max=grant_orm.amount_max,
                         amount_typical=grant_orm.amount_typical,
-                        status=grant_orm.status,
+                        status=(grant_orm.status.value 
+                                if hasattr(grant_orm.status, 'value')
+                                else str(grant_orm.status) 
+                                if grant_orm.status else None),
                         eligibility_types=grant_orm.eligibility_types,
                         focus_areas=grant_orm.focus_areas,
                         source=grant_orm.source,
@@ -1256,6 +1326,467 @@ STATUS BREAKDOWN:
             self.pdf_btn.setEnabled(True)
         
 
+class PastGrantsTab(QWidget):
+    """Tab for viewing and managing past grants and funding history."""
+    
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+        self.load_past_grants()
+    
+    def init_ui(self):
+        """Initialize the user interface for past grants tracking."""
+        layout = QVBoxLayout()
+        
+        # Header
+        header_label = QLabel("CODA Past Grants & Funding History")
+        header_label.setStyleSheet("""
+            QLabel {
+                font-size: 18px;
+                font-weight: bold;
+                color: #2c3e50;
+                padding: 10px;
+                background-color: #ecf0f1;
+                border-radius: 5px;
+                margin-bottom: 10px;
+            }
+        """)
+        layout.addWidget(header_label)
+        
+        # Summary stats
+        self.create_summary_section(layout)
+        
+        # Filter controls
+        self.create_filter_section(layout)
+        
+        # Past grants table
+        self.create_grants_table(layout)
+        
+        # Add new grant section
+        self.create_add_grant_section(layout)
+        
+        self.setLayout(layout)
+    
+    def create_summary_section(self, layout):
+        """Create summary statistics section."""
+        summary_widget = QWidget()
+        summary_layout = QHBoxLayout()
+        
+        # Total funding received
+        self.total_funding_label = QLabel("Total Funding: $0")
+        self.total_funding_label.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                font-weight: bold;
+                color: #27ae60;
+                padding: 10px;
+                background-color: #d5f4e6;
+                border-radius: 5px;
+                border: 2px solid #27ae60;
+            }
+        """)
+        
+        # Number of grants
+        self.grants_count_label = QLabel("Total Grants: 0")
+        self.grants_count_label.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                font-weight: bold;
+                color: #3498db;
+                padding: 10px;
+                background-color: #ebf3fd;
+                border-radius: 5px;
+                border: 2px solid #3498db;
+            }
+        """)
+        
+        # Average grant size
+        self.avg_grant_label = QLabel("Average Grant: $0")
+        self.avg_grant_label.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                font-weight: bold;
+                color: #f39c12;
+                padding: 10px;
+                background-color: #fef9e7;
+                border-radius: 5px;
+                border: 2px solid #f39c12;
+            }
+        """)
+        
+        summary_layout.addWidget(self.total_funding_label)
+        summary_layout.addWidget(self.grants_count_label)
+        summary_layout.addWidget(self.avg_grant_label)
+        summary_layout.addStretch()
+        
+        summary_widget.setLayout(summary_layout)
+        layout.addWidget(summary_widget)
+    
+    def create_filter_section(self, layout):
+        """Create filter controls for grants."""
+        filter_widget = QWidget()
+        filter_layout = QHBoxLayout()
+        
+        # Year filter
+        filter_layout.addWidget(QLabel("Filter by Year:"))
+        self.year_filter = QComboBox()
+        self.year_filter.addItem("All Years")
+        # Add years from 2010 to current year
+        from datetime import datetime
+        current_year = datetime.now().year
+        for year in range(current_year, 2009, -1):
+            self.year_filter.addItem(str(year))
+        self.year_filter.currentTextChanged.connect(self.filter_grants)
+        filter_layout.addWidget(self.year_filter)
+        
+        # Funding type filter
+        filter_layout.addWidget(QLabel("Funding Type:"))
+        self.type_filter = QComboBox()
+        self.type_filter.addItems([
+            "All Types", "Federal Grant", "State Grant", "Foundation Grant",
+            "Corporate Sponsorship", "Private Donation", "Other"
+        ])
+        self.type_filter.currentTextChanged.connect(self.filter_grants)
+        filter_layout.addWidget(self.type_filter)
+        
+        # Status filter
+        filter_layout.addWidget(QLabel("Status:"))
+        self.status_filter = QComboBox()
+        self.status_filter.addItems([
+            "All Status", "Received", "In Progress", "Completed", "Pending"
+        ])
+        self.status_filter.currentTextChanged.connect(self.filter_grants)
+        filter_layout.addWidget(self.status_filter)
+        
+        filter_layout.addStretch()
+        
+        # Refresh button
+        refresh_btn = QPushButton("Refresh Data")
+        refresh_btn.clicked.connect(self.load_past_grants)
+        filter_layout.addWidget(refresh_btn)
+        
+        filter_widget.setLayout(filter_layout)
+        layout.addWidget(filter_widget)
+    
+    def create_grants_table(self, layout):
+        """Create the past grants table."""
+        
+        self.grants_table = QTableWidget()
+        self.grants_table.setColumnCount(7)
+        self.grants_table.setHorizontalHeaderLabels([
+            "Funder", "Amount", "Year", "Type", "Purpose", "Status", "Notes"
+        ])
+        
+        # Set column widths
+        header = self.grants_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.Stretch)  # Funder
+        header.setSectionResizeMode(1, QHeaderView.Fixed)    # Amount
+        header.setSectionResizeMode(2, QHeaderView.Fixed)    # Year
+        header.setSectionResizeMode(3, QHeaderView.Fixed)    # Type
+        header.setSectionResizeMode(4, QHeaderView.Stretch)  # Purpose
+        header.setSectionResizeMode(5, QHeaderView.Fixed)    # Status
+        header.setSectionResizeMode(6, QHeaderView.Stretch)  # Notes
+        
+        self.grants_table.setColumnWidth(1, 100)  # Amount
+        self.grants_table.setColumnWidth(2, 70)   # Year
+        self.grants_table.setColumnWidth(3, 120)  # Type
+        self.grants_table.setColumnWidth(5, 90)   # Status
+        
+        # Enable sorting
+        self.grants_table.setSortingEnabled(True)
+        
+        # Style the table
+        self.grants_table.setStyleSheet("""
+            QTableWidget {
+                gridline-color: #bdc3c7;
+                background-color: white;
+                alternate-background-color: #f8f9fa;
+            }
+            QTableWidget::item {
+                padding: 8px;
+                border-bottom: 1px solid #ecf0f1;
+            }
+            QTableWidget::item:selected {
+                background-color: #3498db;
+                color: white;
+            }
+            QHeaderView::section {
+                background-color: #34495e;
+                color: white;
+                padding: 8px;
+                border: none;
+                font-weight: bold;
+            }
+        """)
+        
+        layout.addWidget(self.grants_table)
+    
+    def create_add_grant_section(self, layout):
+        """Create section for adding new past grants."""
+        add_widget = QWidget()
+        add_layout = QVBoxLayout()
+        
+        # Add grant button
+        add_btn = QPushButton("+ Add New Past Grant")
+        add_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #27ae60;
+                color: white;
+                font-weight: bold;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #229954;
+            }
+            QPushButton:pressed {
+                background-color: #1e8449;
+            }
+        """)
+        add_btn.clicked.connect(self.add_new_grant)
+        
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(add_btn)
+        button_layout.addStretch()
+        
+        add_layout.addLayout(button_layout)
+        add_widget.setLayout(add_layout)
+        layout.addWidget(add_widget)
+    
+    def load_past_grants(self):
+        """Load past grants data from database or storage."""
+        # Sample data for demonstration - in production, this would come from a database
+        self.past_grants_data = [
+            {
+                "funder": "West Virginia Department of Education",
+                "amount": 25000,
+                "year": 2024,
+                "type": "State Grant",
+                "purpose": "After-school STEM programs",
+                "status": "Completed",
+                "notes": "Successfully funded robotics equipment and training"
+            },
+            {
+                "funder": "Appalachian Regional Commission",
+                "amount": 50000,
+                "year": 2023,
+                "type": "Federal Grant",
+                "purpose": "Rural arts education initiative",
+                "status": "Completed",
+                "notes": "Expanded music and art programs to 3 schools"
+            },
+            {
+                "funder": "Claude Worthington Benedum Foundation",
+                "amount": 15000,
+                "year": 2023,
+                "type": "Foundation Grant",
+                "purpose": "Music education equipment",
+                "status": "Completed",
+                "notes": "Purchased new instruments for school band"
+            },
+            {
+                "funder": "United Way of Central West Virginia",
+                "amount": 8000,
+                "year": 2022,
+                "type": "Foundation Grant",
+                "purpose": "Summer camp scholarships",
+                "status": "Completed",
+                "notes": "Provided scholarships for 40 low-income students"
+            },
+            {
+                "funder": "WV Community Foundation",
+                "amount": 12000,
+                "year": 2022,
+                "type": "Foundation Grant",
+                "purpose": "Technology upgrade",
+                "status": "Completed",
+                "notes": "Upgraded computer lab with new equipment"
+            },
+            {
+                "funder": "Local Business Coalition",
+                "amount": 5000,
+                "year": 2024,
+                "type": "Corporate Sponsorship",
+                "purpose": "Robotics competition team",
+                "status": "In Progress",
+                "notes": "Ongoing support for FIRST Robotics team"
+            }
+        ]
+        
+        self.populate_grants_table()
+        self.update_summary_stats()
+    
+    def populate_grants_table(self):
+        """Populate the grants table with filtered data."""
+        # Filter data based on current filters
+        filtered_data = self.filter_data()
+        
+        self.grants_table.setRowCount(len(filtered_data))
+        
+        for row, grant in enumerate(filtered_data):
+            self.grants_table.setItem(row, 0, QTableWidgetItem(grant["funder"]))
+            self.grants_table.setItem(row, 1, QTableWidgetItem(f"${grant['amount']:,}"))
+            self.grants_table.setItem(row, 2, QTableWidgetItem(str(grant["year"])))
+            self.grants_table.setItem(row, 3, QTableWidgetItem(grant["type"]))
+            self.grants_table.setItem(row, 4, QTableWidgetItem(grant["purpose"]))
+            self.grants_table.setItem(row, 5, QTableWidgetItem(grant["status"]))
+            self.grants_table.setItem(row, 6, QTableWidgetItem(grant["notes"]))
+            
+            # Color code by status
+            status_item = self.grants_table.item(row, 5)
+            if grant["status"] == "Completed":
+                status_item.setBackground(QColor("#d5f4e6"))
+                status_item.setForeground(QColor("#27ae60"))
+            elif grant["status"] == "In Progress":
+                status_item.setBackground(QColor("#fff3cd"))
+                status_item.setForeground(QColor("#856404"))
+            elif grant["status"] == "Pending":
+                status_item.setBackground(QColor("#f8d7da"))
+                status_item.setForeground(QColor("#721c24"))
+    
+    def filter_data(self):
+        """Filter grants data based on current filter settings."""
+        filtered_data = self.past_grants_data.copy()
+        
+        # Year filter
+        if self.year_filter.currentText() != "All Years":
+            year = int(self.year_filter.currentText())
+            filtered_data = [g for g in filtered_data if g["year"] == year]
+        
+        # Type filter
+        if self.type_filter.currentText() != "All Types":
+            grant_type = self.type_filter.currentText()
+            filtered_data = [g for g in filtered_data if g["type"] == grant_type]
+        
+        # Status filter
+        if self.status_filter.currentText() != "All Status":
+            status = self.status_filter.currentText()
+            filtered_data = [g for g in filtered_data if g["status"] == status]
+        
+        return filtered_data
+    
+    def filter_grants(self):
+        """Apply filters and refresh the table."""
+        self.populate_grants_table()
+        self.update_summary_stats()
+    
+    def update_summary_stats(self):
+        """Update the summary statistics."""
+        filtered_data = self.filter_data()
+        
+        if filtered_data:
+            total_funding = sum(grant["amount"] for grant in filtered_data)
+            grants_count = len(filtered_data)
+            avg_grant = total_funding / grants_count if grants_count > 0 else 0
+            
+            self.total_funding_label.setText(f"Total Funding: ${total_funding:,}")
+            self.grants_count_label.setText(f"Total Grants: {grants_count}")
+            self.avg_grant_label.setText(f"Average Grant: ${avg_grant:,.0f}")
+        else:
+            self.total_funding_label.setText("Total Funding: $0")
+            self.grants_count_label.setText("Total Grants: 0")
+            self.avg_grant_label.setText("Average Grant: $0")
+    
+    def add_new_grant(self):
+        """Open dialog to add a new past grant."""
+        self.show_add_grant_dialog()
+    
+    def show_add_grant_dialog(self):
+        """Show dialog for adding a new past grant."""
+        from PyQt5.QtWidgets import (
+            QComboBox,
+            QDialog,
+            QDialogButtonBox,
+            QFormLayout,
+            QLineEdit,
+            QSpinBox,
+            QTextEdit,
+        )
+        
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Add New Past Grant")
+        dialog.setModal(True)
+        dialog.resize(500, 400)
+        
+        layout = QFormLayout()
+        
+        # Form fields
+        funder_edit = QLineEdit()
+        amount_edit = QSpinBox()
+        amount_edit.setRange(0, 10000000)
+        amount_edit.setSuffix(" USD")
+        
+        year_edit = QSpinBox()
+        year_edit.setRange(2000, 2030)
+        year_edit.setValue(2024)
+        
+        type_combo = QComboBox()
+        type_combo.addItems([
+            "Federal Grant", "State Grant", "Foundation Grant",
+            "Corporate Sponsorship", "Private Donation", "Other"
+        ])
+        
+        purpose_edit = QLineEdit()
+        
+        status_combo = QComboBox()
+        status_combo.addItems(["Received", "In Progress", "Completed", "Pending"])
+        
+        notes_edit = QTextEdit()
+        notes_edit.setMaximumHeight(80)
+        
+        # Add fields to form
+        layout.addRow("Funder:", funder_edit)
+        layout.addRow("Amount ($):", amount_edit)
+        layout.addRow("Year:", year_edit)
+        layout.addRow("Type:", type_combo)
+        layout.addRow("Purpose:", purpose_edit)
+        layout.addRow("Status:", status_combo)
+        layout.addRow("Notes:", notes_edit)
+        
+        # Dialog buttons
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(lambda: self.save_new_grant(
+            dialog, funder_edit.text(), amount_edit.value(),
+            year_edit.value(), type_combo.currentText(),
+            purpose_edit.text(), status_combo.currentText(),
+            notes_edit.toPlainText()
+        ))
+        buttons.rejected.connect(dialog.reject)
+        
+        layout.addRow(buttons)
+        dialog.setLayout(layout)
+        dialog.exec_()
+    
+    def save_new_grant(self, dialog, funder, amount, year, grant_type, purpose, status, notes):
+        """Save the new grant to the data."""
+        if not funder or not purpose:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.warning(self, "Validation Error", "Funder and Purpose are required fields.")
+            return
+        
+        new_grant = {
+            "funder": funder,
+            "amount": amount,
+            "year": year,
+            "type": grant_type,
+            "purpose": purpose,
+            "status": status,
+            "notes": notes
+        }
+        
+        self.past_grants_data.append(new_grant)
+        self.populate_grants_table()
+        self.update_summary_stats()
+        
+        dialog.accept()
+        
+        from PyQt5.QtWidgets import QMessageBox
+        QMessageBox.information(self, "Success", "New grant added successfully!")
+
+
 class ApplicationTab(QWidget):
     def __init__(self):
         super().__init__()
@@ -1734,6 +2265,7 @@ class MainWindow(QMainWindow):
         self.grant_search_tab = GrantSearchTab(self.org_profile_tab)
         self.questionnaire_tab = QuestionnaireWidget()
         self.reporting_tab = ReportingTab()
+        self.past_grants_tab = PastGrantsTab()
         
         # Connect questionnaire to profile tab
         self.questionnaire_tab.profileCreated.connect(
@@ -1745,8 +2277,8 @@ class MainWindow(QMainWindow):
         tabs.addTab(self.org_profile_tab, "Organization Profile")
         tabs.addTab(self.questionnaire_tab, "Profile Questionnaire")
         tabs.addTab(ApplicationTab(), "Applications")
+        tabs.addTab(self.past_grants_tab, "Past Grants")
         tabs.addTab(self.reporting_tab, "Reports")
-        tabs.addTab(ReportingTab(), "Reports")
         
         self.setCentralWidget(tabs)
 

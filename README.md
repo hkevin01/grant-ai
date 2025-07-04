@@ -5,8 +5,17 @@
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Security](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
+[![Status](https://img.shields.io/badge/status-production--ready-green.svg)]()
 
-An AI-powered system for researching and managing grant applications for non-profit organizations. Built with modern Python development practices and comprehensive quality assurance.
+An AI-powered system for researching and managing grant applications for non-profit organizations. **Production-ready** with enhanced stability, threading-based GUI operations, and comprehensive grant discovery capabilities.
+
+## ✅ Current Status (July 2025)
+
+**🎉 Production Ready!** All major issues resolved:
+- ✅ **Crash-Free Operation**: GUI threading prevents VS Code force quits
+- ✅ **Enhanced Scrapers**: Robust WV Department of Education and foundation grant discovery  
+- ✅ **Organized Codebase**: Professional project structure with comprehensive testing
+- ✅ **Performance Analysis**: Built-in system monitoring and improvement recommendations
 
 ## 🚀 Features
 
@@ -87,6 +96,32 @@ docker run -p 8000:8000 grant-ai
 ## 🚀 Usage
 
 ### Command Line Interface
+
+```bash
+# System Analysis & Health Check
+./run.sh analyze-performance    # Analyze system and get improvement recommendations
+
+# Setup and Launch
+./run.sh setup                  # First-time setup
+./run.sh load-data             # Load sample data
+./run.sh gui                   # Launch GUI application
+
+# Grant Research
+./run.sh cli research          # Command-line grant research
+./run.sh demo-search           # Enhanced search demonstration
+
+# Testing and Validation
+./run.sh test                  # Run all tests
+./run.sh test-integration      # Integration tests
+./run.sh lint                  # Code quality checks
+
+# Advanced Commands
+./run.sh setup-ai              # Setup AI features
+./run.sh gui-enhanced          # Launch enhanced GUI with AI
+./run.sh test-ai               # Test AI functionality
+```
+
+### Original CLI Interface (Advanced)
 
 ```bash
 # Create organization profile

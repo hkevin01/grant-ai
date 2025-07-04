@@ -46,8 +46,11 @@ show_help() {
     echo "  test                    Run all tests"
     echo "  test-unit               Run unit tests only"
     echo "  test-integration        Run integration tests only"
+    echo "  test-comprehensive      Run comprehensive test suite"
+    echo "  test-enhanced           Run enhanced test suite with detailed reporting"
     echo "  test-ai                 Test AI features"
     echo "  demo-search             Run enhanced search demo"
+    echo "  analyze-performance     Analyze system performance and generate recommendations"
     echo "  lint                    Run linter checks"
     echo "  format                  Format code with black"
     echo "  clean                   Clean up temporary files"
@@ -180,6 +183,33 @@ run_tests() {
     fi
 }
 
+# Function to run comprehensive tests
+run_comprehensive_tests() {
+    print_header
+    print_status "Running comprehensive test suite..."
+    
+    check_venv
+    activate_venv
+    
+    python tests/test_comprehensive.py
+}
+
+# Function to run enhanced tests
+run_enhanced_tests() {
+    print_header
+    print_status "Running enhanced test suite with detailed reporting..."
+    
+    check_venv
+    activate_venv
+    
+    python tests/test_runner.py --test-type all --output-file test_results.txt
+    
+    if [ -f "test_results.txt" ]; then
+        print_status "Test results saved to test_results.txt"
+        cat test_results.txt
+    fi
+}
+
 # Function to run linter
 run_lint() {
     print_header
@@ -242,7 +272,7 @@ setup_ai() {
         return 1
     fi
     
-    python setup_ai.py
+    python scripts/setup/setup_ai.py
     
     if [[ $? -eq 0 ]]; then
         print_status "AI features setup completed successfully!"
@@ -321,6 +351,15 @@ print('✅ Enhanced search demo completed')
 "
 }
 
+# Function to analyze system performance
+analyze_performance() {
+    print_status "Analyzing system performance..."
+    check_venv
+    activate_venv
+    
+    python scripts/analyze_performance.py
+}
+
 # Main script logic
 main() {
     case "${1:-gui}" in
@@ -355,11 +394,20 @@ main() {
         "test-integration")
             run_tests integration
             ;;
+        "test-comprehensive")
+            run_comprehensive_tests
+            ;;
+        "test-enhanced")
+            run_enhanced_tests
+            ;;
         "test-ai")
             test_ai
             ;;
         "demo-search")
             demo_enhanced_search
+            ;;
+        "analyze-performance")
+            analyze_performance
             ;;
         "lint")
             run_lint
