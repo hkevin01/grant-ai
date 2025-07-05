@@ -117,7 +117,8 @@ def main():
     # Step 3: Test features
     if test_ai_features():
         logger.info("✅ AI setup completed successfully!")
-        logger.info("You can now use the enhanced GUI with: python launch_enhanced_gui.py")
+        logger.info("You can now use the enhanced GUI with: "
+                    "python scripts/utils/launch_enhanced_gui.py")
         return 0
     else:
         logger.warning("⚠️ AI setup completed with some issues.")

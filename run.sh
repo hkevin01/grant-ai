@@ -219,7 +219,7 @@ validate_integration() {
     check_venv
     activate_venv
     
-    python validate_integration.py
+    python scripts/testing/validate_integration.py
 }
 
 # Function to run linter
@@ -297,13 +297,13 @@ setup_ai() {
 launch_enhanced_gui() {
     print_status "Launching Enhanced Grant AI GUI with AI features..."
     
-    if [[ ! -f "launch_enhanced_gui.py" ]]; then
+    if [[ ! -f "scripts/utils/launch_enhanced_gui.py" ]]; then
         print_warning "Enhanced GUI not available, launching basic GUI..."
         launch_gui
         return
     fi
     
-    python launch_enhanced_gui.py
+    python scripts/utils/launch_enhanced_gui.py
 }
 
 # Function to test AI features

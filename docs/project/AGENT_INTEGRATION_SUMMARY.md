@@ -38,7 +38,7 @@ We have successfully completed the integration of **Predictive Grants** and **En
 - `src/grant_ai/models/enhanced_past_grant.py` - Enhanced past grant data model
 - `scripts/create_sample_data.py` - Sample data generation
 - `test_integration.py` - Integration testing
-- `validate_integration.py` - Integration validation
+- `scripts/testing/validate_integration.py` - Integration validation
 - `INTEGRATION_COMPLETE.md` - Comprehensive documentation
 
 ### Files Modified:

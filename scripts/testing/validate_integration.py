@@ -9,7 +9,7 @@ from pathlib import Path
 
 def check_file_structure():
     """Check that all required files exist."""
-    project_root = Path(__file__).parent
+    project_root = Path(__file__).parent.parent.parent  # grant-ai root
     
     required_files = [
         "src/grant_ai/gui/qt_app.py",
@@ -18,9 +18,9 @@ def check_file_structure():
         "src/grant_ai/models/predictive_grant.py",
         "src/grant_ai/models/enhanced_past_grant.py",
         "run.sh",
-        "test_integration.py",
+        "scripts/testing/test_integration.py",
         "scripts/create_sample_data.py",
-        "INTEGRATION_COMPLETE.md"
+        "docs/project/INTEGRATION_COMPLETE.md"
     ]
     
     print("🔍 Checking file structure...")
@@ -45,7 +45,7 @@ def check_file_structure():
 
 def check_integration_points():
     """Check key integration points in qt_app.py."""
-    project_root = Path(__file__).parent
+    project_root = Path(__file__).parent.parent.parent  # grant-ai root
     qt_app_path = project_root / "src/grant_ai/gui/qt_app.py"
     
     if not qt_app_path.exists():
@@ -86,7 +86,7 @@ def check_integration_points():
 
 def check_tab_methods():
     """Check that tabs have required methods."""
-    project_root = Path(__file__).parent
+    project_root = Path(__file__).parent.parent.parent  # grant-ai root
     
     tab_files = [
         ("Predictive Grants Tab", "src/grant_ai/gui/predictive_grants_tab.py"),

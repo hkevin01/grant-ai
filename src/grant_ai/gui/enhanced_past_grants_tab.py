@@ -12,6 +12,7 @@ from typing import List, Optional
 from PyQt5.QtCore import QDate, Qt, QUrl, pyqtSignal
 from PyQt5.QtGui import QColor, QDesktopServices, QFont, QPixmap
 from PyQt5.QtWidgets import (
+    QApplication,
     QComboBox,
     QDateEdit,
     QDialog,
@@ -199,7 +200,18 @@ class GrantDetailDialog(QDialog):
         """Set up the grant detail dialog UI."""
         self.setWindowTitle(f"Grant Details: {self.grant.title}")
         self.setModal(True)
+        
+        # Set window flags to ensure the dialog is moveable
+        window_flags = (Qt.Dialog | Qt.WindowTitleHint |
+                        Qt.WindowCloseButtonHint | Qt.WindowMinMaxButtonsHint)
+        self.setWindowFlags(window_flags)
+        
+        # Set minimum and initial size
+        self.setMinimumSize(600, 400)
         self.resize(800, 600)
+        
+        # Center the dialog on the parent or screen
+        self.center_on_parent()
         
         layout = QVBoxLayout(self)
         
@@ -232,6 +244,40 @@ class GrantDetailDialog(QDialog):
         button_box = QDialogButtonBox(QDialogButtonBox.Close)
         button_box.rejected.connect(self.accept)
         layout.addWidget(button_box)
+        
+    def center_on_parent(self):
+        """Center the dialog on its parent or screen."""
+        if self.parent():
+            # Center on parent widget
+            parent_geometry = self.parent().geometry()
+            parent_center = parent_geometry.center()
+            
+            # Calculate position to center this dialog
+            dialog_size = self.size()
+            new_x = parent_center.x() - dialog_size.width() // 2
+            new_y = parent_center.y() - dialog_size.height() // 2
+            
+            # Ensure the dialog stays within screen bounds
+            desktop = QApplication.desktop()
+            screen_geometry = desktop.availableGeometry()
+            
+            new_x = max(screen_geometry.left(), 
+                       min(new_x, screen_geometry.right() - dialog_size.width()))
+            new_y = max(screen_geometry.top(), 
+                       min(new_y, screen_geometry.bottom() - dialog_size.height()))
+            
+            self.move(new_x, new_y)
+        else:
+            # Center on screen
+            desktop = QApplication.desktop()
+            screen_geometry = desktop.availableGeometry()
+            screen_center = screen_geometry.center()
+            
+            dialog_size = self.size()
+            new_x = screen_center.x() - dialog_size.width() // 2
+            new_y = screen_center.y() - dialog_size.height() // 2
+            
+            self.move(new_x, new_y)
         
     def create_overview_tab(self) -> QWidget:
         """Create the overview tab."""
@@ -880,6 +926,7 @@ class EnhancedPastGrantsTab(QWidget):
     def show_grant_details(self, grant: EnhancedPastGrant):
         """Show detailed grant information in a dialog."""
         dialog = GrantDetailDialog(grant, self)
+        # The dialog will be properly centered by its setup_ui method
         dialog.exec_()
         
     def add_new_grant(self):
@@ -938,3 +985,37 @@ class EnhancedPastGrantsTab(QWidget):
         
         print(f"📊 Filtered to {len(relevant_grants)} past grants "
               f"for {org_name}")
+    
+    def center_on_parent(self):
+        """Center the dialog on its parent or screen."""
+        if self.parent():
+            # Center on parent widget
+            parent_geometry = self.parent().geometry()
+            parent_center = parent_geometry.center()
+            
+            # Calculate position to center this dialog
+            dialog_size = self.size()
+            new_x = parent_center.x() - dialog_size.width() // 2
+            new_y = parent_center.y() - dialog_size.height() // 2
+            
+            # Ensure the dialog stays within screen bounds
+            desktop = QApplication.desktop()
+            screen_geometry = desktop.availableGeometry()
+            
+            new_x = max(screen_geometry.left(), 
+                       min(new_x, screen_geometry.right() - dialog_size.width()))
+            new_y = max(screen_geometry.top(), 
+                       min(new_y, screen_geometry.bottom() - dialog_size.height()))
+            
+            self.move(new_x, new_y)
+        else:
+            # Center on screen
+            desktop = QApplication.desktop()
+            screen_geometry = desktop.availableGeometry()
+            screen_center = screen_geometry.center()
+            
+            dialog_size = self.size()
+            new_x = screen_center.x() - dialog_size.width() // 2
+            new_y = screen_center.y() - dialog_size.height() // 2
+            
+            self.move(new_x, new_y)
