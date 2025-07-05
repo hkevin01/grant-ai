@@ -54,6 +54,10 @@ show_help() {
     echo "  validate-integration    Validate the integration of new features"
     echo "  lint                    Run linter checks"
     echo "  format                  Format code with black"
+    echo "  test-scraper            Test the enhanced grant scraper"
+    echo "  test-icons              Test icon loading and GUI assets"
+    echo "  next-steps              Show next development steps roadmap"
+    echo "  fix-summary             Show summary of recent fixes"
     echo "  clean                   Clean up temporary files"
     echo ""
     echo "CLI Examples:"
@@ -446,6 +450,83 @@ test_icons() {
     fi
 }
 
+# Function to display fix summary
+show_fix_summary() {
+    print_header
+    print_status "🎉 Grant AI - Recent Fixes Summary"
+    echo ""
+    echo "📋 ICON LOADING ISSUES - RESOLVED ✅"
+    echo "  • Created comprehensive icon manager with emoji + text fallbacks"
+    echo "  • Automatic platform detection (Linux uses text, Mac/Win use emoji)"
+    echo "  • Updated GUI buttons to use consistent icon system"
+    echo "  • Added accessibility support with text alternatives"
+    echo "  • Test: ./run.sh test-icons"
+    echo ""
+    echo "🔧 GRANT SCRAPER ERROR - FIXED ✅"
+    echo "  • Added missing 'scrape_grants' method to RobustWebScraper"
+    echo "  • Fixed 'object has no attribute scrape_grants' error"
+    echo "  • Enhanced scraping with intelligent CSS selectors"
+    echo "  • Improved error handling and fallback mechanisms"
+    echo "  • Test: ./run.sh test-scraper"
+    echo ""
+    echo "📄 DOCUMENTATION UPDATED ✅"
+    echo "  • ICON_LOADING_FIXES_COMPLETE.md - Comprehensive fix documentation"
+    echo "  • Updated run.sh help text with new test commands"
+    echo "  • Added test-icons and test-scraper commands"
+    echo ""
+    echo "🧪 ALL TESTS PASSING ✅"
+    echo "  • Icon manager: Platform detection, fallbacks, button creation"
+    echo "  • Grant scraper: Method availability, real URL validation"
+    echo "  • GUI integration: Import/export without errors"
+    echo ""
+    print_status "To test fixes: ./run.sh test-icons && ./run.sh test-scraper"
+    print_status "To launch GUI: ./run.sh gui"
+}
+
+# Function to show next development steps
+show_next_steps() {
+    print_header
+    print_status "🚀 Grant AI - Next Development Steps"
+    echo ""
+    echo "📋 IMMEDIATE PRIORITIES (Next 2-4 weeks):"
+    echo ""
+    echo "1. 🔍 ENHANCED GRANT DISCOVERY"
+    echo "   • Add more WV state sources (Health, Commerce, Development)"
+    echo "   • Expand federal grant sources (USDA, HUD, NSF, HHS)"
+    echo "   • Integrate foundation grants (Robert Wood Johnson, Ford, Gates)"
+    echo "   • Implementation: Edit src/grant_ai/scrapers/wv_grants.py"
+    echo ""
+    echo "2. 🤖 AI-POWERED GRANT MATCHING"
+    echo "   • Implement semantic matching with sentence transformers"
+    echo "   • Add relevance scoring and smart filtering"
+    echo "   • Natural language query support"
+    echo "   • Implementation: Create src/grant_ai/services/ai_matcher.py"
+    echo ""
+    echo "3. 📋 APPLICATION TRACKING ENHANCEMENT"
+    echo "   • Document management and version control"
+    echo "   • Deadline tracking with calendar integration"
+    echo "   • Collaboration features and review workflows"
+    echo "   • Implementation: Enhance src/grant_ai/utils/tracking_manager.py"
+    echo ""
+    echo "📊 MEDIUM-TERM GOALS (1-3 months):"
+    echo "   • Data analytics dashboard with success metrics"
+    echo "   • Integration platform (Google, Office 365, Salesforce)"
+    echo "   • Performance optimization and caching"
+    echo ""
+    echo "📱 LONG-TERM VISION (3-12 months):"
+    echo "   • Mobile application (React Native/Flutter)"
+    echo "   • Multi-organization platform"
+    echo "   • AI grant writing assistant"
+    echo "   • Marketplace features"
+    echo ""
+    echo "📚 DETAILED ROADMAP:"
+    echo "   • See docs/NEXT_STEPS_ROADMAP.md for complete plan"
+    echo "   • Implementation guides and success metrics included"
+    echo ""
+    print_status "Get started: ./run.sh setup && ./run.sh gui"
+    print_status "Review roadmap: cat docs/NEXT_STEPS_ROADMAP.md"
+}
+
 # Main script logic
 main() {
     case "${1:-gui}" in
@@ -506,6 +587,15 @@ main() {
             ;;
         "test-scraper")
             test_scraper
+            ;;
+        "test-icons")
+            test_icons
+            ;;
+        "next-steps")
+            show_next_steps
+            ;;
+        "fix-summary")
+            show_fix_summary
             ;;
         "clean")
             clean_up

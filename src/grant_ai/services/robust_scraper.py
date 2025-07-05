@@ -342,3 +342,67 @@ class RobustWebScraper:
         self.failed_domains.clear()
         self.domain_cooldown.clear()
         self.logger.info("Reset failed domains and cooldowns")
+    
+    def scrape_grants(
+        self, url: str, selectors: Optional[Dict[str, List[str]]] = None
+    ) -> List[Grant]:
+        """
+        Scrape grants from a URL using intelligent content extraction.
+        
+        Args:
+            url: URL to scrape
+            selectors: Optional custom selectors for grant extraction
+            
+        Returns:
+            List of extracted grants
+        """
+        try:
+            # Fetch the page content
+            soup = self.fetch_with_fallbacks(url)
+            if not soup:
+                self.logger.warning(f"Failed to fetch content from {url}")
+                return []
+            
+            # Use provided selectors or intelligent defaults
+            if selectors:
+                return self.extract_grants_with_selectors(soup, selectors)
+            else:
+                # Use intelligent content extraction with default selectors
+                default_selectors = {
+                    'container': [
+                        '.grant', '.funding', '.opportunity', '.award',
+                        '[class*="grant"]', '[class*="funding"]',
+                        '[class*="opportunity"]',
+                        'article', '.content-item', '.listing-item', '.card',
+                        '.result-item', '.search-result'
+                    ],
+                    'title': [
+                        'h1', 'h2', 'h3', 'h4', '.title', '.name', '.heading',
+                        '[class*="title"]', '[class*="name"]',
+                        '[class*="heading"]'
+                    ],
+                    'description': [
+                        'p', '.description', '.summary', '.excerpt',
+                        '.content',
+                        '[class*="description"]', '[class*="summary"]', '.text'
+                    ],
+                    'amount': [
+                        '.amount', '.funding', '.award', '[class*="amount"]',
+                        '[class*="funding"]', '[class*="money"]',
+                        '[class*="dollar"]'
+                    ],
+                    'deadline': [
+                        '.deadline', '.due', '.expires', '[class*="deadline"]',
+                        '[class*="due"]', '[class*="expire"]', 'time', '.date'
+                    ],
+                    'link': [
+                        'a[href]', '.link', '[class*="link"]', '.read-more'
+                    ]
+                }
+                return self.extract_grants_with_selectors(
+                    soup, default_selectors
+                )
+                
+        except Exception as e:
+            self.logger.error(f"Error scraping grants from {url}: {e}")
+            return []
