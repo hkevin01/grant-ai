@@ -39,6 +39,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+from grant_ai.gui.icon_manager import icon_manager
 from grant_ai.models.enhanced_past_grant import (
     BudgetItem,
     DocumentType,
@@ -541,12 +542,12 @@ class GrantDetailDialog(QDialog):
         # Action buttons
         actions_layout = QVBoxLayout()
         
-        view_btn = QPushButton("👁️ View")
+        view_btn = icon_manager.create_button('view', 'View')
         view_btn.clicked.connect(lambda: self.view_document(document))
         actions_layout.addWidget(view_btn)
         
         if document.file_path and document.exists():
-            open_btn = QPushButton("📂 Open")
+            open_btn = icon_manager.create_button('folder', 'Open')
             open_btn.clicked.connect(lambda: self.open_document(document))
             actions_layout.addWidget(open_btn)
         elif document.url:

@@ -372,6 +372,80 @@ analyze_performance() {
     python scripts/analyze_performance.py
 }
 
+# Function to test the enhanced scraper
+test_scraper() {
+    print_header
+    print_status "Testing enhanced grant scraper..."
+    
+    check_venv
+    activate_venv
+    
+    print_status "Testing WV grant scraper functionality..."
+    python -c "
+import sys
+sys.path.insert(0, 'src')
+
+try:
+    from grant_ai.scrapers.wv_grants import WVGrantScraper
+    print('✅ Successfully imported WVGrantScraper')
+    
+    scraper = WVGrantScraper()
+    print(f'📋 Available sources: {len(scraper.sources)}')
+    
+    # Test a single source to check for errors
+    source_info = scraper.sources['wv_education']
+    print(f'Testing: {source_info[\"name\"]}')
+    
+    # Check if the new method exists
+    if hasattr(scraper, '_scrape_source_robust'):
+        print('✅ _scrape_source_robust method exists')
+    else:
+        print('❌ _scrape_source_robust method missing')
+    
+    # Test sample data generation
+    real_info = scraper._get_real_source_information(source_info)
+    print(f'✅ Generated {len(real_info)} real source information entries')
+    
+    for grant in real_info[:2]:
+        print(f'  - {grant.title}')
+        print(f'    Description preview: {grant.description[:100]}...')
+        print(f'    Source URL: {grant.source_url}')
+        print(f'    Application URL: {grant.application_url}')
+        print(f'    Type: {grant.funding_type}')
+        
+        # Verify no fake URLs
+        app_url_str = str(grant.application_url)
+        if 'example.com' in app_url_str or 'page-not-found' in app_url_str:
+            print('    ❌ WARNING: Contains fake URL!')
+        else:
+            print('    ✅ Real source URL verified')
+    
+except Exception as e:
+    print(f'❌ Error: {e}')
+    import traceback
+    traceback.print_exc()
+"
+}
+
+# Function to test icon loading
+test_icons() {
+    print_header
+    print_status "Testing icon loading and GUI assets..."
+    
+    check_venv
+    activate_venv
+    
+    print_status "Testing icon manager functionality..."
+    python test_icons_simple.py
+    
+    if [ $? -eq 0 ]; then
+        print_status "✅ Icon loading tests passed!"
+    else
+        print_error "❌ Icon loading tests failed!"
+        return 1
+    fi
+}
+
 # Main script logic
 main() {
     case "${1:-gui}" in
@@ -429,6 +503,9 @@ main() {
             ;;
         "format")
             format_code
+            ;;
+        "test-scraper")
+            test_scraper
             ;;
         "clean")
             clean_up

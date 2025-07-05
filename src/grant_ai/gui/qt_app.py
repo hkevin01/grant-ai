@@ -38,6 +38,7 @@ from PyQt5.QtWidgets import (
 from grant_ai.analysis.grant_researcher import GrantResearcher
 from grant_ai.core.db import SessionLocal
 from grant_ai.gui.enhanced_past_grants_tab import EnhancedPastGrantsTab
+from grant_ai.gui.icon_manager import icon_manager
 from grant_ai.gui.predictive_grants_tab import PredictiveGrantsTab
 from grant_ai.gui.questionnaire_widget import QuestionnaireWidget
 from grant_ai.models import OrganizationProfile
@@ -226,7 +227,9 @@ class GrantSearchTab(QWidget):
         )
         
         # Search buttons - Single intelligent search button
-        self.intelligent_search_btn = QPushButton("🔍 Intelligent Grant Search")
+        self.intelligent_search_btn = icon_manager.create_button(
+            'search', 'Intelligent Grant Search'
+        )
         
         # Results
         self.results_list = QListWidget()
@@ -549,11 +552,18 @@ class GrantSearchTab(QWidget):
         """Handle search completion."""
         # Re-enable the search button
         self.intelligent_search_btn.setEnabled(True)
-        self.intelligent_search_btn.setText("🧠 Intelligent Search")
+        icon_manager.set_button_icon(
+            self.intelligent_search_btn, 'search', 'Intelligent Search'
+        )
         
         # Show completion message
         total_grants = len(all_grants)
-        self.results_list.addItem(f"✅ Search completed! Found {total_grants} total grants.")
+        success_icon = icon_manager.get_icon_text('success')
+        status_text = (
+            f"{success_icon} Search completed! "
+            f"Found {total_grants} total grants."
+        )
+        self.results_list.addItem(status_text)
         self.results_list.scrollToBottom()
         
         # Save grants to local storage
@@ -566,10 +576,13 @@ class GrantSearchTab(QWidget):
         """Handle search errors."""
         # Re-enable the search button
         self.intelligent_search_btn.setEnabled(True)
-        self.intelligent_search_btn.setText("🧠 Intelligent Search")
+        icon_manager.set_button_icon(
+            self.intelligent_search_btn, 'search', 'Intelligent Search'
+        )
         
         # Show error message
-        self.results_list.addItem(f"❌ {error_message}")
+        error_icon = icon_manager.get_icon_text('error')
+        self.results_list.addItem(f"{error_icon} {error_message}")
         self.results_list.scrollToBottom()
         
     def _add_grant_to_ui(self, grant):
@@ -950,11 +963,11 @@ class OrgProfileTab(QWidget):
         # Button layout
         button_layout = QHBoxLayout()
         
-        self.save_btn = QPushButton("💾 Save Profile")
+        self.save_btn = icon_manager.create_button('save', 'Save Profile')
         self.save_btn.setToolTip("Save your current profile to reuse it later")
         self.save_btn.clicked.connect(self.save_profile)
         
-        self.load_btn = QPushButton("📂 Load Profile")
+        self.load_btn = icon_manager.create_button('load', 'Load Profile')
         self.load_btn.setToolTip("Load a previously saved profile from your computer")
         self.load_btn.clicked.connect(self.load_profile)
         

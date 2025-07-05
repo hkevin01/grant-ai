@@ -337,8 +337,8 @@ class WVGrantScraper:
                 return self._scrape_generic_source(source_info)
         except Exception as e:
             print(f"Error in _scrape_source for {source_id}: {e}")
-            # Return sample data even on error to ensure user gets results
-            return self._get_sample_generic_grants(source_info)
+            # Return real source information even on error to ensure user gets results
+            return self._get_real_source_information(source_info)
     
     def _scrape_arts_source(self, source_info: dict) -> List[Grant]:
         """Scrape arts grants (WV Arts Commission or Federal Arts)."""
@@ -380,7 +380,7 @@ class WVGrantScraper:
         
         # Add sample grants if scraping fails
         if not grants:
-            grants = self._get_sample_arts_grants(source_info)
+            grants = self._get_real_source_information(source_info)
         
         return grants
 
@@ -456,14 +456,14 @@ class WVGrantScraper:
                 print(f"Error scraping Education from {url}: {e}")
                 continue
         
-        # Always ensure we have sample grants for reliable results
+        # Always ensure we have real source information for reliable results
         if not grants:
-            print("📝 Using sample education grants for reliable results")
-            grants = self._get_sample_education_grants(source_info)
+            print("📝 Using real source information for reliable results")
+            grants = self._get_real_source_information(source_info)
         elif len(grants) < 3:
-            # Supplement with sample grants if we found too few
-            sample_grants = self._get_sample_education_grants(source_info)
-            grants.extend(sample_grants[:3-len(grants)])
+            # Supplement with real source information if we found too few
+            source_info_grants = self._get_real_source_information(source_info)
+            grants.extend(source_info_grants[:3-len(grants)])
         
         return grants
 
@@ -504,7 +504,7 @@ class WVGrantScraper:
             print(f"Error scraping grants.gov: {e}")
         
         if not grants:
-            grants = self._get_sample_federal_grants(source_info)
+            grants = self._get_real_source_information(source_info)
         
         return grants
 
@@ -543,7 +543,7 @@ class WVGrantScraper:
             print(f"Error scraping federal STEM: {e}")
         
         if not grants:
-            grants = self._get_sample_stem_grants(source_info)
+            grants = self._get_real_source_information(source_info)
         
         return grants
 
@@ -581,7 +581,7 @@ class WVGrantScraper:
             print(f"Error scraping federal community: {e}")
         
         if not grants:
-            grants = self._get_sample_community_grants(source_info)
+            grants = self._get_real_source_information(source_info)
         
         return grants
 
@@ -619,7 +619,7 @@ class WVGrantScraper:
             print(f"Error scraping youth programs: {e}")
         
         if not grants:
-            grants = self._get_sample_youth_grants(source_info)
+            grants = self._get_real_source_information(source_info)
         
         return grants
 
@@ -663,7 +663,7 @@ class WVGrantScraper:
             print(f"Error scraping generic source: {e}")
         
         if not grants:
-            grants = self._get_sample_generic_grants(source_info)
+            grants = self._get_real_source_information(source_info)
         
         return grants
 
@@ -820,7 +820,7 @@ class WVGrantScraper:
         # Default amounts by assistance type
         amount_ranges = {
             "Scholarship": (FundingType.SCHOLARSHIP, 2500, 500, 10000),
-            "Loan": (FundingType.LOAN, 15000, 1000, 50000),
+            "Loan": (FundingType.GRANT, 15000, 1000, 50000),
             "Federal Program": (FundingType.GRANT, 50000, 10000, 500000),
             "Professional Development": (FundingType.GRANT, 5000, 1000, 25000),
             "Technology Grant": (FundingType.GRANT, 15000, 3000, 75000),
@@ -1059,52 +1059,72 @@ class WVGrantScraper:
             print(f"Error parsing federal grant: {e}")
             return None
 
-    # Sample data generators for robust fallback when scraping fails
-    def _get_sample_arts_grants(self, source_info: dict) -> List[Grant]:
-        """Generate sample arts grants when scraping fails."""
-        sample_grants = [
-            {
-                'title': 'Arts Education Program Grant',
-                'description': 'Funding for arts education programs in schools and community centers, including music, visual arts, and performance arts.',
-                'amount': 15000,
-                'focus': ['art_education', 'music_education', 'visual_arts']
-            },
-            {
-                'title': 'Community Arts Development Grant',
-                'description': 'Support for community-based arts programs that engage youth and families in creative activities.',
-                'amount': 25000,
-                'focus': ['community_arts', 'youth_engagement', 'cultural_programming']
-            },
-            {
-                'title': 'Music Program Equipment Grant',
-                'description': 'Funding for musical instruments and equipment for educational and community music programs.',
-                'amount': 10000,
-                'focus': ['music_education', 'equipment', 'instruments']
-            }
-        ]
-        
+    def _get_real_source_information(self, source_info: dict) -> List[Grant]:
+        """Get real information about funding opportunities from the source."""
         grants = []
-        for i, sample in enumerate(sample_grants):
-            grant = Grant(
-                id=f"sample_arts_{int(time.time())}_{i}",
-                title=sample['title'],
-                description=sample['description'],
-                funder_name=source_info['name'],
-                funder_type="State Government" if 'wv' in source_info['name'].lower() else "Federal Government",
-                funding_type=FundingType.GRANT,
-                amount_typical=sample['amount'],
-                amount_min=sample['amount'] // 2,
-                amount_max=sample['amount'] * 2,
-                status=GrantStatus.OPEN,
-                eligibility_types=[EligibilityType.NONPROFIT, EligibilityType.EDUCATION],
-                focus_areas=sample['focus'],
-                source=source_info['name'],
-                source_url=source_info['url'],
-                application_url=source_info['url'],
-                last_updated=datetime.now(),
-                created_at=datetime.now()
+        
+        # Create an informational entry that directs users to the real source
+        if 'wv' in source_info['name'].lower() and 'education' in source_info['name'].lower():
+            # WV Education real programs
+            real_programs = [
+                {
+                    'title': 'WV Title I School Improvement Programs',
+                    'description': 'Federal Title I funding for schools serving low-income students. Contact WV Department of Education for current availability and application procedures.',
+                    'focus': ['title_i', 'school_improvement', 'low_income_schools']
+                },
+                {
+                    'title': 'WV Education Finance and Funding Information',
+                    'description': 'Information about state and federal education funding opportunities. Visit the WV Department of Education finance section for current programs.',
+                    'focus': ['education_funding', 'state_programs', 'federal_programs']
+                }
+            ]
+        elif 'federal' in source_info['name'].lower() and 'education' in source_info['name'].lower():
+            # Federal DOE real programs
+            real_programs = [
+                {
+                    'title': 'Federal Education Grant Programs',
+                    'description': 'Visit the U.S. Department of Education website for current federal education grant opportunities including Title programs, STEM initiatives, and special education funding.',
+                    'focus': ['federal_education', 'title_programs', 'stem']
+                }
+            ]
+        elif 'arts' in source_info['name'].lower():
+            # Arts funding real programs
+            real_programs = [
+                {
+                    'title': 'Arts Education Funding Opportunities',
+                    'description': 'Contact the arts commission directly for current grant cycles and application requirements for arts education and community programs.',
+                    'focus': ['arts_education', 'community_arts', 'cultural_programs']
+                }
+            ]
+        elif 'nsf' in source_info['name'].lower():
+            # NSF real programs
+            real_programs = [
+                {
+                    'title': 'NSF Education and Human Resources Programs',
+                    'description': 'National Science Foundation offers various STEM education programs. Visit NSF.gov for current funding opportunities and submission deadlines.',
+                    'focus': ['stem_education', 'research', 'teacher_development']
+                }
+            ]
+        else:
+            # Generic source information
+            real_programs = [
+                {
+                    'title': f'Funding Information from {source_info["name"]}',
+                    'description': f'Visit {source_info["name"]} directly for current funding opportunities and application procedures. Contact them for the most up-to-date information.',
+                    'focus': ['general_funding', 'contact_source']
+                }
+            ]
+        
+        # Create real grant entries that point to actual sources
+        for program in real_programs:
+            grant = self._create_real_grant_from_source(
+                source_info=source_info,
+                title=program['title'],
+                description=program['description'],
+                focus_areas=program['focus']
             )
-            grants.append(grant)
+            if grant:  # Only add if validation passed
+                grants.append(grant)
         
         return grants
 
@@ -1399,7 +1419,99 @@ class WVGrantScraper:
             grants.append(grant)
         
         return grants
+
+    def _validate_grant_url(self, url: str) -> bool:
+        """Validate that a grant URL is real and accessible."""
+        if not url or url == 'http://example.com':
+            return False
+            
+        try:
+            # Quick HEAD request to check if URL exists
+            response = self.session.head(url, timeout=(3, 5), allow_redirects=True)
+            return response.status_code == 200
+        except Exception:
+            return False
+
+    def _validate_grant_data(self, grant_data: dict) -> bool:
+        """Validate that grant data represents a real opportunity."""
+        # Check for fake/placeholder data
+        fake_indicators = [
+            'example.com',
+            'placeholder',
+            'sample',
+            'test grant',
+            'fake',
+            'demo'
+        ]
         
+        title = grant_data.get('title', '').lower()
+        description = grant_data.get('description', '').lower()
+        
+        # Check if title or description contains fake indicators
+        for indicator in fake_indicators:
+            if indicator in title or indicator in description:
+                return False
+        
+        return True
+
+    def _create_real_grant_from_source(self, source_info: dict, title: str, description: str, 
+                                     amount: int = None, focus_areas: List[str] = None) -> Grant:
+        """Create a grant object that points to real source information."""
+        # Only use the actual source URL, no fake application URLs
+        verified_url = source_info['url']
+        
+        # Validate the source URL is accessible
+        if not self._validate_grant_url(verified_url):
+            # If even the source URL is bad, don't create the grant
+            return None
+        
+        return Grant(
+            id=f"real_{hash(title + source_info['name']) % 100000}",
+            title=title,
+            description=f"{description}\n\nNOTE: This is information about potential funding opportunities. Please visit the source website to verify current availability and application requirements.",
+            funder_name=source_info['name'],
+            funder_type="State Government" if 'wv' in source_info['name'].lower() else "Federal Government",
+            funding_type=FundingType.GRANT,
+            amount_typical=amount or 0,  # Set to 0 if no real amount found
+            amount_min=0,
+            amount_max=0,
+            status=GrantStatus.OPEN,
+            eligibility_types=[EligibilityType.NONPROFIT, EligibilityType.EDUCATION],
+            focus_areas=focus_areas or ['general'],
+            source=source_info['name'],
+            source_url=verified_url,  # Only use real, verified URLs
+            application_url=verified_url,  # Point to source for more info
+            information_url=verified_url,
+            contact_email="",  # Don't make up contact info
+            contact_phone="",
+            application_deadline=None,  # Don't make up deadlines
+            decision_date=None,
+            funding_start_date=None,
+            funding_duration_months=None,
+            total_funding_available=None,
+            matching_funds_required=False,
+            matching_percentage=None,
+            relevance_score=0.5,
+            last_updated=datetime.now(),
+            created_at=datetime.now()
+        )
+    
+    def _scrape_source_robust(self, source_id: str, source_info: dict, 
+                             robust_scraper, fallback_urls: List[str]) -> List[Grant]:
+        """Scrape source using robust scraper with fallbacks."""
+        try:
+            # Try robust scraping first
+            grants = robust_scraper.scrape_grants(source_info['url'])
+            if grants:
+                return grants
+            
+            # Fall back to regular scraping
+            return self._scrape_source(source_id, source_info)
+        except Exception as e:
+            print(f"Robust scraping failed: {e}")
+            # Fall back to regular scraping
+            return self._scrape_source(source_id, source_info)
+    
 
 def scrape_wv_grants() -> List[Grant]:
     """Convenience function to scrape all WV grants."""
