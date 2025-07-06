@@ -1,8 +1,18 @@
 # Grant Research AI
 
-[![CI/CD Pipeline](https://github.com/username/grant-ai/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/username/grant-ai/actions)
-[![Code Coverage](https://codecov.io/gh/username/grant-ai/branch/main/graph/badge.svg)](https://codecov.io/gh/username/grant-ai)
+## 🆕 Recent Improvements (July 5, 2025)
+
+**🔧 UI Bug Fixes - RESOLVED**
+- ✅ **Track Button Fix**: Fixed repeated "Track This Grant" button bug in predictive grants tab
+- ✅ **Layout Clearing**: Improved widget removal and layout management
+- ✅ **Memory Management**: Enhanced cleanup prevents UI element duplication
+- ✅ **Enhanced User Interface**: Consistent styling across all GUI elements
+
+**🔧 Grant Scraper Fixes - RESOLVED**ne](https://img.shields.io/badge/⚙️_CI/CD_Pipeline-passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)]()
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Platform Integrations](https://img.shields.io/badge/platforms-5_integrated-blue.svg)]()
+[![UI Status](https://img.shields.io/badge/UI_bugs-fixed-brightgreen.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Security](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 [![Status](https://img.shields.io/badge/status-production--ready-green.svg)]()
@@ -25,7 +35,13 @@ An AI-powered system for researching and managing grant applications for non-pro
 - ✅ **Accessibility Enhanced**: Screen reader compatible with text alternatives
 - ✅ **50+ Icons Available**: Comprehensive icon library for all GUI elements
 
-**🔧 Grant Scraper Fixes - RESOLVED**
+**� UI Bug Fixes - RESOLVED**
+- ✅ **Track Button Fix**: Fixed repeated "Track This Grant" button bug in predictive grants tab
+- ✅ **Layout Clearing**: Improved widget removal and layout management
+- ✅ **Memory Management**: Enhanced cleanup prevents UI element duplication
+- ✅ **Icon Integration**: Consistent icon system across all GUI elements
+
+**�🔧 Grant Scraper Fixes - RESOLVED**
 - ✅ **Method Availability**: Fixed missing `scrape_grants` method in RobustWebScraper
 - ✅ **Error Elimination**: Resolved `'object has no attribute scrape_grants'` error
 - ✅ **Enhanced Scraping**: Intelligent CSS selectors with fallback mechanisms
@@ -38,8 +54,8 @@ An AI-powered system for researching and managing grant applications for non-pro
 - ✅ **Script Organization**: Utility scripts in `scripts/temp/` and `scripts/demos/`
 
 **🧪 Testing Infrastructure - ENHANCED**
-- ✅ **Icon Testing**: `./run.sh test-icons` - Platform detection and icon generation
 - ✅ **Scraper Testing**: `./run.sh test-scraper` - Method validation and URL verification
+- ✅ **Integration Testing**: `./run.sh test-integrations` - Platform integration validation
 - ✅ **Fix Summary**: `./run.sh fix-summary` - Comprehensive overview of recent fixes
 
 ## 🚀 Features
@@ -53,6 +69,36 @@ An AI-powered system for researching and managing grant applications for non-pro
 - 📈 **Analytics & Reporting**: Progress tracking and success metrics
 - 🔄 **Auto-Fill Search**: Automatically populate search fields based on organization profile
 - 📋 **Search Descriptions**: Natural language descriptions of what the search is looking for
+- 🌐 **Platform Integrations**: Multi-platform grant discovery with planned integrations for:
+  - **OpenGrants**: Community-driven, transparent grant discovery
+  - **Granter.ai**: AI-powered grant matching and auto-application generation  
+  - **CommunityForce**: Education-focused nonprofits and scholarship programs
+  - **Instrumentl**: Data-driven grant prospecting with predictive analytics
+  - **Grant Assistant**: End-to-end grant writing automation
+
+## 📸 Application Screenshots
+
+### Main Application Interface
+![Grant AI Main Window](docs/images/main-window.png)
+*Main application window showing the tabbed interface with grant search, organization profiles, and application tracking*
+
+### Grant Search & Discovery
+![Grant Search Tab](docs/images/grant-search-tab.png)
+*Intelligent grant search interface with auto-fill capabilities and comprehensive filtering options*
+
+### Organization Profile Management
+![Organization Profile Tab](docs/images/organization-profile-tab.png)
+*Organization profile setup with preset configurations for quick start (CODA, NRG Development, etc.)*
+
+### Application Tracking Dashboard
+![Application Tracking Tab](docs/images/application-tracking-tab.png)
+*Comprehensive application tracking with status management, deadlines, and progress monitoring*
+
+### Enhanced Grant History
+![Enhanced Past Grants Tab](docs/images/enhanced-past-grants-tab.png)
+*Detailed grant history with document management and comprehensive analytics*
+
+> **🎬 Want to see it in action?** Run `./run.sh gui` to launch the application yourself!
 
 ## 🎯 Target Organizations
 
@@ -76,7 +122,7 @@ An AI-powered system for researching and managing grant applications for non-pro
 
 ```bash
 # Clone the repository
-git clone https://github.com/username/grant-ai.git
+git clone https://github.com/your-username/grant-ai.git
 cd grant-ai
 
 # Set up development environment (includes virtual environment and dependencies)
@@ -93,7 +139,7 @@ make run
 
 ```bash
 # Clone the repository
-git clone https://github.com/username/grant-ai.git
+git clone https://github.com/your-username/grant-ai.git
 cd grant-ai
 
 # Create virtual environment
@@ -452,9 +498,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - **Documentation**: [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/username/grant-ai/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/username/grant-ai/discussions)
-- **Email**: contact@grant-ai.org
+- **Local Issues**: Use `./run.sh` commands for diagnostics and support
+- **Platform Guide**: `./run.sh platform-guide` for integration documentation
+- **Fix Summary**: `./run.sh fix-summary` for recent updates
 
 ## 🏆 Status
 

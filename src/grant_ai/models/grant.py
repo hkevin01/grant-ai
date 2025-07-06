@@ -39,6 +39,8 @@ class EligibilityType(str, Enum):
     STARTUP = "startup"
     RESEARCH = "research"
     COMMUNITY = "community"
+    MUNICIPALITY = "municipality"
+    GOVERNMENT = "government"
 
 
 class Grant(BaseModel):

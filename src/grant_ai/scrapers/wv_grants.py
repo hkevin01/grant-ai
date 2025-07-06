@@ -159,17 +159,20 @@ class WVGrantScraper:
                 ]
             },
             'nasa_education': {
-                'url': 'https://www.nasa.gov/audience/foreducators/stem-on-station/grants/',
+                'url': 'https://www.nasa.gov/audience/foreducators/',
                 'name': 'NASA Education Grants',
                 'fallbacks': [
-                    'https://www.nasa.gov/audience/foreducators/',
-                    'https://www.nasa.gov/offices/education/programs/'
+                    'https://www.nasa.gov/learning-resources/',
+                    ('https://www.nasa.gov/audience/foreducators/'
+                     'postsecondary/index.html')
                 ]
             },
             
             # === COMMUNITY & NONPROFIT ===
             'usda_rural': {
-                'url': 'https://www.rd.usda.gov/programs-services/community-facilities/community-facilities-direct-loan-grant-program',
+                'url': ('https://www.rd.usda.gov/programs-services/community-'
+
+                        'facilities/community-facilities-direct-loan-grant-program'),
                 'name': 'USDA Rural Development',
                 'fallbacks': [
                     'https://www.rd.usda.gov/programs-services',
@@ -246,6 +249,371 @@ class WVGrantScraper:
                 'fallbacks': [
                     'https://www.bgca.org/get-involved/volunteer/',
                     'https://www.bgca.org/'
+                ]
+            },
+            
+            # === EXPANDED WV STATE AGENCIES ===
+            'wv_commerce': {
+                'url': ('https://wvcommerce.org/business-and-industry/'
+                        'financial-assistance/'),
+                'name': 'WV Commerce Department',
+                'fallbacks': [
+                    'https://wvcommerce.org/grants/',
+                    'https://wvcommerce.org/community-development/',
+                    'https://business.wv.gov/financial-assistance/',
+                    'https://westvirginia.gov/business/financial-assistance/'
+                ]
+            },
+            'wv_agriculture': {
+                'url': 'https://agriculture.wv.gov/programs/',
+                'name': 'WV Department of Agriculture',
+                'fallbacks': [
+                    'https://agriculture.wv.gov/grants/',
+                    'https://agriculture.wv.gov/community-programs/',
+                    'https://www.wv.gov/agriculture'
+                ]
+            },
+            'wv_workforce': {
+                'url': 'https://workforcewv.org/employers/funding-opportunities/',
+                'name': 'WV Workforce Development',
+                'fallbacks': [
+                    'https://workforcewv.org/training-grants/',
+                    'https://workforcewv.org/workforce-innovation/',
+                    'https://www.wv.gov/workforce'
+                ]
+            },
+            'wv_housing': {
+                'url': 'https://www.wvhdf.com/programs/',
+                'name': 'WV Housing Development Fund',
+                'fallbacks': [
+                    'https://www.wvhdf.com/community-programs/',
+                    'https://www.wvhdf.com/grants/',
+                    'https://housing.wv.gov/'
+                ]
+            },
+            'wv_veterans': {
+                'url': 'https://veterans.wv.gov/assistance/',
+                'name': 'WV Veterans Affairs',
+                'fallbacks': [
+                    'https://veterans.wv.gov/programs/',
+                    'https://www.wv.gov/veterans'
+                ]
+            },
+            
+            # === EXPANDED FEDERAL AGENCIES ===
+            'hhs_grants': {
+                'url': 'https://www.hhs.gov/grants/',
+                'name': 'Department of Health & Human Services',
+                'fallbacks': [
+                    'https://www.hhs.gov/grants/how-to-apply-for-grants/',
+                    'https://www.acf.hhs.gov/grants',
+                    'https://www.cdc.gov/grants/',
+                    'https://www.grants.gov/search-grants?query=HHS'
+                ]
+            },
+            'dol_workforce': {
+                'url': 'https://www.dol.gov/agencies/eta/grants',
+                'name': 'Department of Labor - Workforce Grants',
+                'fallbacks': [
+                    'https://www.dol.gov/grants/',
+                    'https://www.apprenticeship.gov/grants',
+                    'https://www.doleta.gov/grants/'
+                ]
+            },
+            'doj_community': {
+                'url': 'https://bja.ojp.gov/funding/current',
+                'name': 'Department of Justice - Community Programs',
+                'fallbacks': [
+                    'https://www.ojp.gov/funding/current',
+                    'https://ojjdp.ojp.gov/funding/current',
+                    'https://www.justice.gov/grants'
+                ]
+            },
+            'va_community': {
+                'url': 'https://www.va.gov/homeless/ssvf/',
+                'name': 'Veterans Affairs - Community Support',
+                'fallbacks': [
+                    'https://www.va.gov/homeless/ssvf/grantees/',
+                    'https://www.va.gov/grants/',
+                    'https://www.va.gov/homeless/'
+                ]
+            },
+            'dot_transportation': {
+                'url': 'https://www.transportation.gov/grants',
+                'name': 'Department of Transportation',
+                'fallbacks': [
+                    'https://www.fhwa.dot.gov/grants/',
+                    'https://www.fta.dot.gov/grants/',
+                    'https://www.transportation.gov/buildamerica'
+                ]
+            },
+            'usda_community': {
+                'url': 'https://www.rd.usda.gov/programs-services/community-facilities',
+                'name': 'USDA Community Facilities',
+                'fallbacks': [
+                    'https://www.usda.gov/topics/farming/grants-and-loans',
+                    'https://www.rd.usda.gov/programs-services',
+                    'https://www.grants.gov/search-grants?query=USDA'
+                ]
+            },
+            'cdc_prevention': {
+                'url': 'https://www.cdc.gov/grants/funding/current.html',
+                'name': 'CDC Prevention & Health Grants',
+                'fallbacks': [
+                    'https://www.cdc.gov/grants/',
+                    'https://www.cdc.gov/injury/fundedprograms/',
+                    'https://www.cdc.gov/chronicdisease/programs-impact/'
+                ]
+            },
+            
+            # === MAJOR PRIVATE FOUNDATIONS ===
+            'gates_foundation': {
+                'url': 'https://www.gatesfoundation.org/about/committed-grants',
+                'name': 'Bill & Melinda Gates Foundation',
+                'fallbacks': [
+                    'https://www.gatesfoundation.org/how-we-work/general-information/grant-opportunities',
+                    'https://gcgh.grandchallenges.org/',
+                    'https://www.gatesfoundation.org/'
+                ]
+            },
+            'ford_foundation': {
+                'url': 'https://www.fordfoundation.org/work/our-grants/',
+                'name': 'Ford Foundation',
+                'fallbacks': [
+                    'https://www.fordfoundation.org/work/learning/grantcraft/',
+                    'https://www.fordfoundation.org/about/how-we-work/'
+                ]
+            },
+            'robert_wood_johnson': {
+                'url': 'https://www.rwjf.org/en/grants/active-funding-opportunities.html',
+                'name': 'Robert Wood Johnson Foundation',
+                'fallbacks': [
+                    'https://www.rwjf.org/en/grants.html',
+                    'https://www.rwjf.org/en/how-we-work/grants-and-grant-programs.html'
+                ]
+            },
+            'kresge_foundation': {
+                'url': 'https://kresge.org/opportunities/',
+                'name': 'Kresge Foundation',
+                'fallbacks': [
+                    'https://kresge.org/programs/',
+                    'https://kresge.org/our-work/'
+                ]
+            },
+            'knight_foundation': {
+                'url': 'https://knightfoundation.org/apply/',
+                'name': 'Knight Foundation',
+                'fallbacks': [
+                    'https://knightfoundation.org/grants/',
+                    'https://knightfoundation.org/programs/'
+                ]
+            },
+            'w_k_kellogg': {
+                'url': 'https://www.wkkf.org/grants',
+                'name': 'W.K. Kellogg Foundation',
+                'fallbacks': [
+                    'https://www.wkkf.org/what-we-do/grants',
+                    'https://www.wkkf.org/resource-directory'
+                ]
+            },
+            'casey_foundation': {
+                'url': 'https://www.aecf.org/work/grant-making',
+                'name': 'Annie E. Casey Foundation',
+                'fallbacks': [
+                    'https://www.aecf.org/work/',
+                    'https://www.aecf.org/'
+                ]
+            },
+            
+            # === ARTS & CULTURE FOUNDATIONS ===
+            'doris_duke': {
+                'url': 'https://www.ddcf.org/grant-programs/',
+                'name': 'Doris Duke Charitable Foundation',
+                'fallbacks': [
+                    'https://www.ddcf.org/what-we-fund/',
+                    'https://www.ddcf.org/grant-programs/arts-program/'
+                ]
+            },
+            'andrew_mellon': {
+                'url': 'https://mellon.org/grants/',
+                'name': 'Andrew W. Mellon Foundation',
+                'fallbacks': [
+                    'https://mellon.org/programs/',
+                    'https://mellon.org/grants/grants-database/'
+                ]
+            },
+            'pew_charitable': {
+                'url': 'https://www.pewtrusts.org/en/projects',
+                'name': 'Pew Charitable Trusts',
+                'fallbacks': [
+                    'https://www.pewtrusts.org/en/about/funding-opportunities',
+                    'https://www.pewtrusts.org/'
+                ]
+            },
+            
+            # === YOUTH & EDUCATION FOUNDATIONS ===
+            'wallace_foundation': {
+                'url': 'https://www.wallacefoundation.org/grants-and-contracts',
+                'name': 'Wallace Foundation',
+                'fallbacks': [
+                    'https://www.wallacefoundation.org/knowledge-center/pages/funding-opportunity.aspx',
+                    'https://www.wallacefoundation.org/'
+                ]
+            },
+            'stuart_foundation': {
+                'url': 'https://stuartfoundation.org/what-we-fund/',
+                'name': 'Stuart Foundation',
+                'fallbacks': [
+                    'https://stuartfoundation.org/grants/',
+                    'https://stuartfoundation.org/'
+                ]
+            },
+            'noyce_foundation': {
+                'url': 'https://www.noycefdn.org/grants/',
+                'name': 'Noyce Foundation',
+                'fallbacks': [
+                    'https://www.noycefdn.org/what-we-fund/',
+                    'https://www.noycefdn.org/'
+                ]
+            },
+            
+            # === CORPORATE GIVING PROGRAMS ===
+            'walmart_foundation': {
+                'url': 'https://walmart.org/how-we-give/local-community-grants',
+                'name': 'Walmart Foundation',
+                'fallbacks': [
+                    'https://walmart.org/how-we-give',
+                    'https://corporate.walmart.com/giving'
+                ]
+            },
+            'target_community': {
+                'url': 'https://corporate.target.com/corporate-responsibility/community/grants',
+                'name': 'Target Community Grants',
+                'fallbacks': [
+                    'https://corporate.target.com/corporate-responsibility/community',
+                    'https://corporate.target.com/giving'
+                ]
+            },
+            'google_org': {
+                'url': 'https://www.google.org/our-commitments/',
+                'name': 'Google.org',
+                'fallbacks': [
+                    'https://www.google.org/how-we-help/',
+                    'https://www.google.org/'
+                ]
+            },
+            'microsoft_philanthropies': {
+                'url': 'https://www.microsoft.com/en-us/philanthropies/grants',
+                'name': 'Microsoft Philanthropies',
+                'fallbacks': [
+                    'https://www.microsoft.com/en-us/philanthropies/',
+                    'https://www.microsoft.com/en-us/teals/grants'
+                ]
+            },
+            
+            # === HOUSING & COMMUNITY DEVELOPMENT ===
+            'enterprise_community': {
+                'url': 'https://www.enterprisecommunity.org/financing-and-development',
+                'name': 'Enterprise Community Partners',
+                'fallbacks': [
+                    'https://www.enterprisecommunity.org/solutions-and-innovation/grant-programs',
+                    'https://www.enterprisecommunity.org/'
+                ]
+            },
+            'local_initiatives': {
+                'url': 'https://www.lisc.org/our-resources/resource/grants-funding/',
+                'name': 'Local Initiatives Support Corporation',
+                'fallbacks': [
+                    'https://www.lisc.org/our-resources/',
+                    'https://www.lisc.org/'
+                ]
+            },
+            'habitat_humanity': {
+                'url': 'https://www.habitat.org/support/ways-to-give/grants',
+                'name': 'Habitat for Humanity',
+                'fallbacks': [
+                    'https://www.habitat.org/support',
+                    'https://www.habitat.org/local-grants'
+                ]
+            },
+            
+            # === SENIOR SERVICES & AGING ===
+            'aoa_grants': {
+                'url': 'https://acl.gov/grants',
+                'name': 'Administration on Aging',
+                'fallbacks': [
+                    'https://acl.gov/grants/open-opportunities',
+                    'https://www.acl.gov/programs'
+                ]
+            },
+            'aarp_foundation': {
+                'url': 'https://www.aarp.org/aarp-foundation/grants/',
+                'name': 'AARP Foundation',
+                'fallbacks': [
+                    'https://www.aarp.org/aarp-foundation/',
+                    'https://www.aarp.org/aarp-foundation/our-work/'
+                ]
+            },
+            
+            # === SPECIALIZED STEM & ROBOTICS ===
+            'first_robotics': {
+                'url': 'https://www.firstinspires.org/resource-library/funding-your-team',
+                'name': 'FIRST Robotics Funding',
+                'fallbacks': [
+                    'https://www.firstinspires.org/robotics/frc/grants',
+                    'https://www.firstinspires.org/ways-to-help/fundraising'
+                ]
+            },
+            'simons_foundation': {
+                'url': 'https://www.simonsfoundation.org/grants/',
+                'name': 'Simons Foundation',
+                'fallbacks': [
+                    'https://www.simonsfoundation.org/funding-opportunities/',
+                    'https://www.simonsfoundation.org/'
+                ]
+            },
+            'gordon_betty_moore': {
+                'url': 'https://www.moore.org/grants',
+                'name': 'Gordon and Betty Moore Foundation',
+                'fallbacks': [
+                    'https://www.moore.org/what-we-fund',
+                    'https://www.moore.org/'
+                ]
+            },
+            
+            # === COMMUNITY FOUNDATIONS ===
+            'community_foundation_network': {
+                'url': 'https://www.cof.org/community-foundation-locator',
+                'name': 'Community Foundation Network',
+                'fallbacks': [
+                    'https://www.cof.org/',
+                    'https://www.communityFoundations.org/'
+                ]
+            },
+            'wv_community_foundation': {
+                'url': 'https://www.wvcommunityFoundation.org/grants/',
+                'name': 'WV Community Foundation',
+                'fallbacks': [
+                    'https://www.wvcommunityFoundation.org/',
+                    'https://www.wvcommunityFoundation.org/nonprofits/'
+                ]
+            },
+            
+            # === FAITH-BASED ORGANIZATIONS (for Christian Pocket Community) ===
+            'lilly_endowment': {
+                'url': 'https://lillyendowment.org/grants/',
+                'name': 'Lilly Endowment',
+                'fallbacks': [
+                    'https://lillyendowment.org/what-we-fund/',
+                    'https://lillyendowment.org/'
+                ]
+            },
+            'templeton_foundation': {
+                'url': 'https://www.templeton.org/grants',
+                'name': 'John Templeton Foundation',
+                'fallbacks': [
+                    'https://www.templeton.org/funding-areas',
+                    'https://www.templeton.org/'
                 ]
             }
         }

@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+from grant_ai.gui.icon_manager import IconManager
 from grant_ai.models.predictive_grant import (
     PredictiveGrant,
     PredictiveGrantDatabase,
@@ -41,6 +42,9 @@ class PredictiveGrantsTab(QWidget):
     def __init__(self):
         """Initialize the Predictive Grants tab."""
         super().__init__()
+        
+        # Initialize icon manager
+        self.icon_manager = IconManager()
         
         # Data
         self.predictive_db = PredictiveGrantDatabase()
@@ -99,7 +103,8 @@ class PredictiveGrantsTab(QWidget):
         layout.addStretch()
         
         # Refresh button
-        refresh_btn = QPushButton("🔄 Refresh Predictions")
+        refresh_btn = QPushButton()
+        self.icon_manager.set_button_icon(refresh_btn, "refresh", "Refresh Predictions")
         refresh_btn.clicked.connect(self.refresh_predictions)
         layout.addWidget(refresh_btn)
         
@@ -410,12 +415,14 @@ class PredictiveGrantsTab(QWidget):
         
     def show_grant_details(self, grant: PredictiveGrant):
         """Show detailed information for the selected grant."""
-        # Clear existing details
-        for i in reversed(range(self.details_layout.count())):
-            child = self.details_layout.itemAt(i).widget()
-            if child:
-                child.setParent(None)
-        
+        # Clear existing details - improved clearing logic
+        while self.details_layout.count():
+            child = self.details_layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+            elif child.layout():
+                self.clear_layout(child.layout())
+                
         # Title and agency
         title_label = QLabel(grant.title)
         title_font = QFont()
@@ -510,17 +517,28 @@ class PredictiveGrantsTab(QWidget):
         # Action buttons
         actions_layout = QHBoxLayout()
         
-        track_btn = QPushButton("📌 Track This Grant")
+        track_btn = QPushButton()
+        self.icon_manager.set_button_icon(track_btn, "track", "Track This Grant")
         track_btn.clicked.connect(lambda: self.track_grant(grant))
         actions_layout.addWidget(track_btn)
         
-        similar_btn = QPushButton("🔍 Find Similar Grants")
+        similar_btn = QPushButton()
+        self.icon_manager.set_button_icon(similar_btn, "search", "Find Similar Grants")
         similar_btn.clicked.connect(lambda: self.find_similar_grants(grant))
         actions_layout.addWidget(similar_btn)
         
         self.details_layout.addLayout(actions_layout)
         
         self.details_layout.addStretch()
+        
+    def clear_layout(self, layout):
+        """Recursively clear a layout and all its children."""
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+            elif child.layout():
+                self.clear_layout(child.layout())
         
     def show_no_selection(self):
         """Show placeholder when no grant is selected."""

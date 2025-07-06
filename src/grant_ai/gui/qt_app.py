@@ -1072,9 +1072,15 @@ class OrgProfileTab(QWidget):
             focus_mapping = {
                 "education": "Education",
                 "art_education": "Arts", 
+                "music_education": "Arts",
                 "robotics": "Robotics",
                 "housing": "Housing",
-                "community": "Community"
+                "affordable_housing": "Housing",
+                "community": "Community",
+                "community_development": "Community",
+                "youth_development": "Education",
+                "senior_services": "Community",
+                "social_services": "Community"
             }
             
             # Try to find the first focus area that maps to a combo box option
