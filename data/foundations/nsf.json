@@ -1,0 +1,23 @@
+{
+  "id": "nsf",
+  "name": "National Science Foundation",
+  "website": "https://www.nsf.gov/",
+  "foundation_type": "government",
+  "focus_areas": [
+    "STEM education",
+    "research",
+    "innovation"
+  ],
+  "geographic_scope": "national",
+  "geographic_focus": [
+    "united states"
+  ],
+  "grant_range_min": 50000,
+  "grant_range_max": 5000000,
+  "application_process": "online_application",
+  "key_programs": [
+    "Education and Human Resources",
+    "Computer Science"
+  ],
+  "integration_notes": "Perfect for STEM/robotics programs"
+}

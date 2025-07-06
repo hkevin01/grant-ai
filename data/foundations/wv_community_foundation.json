@@ -1,0 +1,25 @@
+{
+  "id": "wv_community_foundation",
+  "name": "WV Community Foundation",
+  "website": "https://www.wvcommunityfoundation.org/",
+  "contact_email": "info@wvcommunityfoundation.org",
+  "contact_phone": "(304) 346-3036",
+  "foundation_type": "community",
+  "focus_areas": [
+    "community development",
+    "education",
+    "health"
+  ],
+  "geographic_scope": "state",
+  "geographic_focus": [
+    "west virginia"
+  ],
+  "grant_range_min": 1000,
+  "grant_range_max": 50000,
+  "application_process": "online_application",
+  "key_programs": [
+    "Community Development",
+    "Education"
+  ],
+  "integration_notes": "Excellent for local WV projects"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "gates_foundation",
+  "name": "Bill & Melinda Gates Foundation",
+  "website": "https://www.gatesfoundation.org/",
+  "foundation_type": "private",
+  "focus_areas": [
+    "global health",
+    "education",
+    "poverty alleviation"
+  ],
+  "geographic_scope": "international",
+  "geographic_focus": [
+    "global",
+    "united states"
+  ],
+  "grant_range_min": 100000,
+  "grant_range_max": 50000000,
+  "application_process": "invitation_only",
+  "key_programs": [
+    "Education Innovation",
+    "Global Health Discovery"
+  ],
+  "integration_notes": "Health, education, and development projects"
+}

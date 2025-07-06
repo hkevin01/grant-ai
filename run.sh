@@ -861,6 +861,109 @@ show_next_steps() {
     print_status "Review roadmap: cat docs/NEXT_STEPS_ROADMAP.md"
 }
 
+# Function to setup foundation database
+setup_foundations() {
+    print_header
+    print_status "Setting up foundation database..."
+    
+    check_venv
+    activate_venv
+    
+    print_status "Populating foundation database from donors.md..."
+    python setup_foundation_database.py
+    
+    if [ $? -eq 0 ]; then
+        print_status "✅ Foundation database setup completed!"
+    else
+        print_error "❌ Foundation database setup failed!"
+        return 1
+    fi
+}
+
+# Function to test foundation matching
+test_foundations() {
+    print_header
+    print_status "Testing foundation database and matching..."
+    
+    check_venv
+    activate_venv
+    
+    print_status "Testing foundation matching with sample organizations..."
+    python -c "
+import sys
+sys.path.insert(0, 'src')
+
+try:
+    from grant_ai.services.foundation_service import foundation_service
+    from grant_ai.models.foundation import Foundation, FoundationType
+    from grant_ai.models.organization import OrganizationProfile, FocusArea
+    
+    print('✅ Successfully imported foundation services')
+    
+    # Test foundation matching with CODA profile
+    coda_profile = OrganizationProfile(
+        name='Coda Mountain Academy',
+        description='Arts and STEM education for youth',
+        focus_areas=[FocusArea.EDUCATION, FocusArea.ART_EDUCATION, FocusArea.ROBOTICS],
+        location='Fayetteville, West Virginia',
+        preferred_grant_size=(10000, 100000)
+    )
+    
+    print(f'🔍 Testing foundation matching for: {coda_profile.name}')
+    matches = foundation_service.match_foundations_for_organization(coda_profile)
+    
+    print(f'📊 Found {len(matches)} matching foundations:')
+    for foundation in matches[:3]:
+        score = getattr(foundation, 'match_score', 0)
+        print(f'  • {foundation.name} (Score: {score:.2f})')
+        print(f'    Focus: {', '.join(foundation.focus_areas[:2])}')
+        if foundation.grant_range_min and foundation.grant_range_max:
+            print(f'    Range: \${foundation.grant_range_min:,} - \${foundation.grant_range_max:,}')
+    
+    print('\\n✅ Foundation database tests completed successfully!')
+    
+except Exception as e:
+    print(f'❌ Error: {e}')
+    import traceback
+    traceback.print_exc()
+"
+    
+    if [ $? -eq 0 ]; then
+        print_status "✅ Foundation database tests passed!"
+    else
+        print_error "❌ Foundation database tests failed!"
+        return 1
+    fi
+}
+
+# Function to match foundations for organizations
+match_foundations() {
+    print_header
+    print_status "Finding foundation matches for organizations..."
+    
+    check_venv
+    activate_venv
+    
+    # Match foundations for available organizations
+    echo "Available organizations:"
+    ls data/profiles/*.json 2>/dev/null | xargs -I {} basename {} .json | sed 's/_/ /g' | nl
+    
+    echo ""
+    read -p "Enter organization name (or 'all' for all organizations): " org_name
+    
+    if [ "$org_name" = "all" ]; then
+        for profile_file in data/profiles/*.json; do
+            if [ -f "$profile_file" ]; then
+                org_name=$(basename "$profile_file" .json | sed 's/_/ /g')
+                echo ""
+                python -m grant_ai.core.cli foundations match "$org_name"
+            fi
+        done
+    else
+        python -m grant_ai.core.cli foundations match "$org_name"
+    fi
+}
+
 # Main script logic
 main() {
     case "${1:-gui}" in
@@ -948,6 +1051,15 @@ main() {
             ;;
         "clean")
             clean_up
+            ;;
+        "setup-foundations")
+            setup_foundations
+            ;;
+        "test-foundations")
+            test_foundations
+            ;;
+        "match-foundations")
+            match_foundations
             ;;
         *)
             print_error "Unknown command: $1"

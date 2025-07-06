@@ -1,0 +1,38 @@
+[
+  {
+    "id": "benedum_2023_music",
+    "foundation_id": "benedum_foundation",
+    "foundation_name": "Claude Worthington Benedum Foundation",
+    "organization_name": "Coda Mountain Academy",
+    "grant_amount": 15000,
+    "grant_date": "2023-06-15",
+    "grant_purpose": "Music education equipment",
+    "program_name": "Education Excellence",
+    "success": true,
+    "notes": "Purchase of musical instruments and audio equipment"
+  },
+  {
+    "id": "united_way_2022_camps",
+    "foundation_id": "united_way_cwv",
+    "foundation_name": "United Way of Central West Virginia",
+    "organization_name": "Coda Mountain Academy",
+    "grant_amount": 8000,
+    "grant_date": "2022-08-01",
+    "grant_purpose": "Summer camp scholarships",
+    "program_name": "Community Impact",
+    "success": true,
+    "notes": "Scholarships for underserved youth summer camps"
+  },
+  {
+    "id": "business_coalition_2024_robotics",
+    "foundation_id": "local_business_coalition",
+    "foundation_name": "Local Business Coalition",
+    "organization_name": "Coda Mountain Academy",
+    "grant_amount": 5000,
+    "grant_date": "2024-03-20",
+    "grant_purpose": "Robotics competition team",
+    "program_name": "Corporate Sponsorship",
+    "success": true,
+    "notes": "Corporate sponsorship for competitive robotics team"
+  }
+]

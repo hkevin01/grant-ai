@@ -11,12 +11,12 @@ from ..analysis.grant_researcher import GrantResearcher
 from ..models.organization import FocusArea, OrganizationProfile, ProgramType
 from ..services.grant_writing import GrantWritingAssistant
 from ..services.organization_scraper import OrganizationScraper
+from ..services.usaspending_scraper import USASpendingScraper
 from ..utils import load_json_file, save_json_file
 from ..utils.questionnaire_manager import QuestionnaireManager
 from ..utils.reporting import ReportGenerator
 from ..utils.template_manager import TemplateManager
 from ..utils.tracking_manager import TrackingManager
-from ..services.usaspending_scraper import USASpendingScraper
 
 
 @click.group()
@@ -1428,5 +1428,429 @@ def fetch(org_name, ein, limit):
         click.echo(f"Error fetching past grants: {e}")
 
 
-if __name__ == "__main__":
-    main()
+@main.group()
+def foundations():
+    """Manage foundation and donor database."""
+    pass
+
+
+@foundations.command()
+def setup():
+    """Set up and populate the foundation database."""
+    from datetime import date
+
+    from ..core.db import init_db
+    from ..models.foundation import (
+        ApplicationProcess,
+        Foundation,
+        FoundationType,
+        GeographicScope,
+    )
+    from ..services.foundation_service import foundation_service
+    
+    click.echo("Setting up foundation database...")
+    
+    # Initialize database tables
+    init_db()
+    click.echo("✅ Database tables created")
+    
+    # Foundation data
+    foundations_data = [
+        {
+            "name": "Claude Worthington Benedum Foundation",
+            "website": "https://benedum.org/",
+            "contact_email": "info@benedum.org",
+            "contact_phone": "(412) 288-0360",
+            "foundation_type": FoundationType.PRIVATE,
+            "focus_areas": ["education", "economic development", 
+                           "community development"],
+            "geographic_scope": GeographicScope.REGIONAL,
+            "geographic_focus": ["west virginia", "southwestern pennsylvania"],
+            "grant_range_min": 10000,
+            "grant_range_max": 500000,
+            "application_process": ApplicationProcess.LETTER_OF_INQUIRY,
+            "key_programs": ["Education Excellence", "Economic Development", 
+                           "Community Development"],
+            "integration_notes": "Ideal for CODA-type organizations in WV/PA"
+        },
+        {
+            "name": "United Way of Central West Virginia",
+            "website": "https://www.unitedwaycwv.org/",
+            "contact_email": "info@unitedwaycwv.org",
+            "contact_phone": "(304) 340-3557",
+            "foundation_type": FoundationType.COMMUNITY,
+            "focus_areas": ["education", "health", "financial stability"],
+            "geographic_scope": GeographicScope.REGIONAL,
+            "geographic_focus": ["central west virginia"],
+            "grant_range_min": 1000,
+            "grant_range_max": 25000,
+            "application_process": ApplicationProcess.SPECIFIC_DEADLINES,
+            "key_programs": ["Community Impact", "Education", "Health"],
+            "integration_notes": "Great for social service programs"
+        },
+        {
+            "name": "National Science Foundation",
+            "website": "https://www.nsf.gov/",
+            "foundation_type": FoundationType.GOVERNMENT,
+            "focus_areas": ["STEM education", "research", "innovation"],
+            "geographic_scope": GeographicScope.NATIONAL,
+            "geographic_focus": ["united states"],
+            "grant_range_min": 50000,
+            "grant_range_max": 5000000,
+            "application_process": ApplicationProcess.ONLINE_APPLICATION,
+            "key_programs": ["Education and Human Resources", 
+                           "Computer and Information Science"],
+            "integration_notes": "Perfect for STEM/robotics programs"
+        }
+    ]
+    
+    added_count = 0
+    for foundation_data in foundations_data:
+        try:
+            foundation = Foundation(**foundation_data)
+            foundation_id = foundation_service.add_foundation(foundation)
+            click.echo(f"✅ Added: {foundation.name}")
+            added_count += 1
+        except Exception as e:
+            click.echo(f"❌ Error adding {foundation_data['name']}: {e}")
+    
+    click.echo(f"\n📊 Added {added_count}/{len(foundations_data)} foundations to database")
+
+
+@foundations.command()
+@click.argument("organization_name")
+def match(organization_name):
+    """Find foundations that match an organization profile."""
+    from ..models.organization import OrganizationProfile
+    from ..services.foundation_service import foundation_service
+
+    # Load organization profile
+    profiles_dir = Path("data/profiles")
+    profile_file = profiles_dir / f"{organization_name.lower().replace(' ', '_')}.json"
+    
+    if not profile_file.exists():
+        click.echo(f"❌ Organization profile not found: {profile_file}")
+        return
+    
+    try:
+        with open(profile_file, 'r') as f:
+            profile_data = json.load(f)
+        
+        org_profile = OrganizationProfile(**profile_data)
+        matches = foundation_service.match_foundations_for_organization(org_profile)
+        
+        click.echo(f"\n🎯 Found {len(matches)} matching foundations for {org_profile.name}:")
+        click.echo("=" * 60)
+        
+        for i, foundation in enumerate(matches[:10], 1):  # Top 10
+            score = getattr(foundation, 'match_score', 0)
+            click.echo(f"\n{i}. {foundation.name} (Match Score: {score:.2f})")
+            click.echo(f"   Focus Areas: {', '.join(foundation.focus_areas[:3])}")
+            click.echo(f"   Grant Range: ${foundation.grant_range_min:,} - ${foundation.grant_range_max:,}")
+            click.echo(f"   Geographic: {', '.join(foundation.geographic_focus)}")
+            if foundation.contact_email:
+                click.echo(f"   Contact: {foundation.contact_email}")
+            if foundation.integration_notes:
+                click.echo(f"   Notes: {foundation.integration_notes}")
+                
+    except Exception as e:
+        click.echo(f"❌ Error matching foundations: {e}")
+
+
+@foundations.command()
+def list():
+    """List all foundations in the database."""
+    from ..core.db import init_db
+    from ..services.foundation_service import foundation_service
+
+    # Initialize database tables
+    init_db()
+    
+    try:
+        foundations = foundation_service.get_all_foundations()
+        
+        if not foundations:
+            click.echo("📋 No foundations found in database")
+            msg = "💡 Use 'foundations setup' to populate with defaults"
+            click.echo(msg)
+            return
+        
+        click.echo(f"📋 Found {len(foundations)} foundation(s) in database:")
+        click.echo("=" * 60)
+        
+        for i, foundation in enumerate(foundations, 1):
+            click.echo(f"\n{i}. {foundation.name}")
+            click.echo(f"   Type: {foundation.foundation_type}")
+            click.echo(f"   Focus: {', '.join(foundation.focus_areas[:3])}")
+            if foundation.grant_range_min and foundation.grant_range_max:
+                min_amt = foundation.grant_range_min
+                max_amt = foundation.grant_range_max
+                click.echo(f"   Grant Range: ${min_amt:,} - ${max_amt:,}")
+            click.echo(f"   Geographic: {foundation.geographic_scope}")
+            if foundation.contact_email:
+                click.echo(f"   Contact: {foundation.contact_email}")
+                
+    except Exception as e:
+        click.echo(f"❌ Error listing foundations: {e}")
+
+
+@foundations.command()
+@click.argument("query")
+def search(query):
+    """Search foundations by name, focus area, or description."""
+    from ..services.foundation_service import foundation_service
+    
+    try:
+        foundations = foundation_service.search_foundations(query)
+        
+        if not foundations:
+            click.echo(f"🔍 No foundations found matching: {query}")
+            return
+        
+        click.echo(f"🔍 Found {len(foundations)} foundation(s) matching '{query}':")
+        click.echo("=" * 60)
+        
+        for i, foundation in enumerate(foundations, 1):
+            click.echo(f"\n{i}. {foundation.name}")
+            click.echo(f"   Focus: {', '.join(foundation.focus_areas)}")
+            if foundation.grant_range_min and foundation.grant_range_max:
+                min_amt = foundation.grant_range_min
+                max_amt = foundation.grant_range_max
+                click.echo(f"   Grant Range: ${min_amt:,} - ${max_amt:,}")
+            if foundation.integration_notes:
+                click.echo(f"   Notes: {foundation.integration_notes}")
+                
+    except Exception as e:
+        click.echo(f"❌ Error searching foundations: {e}")
+
+
+@foundations.command()
+@click.option("--min-amount", type=int, required=True, help="Minimum grant amount")
+@click.option("--max-amount", type=int, required=True, help="Maximum grant amount")
+def range_search(min_amount, max_amount):
+    """Find foundations by grant amount range."""
+    from ..services.foundation_service import foundation_service
+    
+    try:
+        foundations = foundation_service.get_foundations_by_grant_range(
+            min_amount, max_amount
+        )
+        
+        if not foundations:
+            range_str = f"${min_amount:,} - ${max_amount:,}"
+            click.echo(f"💰 No foundations found for range: {range_str}")
+            return
+        
+        range_str = f"${min_amount:,} - ${max_amount:,}"
+        click.echo(f"💰 Found {len(foundations)} foundation(s) in range {range_str}:")
+        click.echo("=" * 60)
+        
+        for i, foundation in enumerate(foundations, 1):
+            min_amt = foundation.grant_range_min
+            max_amt = foundation.grant_range_max
+            click.echo(f"\n{i}. {foundation.name}")
+            click.echo(f"   Grant Range: ${min_amt:,} - ${max_amt:,}")
+            click.echo(f"   Focus: {', '.join(foundation.focus_areas[:3])}")
+            if foundation.contact_email:
+                click.echo(f"   Contact: {foundation.contact_email}")
+                
+    except Exception as e:
+        click.echo(f"❌ Error searching by range: {e}")
+
+
+@foundations.command()
+def stats():
+    """Show foundation database statistics."""
+    from ..services.foundation_service import foundation_service
+    
+    try:
+        stats = foundation_service.get_foundation_statistics()
+        
+        click.echo("📊 Foundation Database Statistics")
+        click.echo("=" * 40)
+        click.echo(f"Total Foundations: {stats['total_foundations']}")
+        click.echo(f"Total Historical Grants: {stats['total_historical_grants']}")
+        total_amount = stats['total_grant_amount']
+        click.echo(f"Total Grant Amount: ${total_amount:,}")
+        
+        if stats['average_grant_min']:
+            avg_min = stats['average_grant_min']
+            click.echo(f"Average Min Grant: ${avg_min:,}")
+        if stats['average_grant_max']:
+            avg_max = stats['average_grant_max']
+            click.echo(f"Average Max Grant: ${avg_max:,}")
+        
+        click.echo("\nFoundation Types:")
+        for ftype, count in stats['foundation_types'].items():
+            click.echo(f"  {ftype}: {count}")
+        
+        click.echo("\nGeographic Scopes:")
+        for scope, count in stats['geographic_scopes'].items():
+            click.echo(f"  {scope}: {count}")
+            
+    except Exception as e:
+        click.echo(f"❌ Error getting statistics: {e}")
+
+
+@foundations.command()
+@click.argument("foundation_name")
+def report(foundation_name):
+    """Generate comprehensive report for a foundation."""
+    from ..services.foundation_service import foundation_service
+    
+    try:
+        # Search for foundation by name
+        foundations = foundation_service.search_foundations(foundation_name)
+        
+        if not foundations:
+            click.echo(f"❌ Foundation not found: {foundation_name}")
+            return
+        
+        if len(foundations) > 1:
+            click.echo(f"🔍 Multiple foundations found for '{foundation_name}':")
+            for i, f in enumerate(foundations, 1):
+                click.echo(f"  {i}. {f.name}")
+            return
+        
+        foundation = foundations[0]
+        report_data = foundation_service.generate_foundation_report(foundation.id)
+        
+        if not report_data:
+            click.echo(f"❌ Could not generate report for {foundation.name}")
+            return
+        
+        click.echo(f"📋 Foundation Report: {foundation.name}")
+        click.echo("=" * 60)
+        
+        # Foundation details
+        f_data = report_data['foundation']
+        click.echo(f"Website: {f_data.get('website', 'N/A')}")
+        click.echo(f"Type: {f_data.get('foundation_type', 'N/A')}")
+        click.echo(f"Focus Areas: {', '.join(f_data.get('focus_areas', []))}")
+        
+        if f_data.get('grant_range_min') and f_data.get('grant_range_max'):
+            min_amt = f_data['grant_range_min']
+            max_amt = f_data['grant_range_max']
+            click.echo(f"Grant Range: ${min_amt:,} - ${max_amt:,}")
+        
+        # Statistics
+        stats = report_data['statistics']
+        click.echo(f"\nGrant History:")
+        click.echo(f"  Total Grants: {stats['total_grants']}")
+        click.echo(f"  Total Amount: ${stats['total_amount']:,}")
+        if stats['success_rate']:
+            success_pct = stats['success_rate'] * 100
+            click.echo(f"  Success Rate: {success_pct:.1f}%")
+        if stats['last_contact']:
+            click.echo(f"  Last Contact: {stats['last_contact']}")
+        
+        # Recent grants
+        grants = report_data['historical_grants']
+        if grants:
+            click.echo(f"\nRecent Grants ({len(grants)}):")
+            for grant in grants[:5]:  # Show last 5
+                amount = grant['amount']
+                click.echo(f"  {grant['date']}: {grant['organization']} - ${amount:,}")
+                click.echo(f"    Purpose: {grant['purpose']}")
+        
+        # Contact history
+        contacts = report_data['contact_history']
+        if contacts:
+            click.echo(f"\nRecent Contacts ({len(contacts)}):")
+            for contact in contacts[:3]:  # Show last 3
+                click.echo(f"  {contact['date']}: {contact['type']}")
+                click.echo(f"    Purpose: {contact['purpose']}")
+                if contact['outcome']:
+                    click.echo(f"    Outcome: {contact['outcome']}")
+                    
+    except Exception as e:
+        click.echo(f"❌ Error generating report: {e}")
+
+
+@foundations.command()
+@click.argument("foundation_name")
+@click.argument("contact_type")
+@click.argument("purpose")
+@click.option("--person", help="Person contacted")
+@click.option("--outcome", help="Contact outcome")
+@click.option("--follow-up", is_flag=True, help="Requires follow-up")
+@click.option("--follow-up-date", help="Follow-up date (YYYY-MM-DD)")
+@click.option("--notes", help="Additional notes")
+def add_contact(foundation_name, contact_type, purpose, person, outcome, 
+                follow_up, follow_up_date, notes):
+    """Add a contact record for a foundation."""
+    from datetime import datetime
+
+    from ..models.foundation import FoundationContact
+    from ..services.foundation_service import foundation_service
+    
+    try:
+        # Find foundation
+        foundations = foundation_service.search_foundations(foundation_name)
+        
+        if not foundations:
+            click.echo(f"❌ Foundation not found: {foundation_name}")
+            return
+        
+        if len(foundations) > 1:
+            click.echo(f"🔍 Multiple foundations found for '{foundation_name}':")
+            for i, f in enumerate(foundations, 1):
+                click.echo(f"  {i}. {f.name}")
+            return
+        
+        foundation = foundations[0]
+        
+        # Parse follow-up date
+        followup_date = None
+        if follow_up_date:
+            followup_date = datetime.strptime(follow_up_date, "%Y-%m-%d").date()
+        
+        # Create contact record
+        contact = FoundationContact(
+            foundation_id=foundation.id,
+            contact_date=date.today(),
+            contact_type=contact_type,
+            contact_person=person,
+            purpose=purpose,
+            outcome=outcome,
+            follow_up_required=follow_up,
+            follow_up_date=followup_date,
+            notes=notes
+        )
+        
+        contact_id = foundation_service.add_foundation_contact(contact)
+        click.echo(f"✅ Added contact record for {foundation.name}")
+        click.echo(f"   Type: {contact_type}")
+        click.echo(f"   Purpose: {purpose}")
+        if follow_up:
+            click.echo(f"   Follow-up required: {follow_up_date or 'TBD'}")
+            
+    except Exception as e:
+        click.echo(f"❌ Error adding contact: {e}")
+
+
+@foundations.command()
+def deadlines():
+    """Show upcoming foundation deadlines and follow-ups."""
+    from ..services.foundation_service import foundation_service
+    
+    try:
+        deadlines = foundation_service.get_upcoming_deadlines()
+        
+        if not deadlines:
+            click.echo("📅 No upcoming deadlines or follow-ups")
+            return
+        
+        click.echo(f"📅 Found {len(deadlines)} upcoming deadline(s):")
+        click.echo("=" * 50)
+        
+        for deadline in deadlines:
+            click.echo(f"\n🔔 {deadline['foundation_name']}")
+            click.echo(f"   Type: {deadline['type']}")
+            click.echo(f"   Date: {deadline['contact_date']}")
+            click.echo(f"   Purpose: {deadline['purpose']}")
+            if deadline['notes']:
+                click.echo(f"   Notes: {deadline['notes']}")
+                
+    except Exception as e:
+        click.echo(f"❌ Error getting deadlines: {e}")

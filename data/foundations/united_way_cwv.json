@@ -1,0 +1,26 @@
+{
+  "id": "united_way_cwv",
+  "name": "United Way of Central West Virginia",
+  "website": "https://www.unitedwaycwv.org/",
+  "contact_email": "info@unitedwaycwv.org",
+  "contact_phone": "(304) 340-3557",
+  "foundation_type": "community",
+  "focus_areas": [
+    "education",
+    "health",
+    "financial stability"
+  ],
+  "geographic_scope": "regional",
+  "geographic_focus": [
+    "central west virginia"
+  ],
+  "grant_range_min": 1000,
+  "grant_range_max": 25000,
+  "application_process": "specific_deadlines",
+  "key_programs": [
+    "Community Impact",
+    "Education",
+    "Health"
+  ],
+  "integration_notes": "Great for social service programs"
+}

@@ -1,0 +1,26 @@
+{
+  "id": "benedum_foundation",
+  "name": "Claude Worthington Benedum Foundation",
+  "website": "https://benedum.org/",
+  "contact_email": "info@benedum.org",
+  "contact_phone": "(412) 288-0360",
+  "foundation_type": "private",
+  "focus_areas": [
+    "education",
+    "economic development",
+    "community development"
+  ],
+  "geographic_scope": "regional",
+  "geographic_focus": [
+    "west virginia",
+    "southwestern pennsylvania"
+  ],
+  "grant_range_min": 10000,
+  "grant_range_max": 500000,
+  "application_process": "letter_of_inquiry",
+  "key_programs": [
+    "Education Excellence",
+    "Economic Development"
+  ],
+  "integration_notes": "Ideal for WV/PA organizations like CODA"
+}

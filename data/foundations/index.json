@@ -1,0 +1,11 @@
+{
+  "foundations": [
+    "gates_foundation",
+    "benedum_foundation",
+    "united_way_cwv",
+    "nsf",
+    "wv_community_foundation"
+  ],
+  "count": 5,
+  "last_updated": "2025-07-06"
+}

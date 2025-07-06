@@ -267,3 +267,7 @@ credentials.json
 local_*
 dev_*
 test_*
+
+
+#extra docs
+docs/donors.md
