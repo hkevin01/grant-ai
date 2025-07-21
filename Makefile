@@ -74,25 +74,25 @@ security:
 # Run all tests
 test:
 	@echo "Running all tests..."
-	pytest tests/ -v --cov=src/grant_ai --cov-report=term-missing --cov-report=html
+	source venv/bin/activate && pytest tests/ -v --cov=src/grant_ai --cov-report=term-missing --cov-report=html
 	@echo "Tests completed"
 
 # Run unit tests only
 test-unit:
 	@echo "Running unit tests..."
-	pytest tests/unit/ -v --cov=src/grant_ai --cov-report=term-missing
+	source venv/bin/activate && pytest tests/unit/ -v --cov=src/grant_ai --cov-report=term-missing
 	@echo "Unit tests completed"
 
 # Run integration tests only
 test-integration:
 	@echo "Running integration tests..."
-	pytest tests/integration/ -v --cov=src/grant_ai --cov-report=term-missing
+	source venv/bin/activate && pytest tests/integration/ -v --cov=src/grant_ai --cov-report=term-missing
 	@echo "Integration tests completed"
 
 # Run end-to-end tests only
 test-e2e:
 	@echo "Running end-to-end tests..."
-	pytest tests/e2e/ -v
+	source venv/bin/activate && pytest tests/e2e/ -v
 	@echo "End-to-end tests completed"
 
 # Run all quality checks
@@ -182,7 +182,7 @@ docker-run:
 # Performance testing
 perf-test:
 	@echo "Running performance tests..."
-	pytest tests/performance/ -v
+	source venv/bin/activate && pytest tests/performance/ -v
 
 # Load testing
 load-test:
@@ -227,7 +227,7 @@ requirements:
 # Code coverage report
 coverage:
 	@echo "Generating coverage report..."
-	pytest tests/ --cov=src/grant_ai --cov-report=html --cov-report=term-missing
+	source venv/bin/activate && pytest tests/ --cov=src/grant_ai --cov-report=html --cov-report=term-missing
 	@echo "Coverage report generated in htmlcov/"
 
 # Security audit
@@ -251,4 +251,4 @@ clean-all: clean
 	rm -rf __pycache__/
 	find . -name "*.pyc" -delete
 	find . -name "__pycache__" -type d -exec rm -rf {} +
-	@echo "All artifacts cleaned" 
+	@echo "All artifacts cleaned"

@@ -111,10 +111,10 @@ class Grant(BaseModel):
         description="Reasons for organization match"
     )
     
-    class Config:
-        """Pydantic configuration."""
-        use_enum_values = True
-        validate_assignment = True
+    model_config = ConfigDict(
+        use_enum_values=True,
+        validate_assignment=True,
+    )
     
     def is_currently_open(self) -> bool:
         """Check if the grant is currently accepting applications."""

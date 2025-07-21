@@ -271,3 +271,8 @@ test_*
 
 #extra docs
 docs/donors.md
+
+# Ignore additional temp/output folders
+output/
+temp/
+results/
