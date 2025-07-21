@@ -1,6 +1,5 @@
 """API endpoints for grant, organization, and application management."""
 
-from typing import List
 
 from fastapi import APIRouter
 
@@ -16,11 +15,15 @@ def get_health():
 
 router.add_api_route("/health", get_health, methods=["GET"])
 
-
 # Example: List grants endpoint
+fake_grants = [
+    Grant(id="g1", title="Music Education Grant", funder_name="Arts Foundation"),
+    Grant(id="g2", title="Robotics Youth Grant", funder_name="Tech Foundation"),
+]
+
+
 def list_grants() -> list[Grant]:
-    # TODO: Replace with real database query
-    return []
+    return [grant.to_dict() for grant in fake_grants]
 
 
 router.add_api_route("/grants", list_grants, methods=["GET"])

@@ -187,48 +187,32 @@ This document outlines the testing strategy for the Grant AI project, including 
 - [ ] Tutorial update and feedback tests
 - [ ] Complete documentation/tutorial checklist in docs/documentation_tutorial_checklist.md
 
-## Phase 13: User Feedback & Community
-- [ ] Implement user feedback collection (forms, surveys)
-- [ ] Integrate feedback into dashboard and reporting
-- [ ] Create community forum or discussion board
-- [ ] Add best practices sharing feature
-- [ ] Organize webinars and training sessions
-- [ ] Track participation and engagement metrics
-- [ ] Moderate and maintain community spaces
-- [ ] Document feedback and community features in user guide
-- [ ] Test feedback and community workflows
-- [ ] Complete feedback/community checklist in docs/feedback_community_checklist.md
+## Phase 13: AI-Powered Grant Recommendation
+- [ ] ML model integration for grant recommendation
+- [ ] Historical data training and validation
+- [ ] Recommendation explainability tests
+- [ ] Model training and evaluation documentation
 
-## Phase 14: Security & Compliance
-- [ ] Review and update data privacy policies
-- [ ] Implement secure authentication and authorization
-- [ ] Conduct vulnerability scans and penetration tests
-- [ ] Ensure compliance with relevant regulations (GDPR, HIPAA, etc.)
-- [ ] Encrypt sensitive data at rest and in transit
-- [ ] Audit and log access to grant and organization data
-- [ ] Provide user controls for data management and consent
-- [ ] Document security and compliance features in user guide
-- [ ] Test security and compliance workflows
-- [ ] Complete security/compliance checklist in docs/security_compliance_checklist.md
+## Phase 14: Real-Time Grant Updates & Notifications
+- [ ] Grant update polling/scraping tests
+- [ ] Notification system (email, in-app) tests
+- [ ] Notification preference management tests
+- [ ] Notification delivery and reliability validation
+- [ ] Notification setup and usage documentation
 
-## Phase 15: Advanced Analytics & Reporting
-- [ ] Design and implement advanced analytics dashboards
-- [ ] Integrate data visualization tools (charts, graphs)
-- [ ] Add grant success rate and trend analysis
-- [ ] Enable custom report generation and export
-- [ ] Implement predictive analytics for grant matching
-- [ ] Test analytics and reporting workflows
-- [ ] Document analytics/reporting features in user guide
-- [ ] Complete analytics/reporting checklist in docs/analytics_reporting_checklist.md
+## Phase 15: Community Portal & Feedback System
+- [ ] User forum/community portal tests
+- [ ] In-app feedback and bug reporting tests
+- [ ] Moderation and support workflow validation
+- [ ] Feedback and feature request tracking tests
+- [ ] Community guidelines and support documentation
 
-## Phase 16: API & Integration Platform
-- [ ] Design and document public API endpoints
-- [ ] Implement API authentication and rate limiting
-- [ ] Integrate with external grant databases and platforms
-- [ ] Test API workflows and error handling
-- [ ] Provide API usage examples and tutorials
-- [ ] Document API and integration features in user guide
-- [ ] Complete API/integration checklist in docs/api_integration_checklist.md
+## Phase 16: Internationalization (i18n)
+- [ ] i18n support for user-facing modules
+- [ ] UI and documentation translation tests
+- [ ] Translation accuracy and completeness validation
+- [ ] User language preference management tests
+- [ ] i18n setup and translation process documentation
 
 ## Phase 17: Mobile & Responsive Design
 - [ ] Design and implement mobile-friendly UI

@@ -1,5 +1,5 @@
 """
-Configuration module for Grant AI project.
+Config package for Grant Research AI.
 """
 import os
 from pathlib import Path
@@ -16,10 +16,7 @@ APPLICATIONS_DIR = DATA_DIR / "applications"
 TEMPLATES_DIR = DATA_DIR / "templates"
 
 # Ensure directories exist
-directories = [
-    PROFILES_DIR, GRANTS_DIR, COMPANIES_DIR, 
-    APPLICATIONS_DIR, TEMPLATES_DIR
-]
+directories = [PROFILES_DIR, GRANTS_DIR, COMPANIES_DIR, APPLICATIONS_DIR, TEMPLATES_DIR]
 for directory in directories:
     directory.mkdir(parents=True, exist_ok=True)
 
@@ -33,10 +30,10 @@ GRANTS_GOV_BASE_URL = "https://www.grants.gov/api"
 # Default file paths
 DEFAULT_PROFILES = {
     "coda": PROFILES_DIR / "coda_profile.json",
-    "nrg": PROFILES_DIR / "nrg_profile.json"
+    "nrg": PROFILES_DIR / "nrg_profile.json",
 }
 
 DEFAULT_DATA = {
     "grants": GRANTS_DIR / "sample_grants.json",
-    "companies": COMPANIES_DIR / "sample_ai_companies.json"
-} 
+    "companies": COMPANIES_DIR / "sample_ai_companies.json",
+}
