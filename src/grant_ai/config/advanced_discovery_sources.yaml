@@ -1,0 +1,23 @@
+# Advanced Grant Discovery Sources Configuration
+# List of sources for NASA, ESA, Grants.gov, NSF, DOE, etc.
+sources:
+  - id: nasa_nspires
+    name: NASA NSPIRES
+    api_url: https://nspires.nasaprs.com/external/
+    keywords: ["AI", "space technology", "machine learning"]
+  - id: esa_osip
+    name: ESA Open Space Innovation Platform
+    api_url: https://osip.esa.int/
+    keywords: ["AI", "earth observation", "autonomous systems"]
+  - id: grants_gov
+    name: Grants.gov
+    api_url: https://www.grants.gov/
+    keywords: ["AI", "space", "technology"]
+  - id: nsf_ai
+    name: NSF AI Institutes
+    api_url: https://www.nsf.gov/funding/pgm_summ.jsp?pims_id=505686
+    keywords: ["AI", "machine learning"]
+  - id: doe_ai
+    name: DOE AI Programs
+    api_url: https://www.energy.gov/science/artificial-intelligence
+    keywords: ["AI", "energy", "machine learning"]

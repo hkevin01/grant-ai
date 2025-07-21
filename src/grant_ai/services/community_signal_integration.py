@@ -1,6 +1,7 @@
 """
-Community Signal Integration
-Pulls recent publications and signals from arXiv, ESA/NASA reports, IAC proceedings
+Community Signal Integration Service
+Monitors arXiv, NASA/ESA reports, and trending research for grant relevance.
+Includes robust error handling and centralized logging.
 """
 import re
 import xml.etree.ElementTree as ET
@@ -12,6 +13,9 @@ import requests
 from bs4 import BeautifulSoup
 
 from grant_ai.models.grant import Grant
+from grant_ai.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -28,9 +32,11 @@ class CommunitySignal:
 
 
 class CommunitySignalIntegrator:
-    """Integrates community signals to enhance grant discovery"""
+    """Integrates community signals (arXiv, NASA/ESA reports) for grant relevance."""
     
     def __init__(self):
+        logger.info("Initialized CommunitySignalIntegrator.")
+        
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': (
@@ -60,115 +66,96 @@ class CommunitySignalIntegrator:
             'autonomous systems', 'space exploration'
         ]
     
-    def get_recent_signals(self, days_back: int = 30) -> Dict[str, List[CommunitySignal]]:
-        """Get recent community signals from multiple sources"""
-        signals = {}
-        
-        # Get arXiv signals
+    def fetch_arxiv_signals(self, categories: List[str]) -> List[Dict]:
+        """Fetch trending papers from arXiv for given categories."""
         try:
-            signals['arxiv'] = self._get_arxiv_signals(days_back)
-        except Exception as e:
-            print(f"Error getting arXiv signals: {e}")
-            signals['arxiv'] = []
-        
-        # Get NASA/ESA technical reports
-        try:
-            signals['nasa_reports'] = self._get_nasa_technical_reports(days_back)
-        except Exception as e:
-            print(f"Error getting NASA reports: {e}")
-            signals['nasa_reports'] = []
-        
-        try:
-            signals['esa_reports'] = self._get_esa_technical_reports(days_back)
-        except Exception as e:
-            print(f"Error getting ESA reports: {e}")
-            signals['esa_reports'] = []
-        
-        # Filter and score signals
-        for source in signals:
-            signals[source] = self._filter_and_score_signals(signals[source])
-        
-        return signals
-    
-    def _get_arxiv_signals(self, days_back: int) -> List[CommunitySignal]:
-        """Get recent arXiv papers in relevant categories"""
-        signals = []
-        cutoff_date = datetime.now() - timedelta(days=days_back)
-        
-        for category in self.arxiv_categories:
-            try:
-                # arXiv API query
-                url = f"http://export.arxiv.org/api/query"
-                params = {
-                    'search_query': f'cat:{category}',
-                    'start': 0,
-                    'max_results': 50,
-                    'sortBy': 'submittedDate',
-                    'sortOrder': 'descending'
-                }
-                
-                response = self.session.get(url, params=params, timeout=15)
-                
-                # Parse XML response
-                root = ET.fromstring(response.content)
-                
-                # Namespace for arXiv API
-                ns = {'atom': 'http://www.w3.org/2005/Atom'}
-                
-                for entry in root.findall('atom:entry', ns):
-                    try:
-                        title = entry.find('atom:title', ns).text.strip()
-                        summary = entry.find('atom:summary', ns).text.strip()
-                        
-                        # Parse authors
-                        authors = []
-                        for author in entry.findall('atom:author', ns):
-                            name = author.find('atom:name', ns)
-                            if name is not None:
-                                authors.append(name.text)
-                        
-                        # Parse publication date
-                        published = entry.find('atom:published', ns).text
-                        pub_date = datetime.fromisoformat(
-                            published.replace('Z', '+00:00')
-                        )
-                        
-                        # Skip if too old
-                        if pub_date < cutoff_date:
+            logger.info(f"Fetching arXiv signals for categories: {categories}")
+            
+            signals = []
+            cutoff_date = datetime.now() - timedelta(days=30)
+            
+            for category in categories:
+                try:
+                    # arXiv API query
+                    url = f"http://export.arxiv.org/api/query"
+                    params = {
+                        'search_query': f'cat:{category}',
+                        'start': 0,
+                        'max_results': 50,
+                        'sortBy': 'submittedDate',
+                        'sortOrder': 'descending'
+                    }
+                    
+                    response = self.session.get(url, params=params, timeout=15)
+                    
+                    # Parse XML response
+                    root = ET.fromstring(response.content)
+                    
+                    # Namespace for arXiv API
+                    ns = {'atom': 'http://www.w3.org/2005/Atom'}
+                    
+                    for entry in root.findall('atom:entry', ns):
+                        try:
+                            title = entry.find('atom:title', ns).text.strip()
+                            summary = entry.find('atom:summary', ns).text.strip()
+                            
+                            # Parse authors
+                            authors = []
+                            for author in entry.findall('atom:author', ns):
+                                name = author.find('atom:name', ns)
+                                if name is not None:
+                                    authors.append(name.text)
+                            
+                            # Parse publication date
+                            published = entry.find('atom:published', ns).text
+                            pub_date = datetime.fromisoformat(
+                                published.replace('Z', '+00:00')
+                            )
+                            
+                            # Skip if too old
+                            if pub_date < cutoff_date:
+                                continue
+                            
+                            # Get paper URL
+                            paper_url = entry.find('atom:id', ns).text
+                            
+                            # Extract keywords from title and abstract
+                            keywords = self._extract_keywords(f"{title} {summary}")
+                            
+                            signal = CommunitySignal(
+                                title=title,
+                                authors=authors,
+                                abstract=summary,
+                                publication_date=pub_date,
+                                source=f"arXiv:{category}",
+                                url=paper_url,
+                                keywords=keywords,
+                                relevance_score=0.0  # Will be calculated later
+                            )
+                            signals.append(signal)
+                            
+                        except Exception as e:
+                            logger.warning(f"Error processing arXiv entry: {e}")
                             continue
-                        
-                        # Get paper URL
-                        paper_url = entry.find('atom:id', ns).text
-                        
-                        # Extract keywords from title and abstract
-                        keywords = self._extract_keywords(f"{title} {summary}")
-                        
-                        signal = CommunitySignal(
-                            title=title,
-                            authors=authors,
-                            abstract=summary,
-                            publication_date=pub_date,
-                            source=f"arXiv:{category}",
-                            url=paper_url,
-                            keywords=keywords,
-                            relevance_score=0.0  # Will be calculated later
-                        )
-                        signals.append(signal)
-                        
-                    except Exception as e:
-                        continue
-                        
-            except Exception as e:
-                print(f"Error querying arXiv category {category}: {e}")
-                continue
-        
-        return signals
+                            
+                except Exception as e:
+                    logger.error(f"Error querying arXiv category {category}: {e}")
+                    continue
+            
+            logger.info(f"Fetched {len(signals)} signals from arXiv.")
+            return signals
+            
+        except Exception as e:
+            logger.error(f"Error fetching arXiv signals: {e}")
+            return []
     
-    def _get_nasa_technical_reports(self, days_back: int) -> List[CommunitySignal]:
-        """Get recent NASA technical reports"""
-        signals = []
-        
+    def fetch_nasa_reports(self) -> List[Dict]:
+        """Fetch recent NASA technical reports."""
         try:
+            logger.info("Fetching NASA technical reports.")
+            
+            signals = []
+            
             # NASA Technical Reports Server
             url = "https://ntrs.nasa.gov/search.jsp"
             params = {
@@ -222,19 +209,24 @@ class CommunitySignalIntegrator:
                     )
                     signals.append(signal)
                     
-                except Exception:
+                except Exception as e:
+                    logger.warning(f"Error processing NASA report item: {e}")
                     continue
                     
+            logger.info(f"Fetched {len(signals)} signals from NASA.")
+            return signals
+            
         except Exception as e:
-            print(f"Error getting NASA technical reports: {e}")
-        
-        return signals
+            logger.error(f"Error fetching NASA reports: {e}")
+            return []
     
-    def _get_esa_technical_reports(self, days_back: int) -> List[CommunitySignal]:
-        """Get recent ESA technical reports"""
-        signals = []
-        
+    def fetch_esa_reports(self) -> List[Dict]:
+        """Fetch recent ESA technical reports."""
         try:
+            logger.info("Fetching ESA technical reports.")
+            
+            signals = []
+            
             # ESA Technical Publications
             url = "https://www.esa.int/Science_Exploration/Space_Science/Publications"
             response = self.session.get(url, timeout=15)
@@ -278,13 +270,16 @@ class CommunitySignalIntegrator:
                     )
                     signals.append(signal)
                     
-                except Exception:
+                except Exception as e:
+                    logger.warning(f"Error processing ESA publication item: {e}")
                     continue
-                    
+            
+            logger.info(f"Fetched {len(signals)} signals from ESA.")
+            return signals
+            
         except Exception as e:
-            print(f"Error getting ESA technical reports: {e}")
-        
-        return signals
+            logger.error(f"Error fetching ESA reports: {e}")
+            return []
     
     def _extract_keywords(self, text: str) -> List[str]:
         """Extract relevant keywords from text"""
@@ -455,6 +450,37 @@ class CommunitySignalIntegrator:
             )
         
         return insights[:5]  # Return top 5 insights
+    
+    def get_recent_signals(self, days_back: int = 30) -> Dict[str, List[CommunitySignal]]:
+        """Get recent community signals from multiple sources"""
+        signals = {}
+        
+        # Get arXiv signals
+        try:
+            signals['arxiv'] = self.fetch_arxiv_signals(self.arxiv_categories)
+        except Exception as e:
+            logger.error(f"Error getting arXiv signals: {e}")
+            signals['arxiv'] = []
+        
+        # Get NASA/ESA technical reports
+        try:
+            signals['nasa_reports'] = self.fetch_nasa_reports()
+        except Exception as e:
+            logger.error(f"Error getting NASA reports: {e}")
+            signals['nasa_reports'] = []
+        
+        try:
+            signals['esa_reports'] = self.fetch_esa_reports()
+        except Exception as e:
+            logger.error(f"Error getting ESA reports: {e}")
+            signals['esa_reports'] = []
+        
+        # Filter and score signals
+        for source in signals:
+            signals[source] = self._filter_and_score_signals(signals[source])
+        
+        logger.info("Recent signals fetched and processed.")
+        return signals
 
 
 # Integration function

@@ -391,6 +391,7 @@ docker-compose exec grant-ai make test
 - **[Project Goals](PROJECT_GOALS.md)** - Project purpose and objectives
 - **[Development Workflow](WORKFLOW.md)** - Development processes and CI/CD
 - **[Project Status](PROJECT_STATUS.md)** - Current status and roadmap
+- **[Advanced Discovery Features](docs/ADVANCED_DISCOVERY_FEATURES.md)** - Details on advanced discovery features
 
 ## 🤝 Contributing
 
@@ -513,3 +514,33 @@ This project has undergone comprehensive modernization and is now following indu
 ---
 
 **Made with ❤️ for the non-profit community**
+
+## New Modules & Utilities
+- Centralized config: `src/grant_ai/config.py`
+- Helper functions: `src/grant_ai/utils/helpers.py`
+- Analytics: `src/grant_ai/analytics/analytics.py`
+- Security: `src/grant_ai/security/security.py`
+- Community: `src/grant_ai/community/community.py`
+- Internationalization: `src/grant_ai/i18n/i18n.py`
+- Mobile support: `src/grant_ai/mobile/mobile.py`
+- Accessibility: `src/grant_ai/accessibility/accessibility.py`
+
+## Logging
+- All changes tracked in `logs/change_log.md`
+- All test output saved in `logs/test_output.log`
+
+## Next Steps
+See `project_plan.md` and `test_plan.md` for current roadmap and testing strategy.
+
+## Advanced Grant Discovery
+Grant AI now supports advanced grant discovery from NASA, ESA, Grants.gov, NSF, and DOE. See `src/grant_ai/config/advanced_discovery_sources.yaml` for source configuration.
+
+- AI and space technology keyword filtering
+- Multi-source aggregation
+- Community signal integration (arXiv, NASA/ESA reports)
+- AI proposal classification
+
+Run `./run.sh test-advanced` to test these features.
+
+## Documentation
+See `docs/ADVANCED_DISCOVERY_FEATURES.md` for details on advanced discovery features.

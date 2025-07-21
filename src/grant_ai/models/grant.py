@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, HttpUrl
+from pydantic import ConfigDict
 from sqlalchemy import Boolean, Column, Date, DateTime, Float, Integer, String, Text
 from sqlalchemy.dialects.sqlite import JSON as SQLiteJSON
 from sqlalchemy.orm import declarative_base
