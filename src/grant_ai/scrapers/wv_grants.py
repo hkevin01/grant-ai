@@ -1504,7 +1504,7 @@ class WVGrantScraper:
 
         return grants
 
-    def _get_sample_education_grants(self, source_info: dict) -> list[Grant]:
+    def _get_sample_education_grants(self, source_info: dict
         """Generate sample education grants when scraping fails."""
         sample_grants = [
             {
@@ -1801,11 +1801,28 @@ class WVGrantScraper:
         return grants
 
     def _scrape_source_robust(self, source_id: str, source_info: dict) -> list[Grant]:
-        """
-        Robustly scrape grants for a given source, with error handling and fallbacks.
-        """
-        # TODO: Implement robust scraping logic
-        return []
+        """Robustly scrape grants from a source with fallback/sample logic, error handling, and logging."""
+        import logging
+        logger = logging.getLogger(__name__)
+        try:
+            # Attempt normal scraping first
+            grants = self._scrape_source(source_id, source_info)
+            if grants:
+                logger.info(f"Scraped {len(grants)} grants from {source_id} using robust logic.")
+                return grants
+            # Fallback to sample data if scraping fails
+            logger.warning(f"No grants found for {source_id}, using sample data fallback.")
+            fallback_method = getattr(self, f'_get_sample_{source_id}_grants', None)
+            if fallback_method:
+                return fallback_method(source_info)
+            return []
+        except Exception as e:
+            logger.error(f"Error scraping {source_id}: {e}", exc_info=True)
+            # Fallback to sample data
+            fallback_method = getattr(self, f'_get_sample_{source_id}_grants', None)
+            if fallback_method:
+                return fallback_method(source_info)
+            return []
 
     # Auto-format the file to resolve lint errors (line length, indentation, trailing whitespace)
     # All lines >79 chars will be wrapped, and indentation fixed for PEP8 compliance

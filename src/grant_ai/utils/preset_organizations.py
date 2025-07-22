@@ -29,7 +29,30 @@ class PresetOrganizationManager:
         self.profiles_dir = PROFILES_DIR
         self._presets_cache: Optional[List[PresetOrganization]] = None
         self._profile_data_cache: Dict[str, Dict[str, Any]] = {}
+        self.organizations: List[PresetOrganization] = []
+        self._load_presets()
         
+    def _load_presets(self):
+        """Load preset organizations from PROFILES_DIR."""
+        self.organizations.clear()
+        if not PROFILES_DIR.exists():
+            return
+        for file in PROFILES_DIR.glob("*.json"):
+            try:
+                with open(file, "r") as f:
+                    data = json.load(f)
+                org = PresetOrganization(
+                    name=data.get("name", file.stem),
+                    display_name=data.get("display_name", file.stem.replace("_", " ")), 
+                    file_path=file,
+                    description=data.get("description", ""),
+                    focus_area=data.get("focus_area", ""),
+                    location=data.get("location", "")
+                )
+                self.organizations.append(org)
+            except Exception:
+                continue
+
     def get_available_presets(self) -> List[PresetOrganization]:
         """Get all available preset organizations."""
         if self._presets_cache is not None:
@@ -223,7 +246,18 @@ class PresetOrganizationManager:
         presets = self.get_available_presets()
         return next((p for p in presets 
                     if p.display_name == display_name), None)
+    
+    def get_all_presets(self) -> List[PresetOrganization]:
+        """Return all loaded preset organizations."""
+        return self.organizations
+    
+    def find_by_name(self, name: str) -> Optional[PresetOrganization]:
+        """Find a preset organization by name."""
+        for org in self.organizations:
+            if org.name == name:
+                return org
+        return None
 
 
 # Global instance for easy access
-preset_manager = PresetOrganizationManager() 
+preset_manager = PresetOrganizationManager()

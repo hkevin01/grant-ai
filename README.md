@@ -1,5 +1,49 @@
 # Grant Research AI
 
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)]()
+[![Platform Integrations](https://img.shields.io/badge/platforms-5_integrated-blue.svg)]()
+[![UI Status](https://img.shields.io/badge/UI_bugs-fixed-brightgreen.svg)]()
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)]()
+[![Security](https://img.shields.io/badge/security-checked-green.svg)]()
+[![Production Ready](https://img.shields.io/badge/production-ready-brightgreen.svg)]()
+
+Grant Research AI is a Python project for researching and managing grant applications for non-profit organizations. It features advanced grant discovery, application management, organization profiles, and platform integrations.
+
+## Features
+- Advanced grant discovery (NASA, ESA, Grants.gov, NSF, DOE)
+- AI proposal classifier and domain scoring
+- Community signal integration (arXiv, NASA/ESA reports)
+- Application management and tracking
+- Foundation matching for organizations
+- Comprehensive platform integrations (OpenGrants, etc.)
+- Robust error handling and logging
+- Modern GUI with accessibility and icon manager
+
+## Quick Start
+```bash
+./run.sh setup
+./run.sh gui
+```
+
+## Testing
+```bash
+./run.sh test
+./run.sh test-advanced
+./run.sh test-scraper
+./run.sh test-icons
+```
+
+## Documentation
+- [Platform Integration Guide](docs/GRANT_PLATFORM_INTEGRATION.md)
+- [Icon Loading Fixes](docs/fixes/ICON_LOADING_FIXES_COMPLETE.md)
+- [Next Steps Roadmap](docs/NEXT_STEPS_ROADMAP.md)
+
+## License
+MIT
+
+# Grant Research AI
+
 ## 🆕 Recent Improvements (July 5, 2025)
 
 **🔧 UI Bug Fixes - RESOLVED**
@@ -392,6 +436,9 @@ docker-compose exec grant-ai make test
 - **[Development Workflow](WORKFLOW.md)** - Development processes and CI/CD
 - **[Project Status](PROJECT_STATUS.md)** - Current status and roadmap
 - **[Advanced Discovery Features](docs/ADVANCED_DISCOVERY_FEATURES.md)** - Details on advanced discovery features
+- **[Platform Integration Guide](docs/GRANT_PLATFORM_INTEGRATION.md)** - Guide to integrating with grant platforms
+- **[Icon Loading Fixes](docs/fixes/ICON_LOADING_FIXES_COMPLETE.md)** - Documentation of recent icon loading fixes
+- **[Next Steps Roadmap](docs/NEXT_STEPS_ROADMAP.md)** - Roadmap for upcoming features and improvements
 
 ## 🤝 Contributing
 

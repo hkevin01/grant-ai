@@ -22,7 +22,7 @@ class GrantScraper(ABC):
                 results.append(grant)
         return results
 
+    @abstractmethod
     def get_all_grants(self) -> list[Grant]:
-        """Return all grants (stub for demonstration)."""
-        # This should be implemented in subclasses to fetch actual grants
-        return []
+        """Return all grants. Must be implemented by subclasses."""
+        raise NotImplementedError("get_all_grants must be implemented by subclasses")

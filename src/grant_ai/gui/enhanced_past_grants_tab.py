@@ -1020,3 +1020,4 @@ class EnhancedPastGrantsTab(QWidget):
             new_y = screen_center.y() - dialog_size.height() // 2
             
             self.move(new_x, new_y)
+        

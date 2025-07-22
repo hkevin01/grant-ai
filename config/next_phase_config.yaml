@@ -1,0 +1,31 @@
+# Grant AI - Next Phase Configuration
+# Configuration for advanced analytics, proposal generation, community signals, mobile, and i18n
+
+analytics:
+  enable_impact_analysis: true
+  dashboard_refresh_interval: 60
+
+proposal_generator:
+  templates:
+    - nasa
+    - esa
+    - ai_responsible
+  default_template: nasa
+
+community_signals:
+  arxiv_categories:
+    - cs.AI
+    - astro-ph.IM
+  enable_trend_monitoring: true
+
+mobile:
+  accessibility_checks: true
+  wireframe_mode: enhanced
+
+i18n:
+  supported_languages:
+    - en
+    - es
+    - fr
+    - de
+  default_language: en

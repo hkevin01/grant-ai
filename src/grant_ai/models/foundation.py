@@ -209,15 +209,12 @@ class FoundationContactDB(Base):
     """SQLAlchemy model for foundation contacts."""
     __tablename__ = "foundation_contacts"
     
-    id = Column(String, primary_key=True)
-    foundation_id = Column(String, nullable=False, index=True)
-    contact_date = Column(Date, nullable=False)
-    contact_type = Column(String, nullable=False)
-    contact_person = Column(String)
-    purpose = Column(Text, nullable=False)
-    outcome = Column(Text)
-    follow_up_required = Column(Boolean, default=False)
-    follow_up_date = Column(Date)
+    id = Column(Integer, primary_key=True)
+    foundation_id = Column(Integer)
+    contact_name = Column(String)
+    contact_email = Column(String)
+    contact_phone = Column(String)
+    contact_date = Column(Date)
     notes = Column(Text)
     
     created_at = Column(DateTime, default=datetime.utcnow)

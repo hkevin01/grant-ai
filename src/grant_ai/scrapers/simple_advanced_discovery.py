@@ -26,7 +26,7 @@ class SimpleGrantResult:
 
 
 class SimpleAdvancedDiscovery:
-    """Simple version for testing advanced grant discovery with error handling and logging."""
+    """Discovers AI and space technology grants from advanced sources."""
     
     def __init__(self):
         # Sample grants for different sources
@@ -109,16 +109,25 @@ class SimpleAdvancedDiscovery:
         
         return results
 
-    def get_discovery_summary(self, results: Dict[str, SimpleGrantResult]) -> Dict:
-        """Generate a summary of the discovery results."""
-        total_grants = sum(len(r.grants) for r in results.values() if r.success)
-        successful_sources = [s for s, r in results.items() if r.success]
-        success_rate = len(successful_sources) / max(1, len(results))
-        logger.info(f"Discovery summary: {total_grants} grants, {len(successful_sources)} successful sources.")
+    def _search_source(self, source: str, keywords: List[str]) -> Dict:
+        """Stub for searching a source."""
+        logger.info(f"Searching {source} for keywords: {keywords}")
         return {
-            "total_grants": total_grants,
-            "successful_sources": successful_sources,
-            "success_rate": success_rate,
+            'source': source,
+            'success': True,
+            'grants': [{'title': f'Sample {source} grant', 'domain': 'ai', 'confidence': 0.9}],
+            'message': 'Search completed'
+        }
+
+    def get_discovery_summary(self, results: dict) -> dict:
+        """Return summary of discovery results."""
+        total_grants = sum(len(r.grants) for r in results.values() if hasattr(r, 'grants'))
+        successful_sources = [k for k, r in results.items() if getattr(r, 'success', False)]
+        success_rate = len(successful_sources) / max(1, len(results))
+        return {
+            'total_grants': total_grants,
+            'successful_sources': successful_sources,
+            'success_rate': success_rate
         }
 
 

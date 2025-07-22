@@ -40,18 +40,12 @@ class PlatformIntegration(ABC):
         self, organization: OrganizationProfile, criteria: dict[str, Any]
     ) -> IntegrationResult:
         """Discover grants from this platform."""
-        pass
+        raise NotImplementedError("discover_grants must be implemented by subclasses")
 
     @abstractmethod
     def get_platform_info(self) -> dict[str, Any]:
         """Get information about this platform."""
-        return {
-            "name": self.name,
-            "enabled": self.enabled,
-            "description": getattr(self, "description", "No description available."),
-            "features": getattr(self, "features", []),
-            "api_version": getattr(self, "api_version", "N/A"),
-        }
+        raise NotImplementedError("get_platform_info must be implemented by subclasses")
 
     def is_available(self) -> bool:
         """Check if this integration is available."""

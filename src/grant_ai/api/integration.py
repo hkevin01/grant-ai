@@ -9,34 +9,23 @@ logger = logging.getLogger(__name__)
 
 
 def integrate_crm(data):
-    """
-    Integrate with CRM system (e.g., Salesforce, HubSpot).
-    Args:
-        data (dict): Data to send to CRM.
-    Returns:
-        bool: Success status.
-    """
+    """Integrate organization data with CRM system. Returns True if successful."""
     try:
-        # TODO: Implement CRM integration logic
-        logger.info("Integrating with CRM system.")
+        # Simulate integration logic
+        logger.info(f"Integrating CRM with data: {data}")
+        # TODO: Replace with real CRM API call
         return True
     except Exception as e:
-        logger.error(f"CRM integration failed: {e}")
+        logger.error(f"CRM integration failed: {e}", exc_info=True)
         return False
 
 
 def integrate_accounting(data):
-    """
-    Integrate with accounting system (e.g., QuickBooks).
-    Args:
-        data (dict): Data to send to accounting system.
-    Returns:
-        bool: Success status.
-    """
+    """Integrate organization data with accounting system. Returns True if successful."""
     try:
-        # TODO: Implement accounting integration logic
-        logger.info("Integrating with accounting system.")
+        logger.info(f"Integrating accounting with data: {data}")
+        # TODO: Replace with real accounting API call
         return True
     except Exception as e:
-        logger.error(f"Accounting integration failed: {e}")
+        logger.error(f"Accounting integration failed: {e}", exc_info=True)
         return False

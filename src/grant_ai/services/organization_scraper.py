@@ -116,222 +116,277 @@ class OrganizationScraper:
     
     def _extract_organization_name(self, soup: BeautifulSoup, url: str) -> Optional[str]:
         """Extract organization name from various sources."""
-        # Try meta tags first
-        meta_name = soup.find('meta', property='og:site_name')
-        if meta_name and meta_name.get('content'):
-            return meta_name['content'].strip()
+        try:
+            # Try meta tags first
+            meta_name = soup.find('meta', property='og:site_name')
+            if meta_name and meta_name.get('content'):
+                return meta_name['content'].strip()
+            
+            # Try title tag
+            title = soup.find('title')
+            if title and title.text:
+                title_text = title.text.strip()
+                # Clean up common title suffixes
+                for suffix in [' - Home', ' | Home', ' - Welcome', ' | Welcome']:
+                    if title_text.endswith(suffix):
+                        title_text = title_text[:-len(suffix)]
+                return title_text
+            
+            # Try h1 tags
+            h1 = soup.find('h1')
+            if h1 and h1.text:
+                return h1.text.strip()
+            
+            # Extract from URL as fallback
+            domain = urlparse(url).netloc
+            if domain.startswith('www.'):
+                domain = domain[4:]
+            return domain.replace('.', ' ').title()
         
-        # Try title tag
-        title = soup.find('title')
-        if title and title.text:
-            title_text = title.text.strip()
-            # Clean up common title suffixes
-            for suffix in [' - Home', ' | Home', ' - Welcome', ' | Welcome']:
-                if title_text.endswith(suffix):
-                    title_text = title_text[:-len(suffix)]
-            return title_text
-        
-        # Try h1 tags
-        h1 = soup.find('h1')
-        if h1 and h1.text:
-            return h1.text.strip()
-        
-        # Extract from URL as fallback
-        domain = urlparse(url).netloc
-        if domain.startswith('www.'):
-            domain = domain[4:]
-        return domain.replace('.', ' ').title()
+        except Exception as e:
+            print(f"Error extracting organization name: {e}")
+            return None
     
     def _extract_description(self, soup: BeautifulSoup) -> Optional[str]:
         """Extract organization description/mission."""
-        # Try meta description
-        meta_desc = soup.find('meta', attrs={'name': 'description'})
-        if meta_desc and meta_desc.get('content'):
-            return meta_desc['content'].strip()
+        try:
+            # Try meta description
+            meta_desc = soup.find('meta', attrs={'name': 'description'})
+            if meta_desc and meta_desc.get('content'):
+                return meta_desc['content'].strip()
+            
+            # Try og:description
+            og_desc = soup.find('meta', property='og:description')
+            if og_desc and og_desc.get('content'):
+                return og_desc['content'].strip()
+            
+            # Look for mission statement patterns
+            mission_patterns = [
+                'mission',
+                'about us',
+                'who we are',
+                'our story',
+                'purpose',
+                'vision'
+            ]
+            
+            for pattern in mission_patterns:
+                # Look for headings containing these words
+                for tag in ['h1', 'h2', 'h3', 'h4']:
+                    for heading in soup.find_all(tag):
+                        if pattern.lower() in heading.text.lower():
+                            # Get the next paragraph or div
+                            next_elem = heading.find_next_sibling(['p', 'div'])
+                            if next_elem and next_elem.text.strip():
+                                return next_elem.text.strip()[:500]  # Limit length
+            
+            # Try to find the first substantial paragraph
+            for p in soup.find_all('p'):
+                text = p.text.strip()
+                if len(text) > 50 and len(text) < 500:
+                    return text
+            
+            return None
         
-        # Try og:description
-        og_desc = soup.find('meta', property='og:description')
-        if og_desc and og_desc.get('content'):
-            return og_desc['content'].strip()
-        
-        # Look for mission statement patterns
-        mission_patterns = [
-            'mission',
-            'about us',
-            'who we are',
-            'our story',
-            'purpose',
-            'vision'
-        ]
-        
-        for pattern in mission_patterns:
-            # Look for headings containing these words
-            for tag in ['h1', 'h2', 'h3', 'h4']:
-                for heading in soup.find_all(tag):
-                    if pattern.lower() in heading.text.lower():
-                        # Get the next paragraph or div
-                        next_elem = heading.find_next_sibling(['p', 'div'])
-                        if next_elem and next_elem.text.strip():
-                            return next_elem.text.strip()[:500]  # Limit length
-        
-        # Try to find the first substantial paragraph
-        for p in soup.find_all('p'):
-            text = p.text.strip()
-            if len(text) > 50 and len(text) < 500:
-                return text
-        
-        return None
+        except Exception as e:
+            print(f"Error extracting description: {e}")
+            return None
     
     def _identify_focus_areas(self, soup: BeautifulSoup) -> List[str]:
         """Identify focus areas based on content analysis."""
-        text_content = soup.get_text().lower()
-        identified_areas = []
+        try:
+            text_content = soup.get_text().lower()
+            identified_areas = []
+            
+            for focus_area, keywords in self.focus_keywords.items():
+                for keyword in keywords:
+                    if keyword in text_content:
+                        identified_areas.append(focus_area.value)
+                        break
+            
+            return identified_areas
         
-        for focus_area, keywords in self.focus_keywords.items():
-            for keyword in keywords:
-                if keyword in text_content:
-                    identified_areas.append(focus_area.value)
-                    break
-        
-        return identified_areas
+        except Exception as e:
+            print(f"Error identifying focus areas: {e}")
+            return []
     
     def _identify_program_types(self, soup: BeautifulSoup) -> List[str]:
         """Identify program types based on content analysis."""
-        text_content = soup.get_text().lower()
-        identified_programs = []
+        try:
+            text_content = soup.get_text().lower()
+            identified_programs = []
+            
+            for program_type, keywords in self.program_keywords.items():
+                for keyword in keywords:
+                    if keyword in text_content:
+                        identified_programs.append(program_type.value)
+                        break
+            
+            return identified_programs
         
-        for program_type, keywords in self.program_keywords.items():
-            for keyword in keywords:
-                if keyword in text_content:
-                    identified_programs.append(program_type.value)
-                    break
-        
-        return identified_programs
+        except Exception as e:
+            print(f"Error identifying program types: {e}")
+            return []
     
     def _extract_target_demographics(self, soup: BeautifulSoup) -> List[str]:
         """Extract target demographics from content."""
-        text_content = soup.get_text().lower()
-        demographics = []
+        try:
+            text_content = soup.get_text().lower()
+            demographics = []
+            
+            demographic_keywords = [
+                'youth', 'teen', 'adolescent', 'young people', 'children', 'kids',
+                'senior', 'elderly', 'older adults', 'aging population',
+                'family', 'families', 'parents',
+                'student', 'students', 'learner', 'learners',
+                'community', 'residents', 'citizens',
+                'veteran', 'veterans', 'military',
+                'disability', 'disabled', 'special needs',
+                'minority', 'underrepresented', 'marginalized',
+                'low-income', 'economically disadvantaged',
+                'rural', 'urban', 'suburban'
+            ]
+            
+            for keyword in demographic_keywords:
+                if keyword in text_content:
+                    demographics.append(keyword.title())
+            
+            return list(set(demographics))  # Remove duplicates
         
-        demographic_keywords = [
-            'youth', 'teen', 'adolescent', 'young people', 'children', 'kids',
-            'senior', 'elderly', 'older adults', 'aging population',
-            'family', 'families', 'parents',
-            'student', 'students', 'learner', 'learners',
-            'community', 'residents', 'citizens',
-            'veteran', 'veterans', 'military',
-            'disability', 'disabled', 'special needs',
-            'minority', 'underrepresented', 'marginalized',
-            'low-income', 'economically disadvantaged',
-            'rural', 'urban', 'suburban'
-        ]
-        
-        for keyword in demographic_keywords:
-            if keyword in text_content:
-                demographics.append(keyword.title())
-        
-        return list(set(demographics))  # Remove duplicates
+        except Exception as e:
+            print(f"Error extracting target demographics: {e}")
+            return []
     
     def _extract_location(self, soup: BeautifulSoup) -> Optional[str]:
         """Extract organization location."""
-        # Look for address patterns
-        text_content = soup.get_text()
-        address_match = re.search(self.patterns['address'], text_content)
-        if address_match:
-            return address_match.group(0)
+        try:
+            # Look for address patterns
+            text_content = soup.get_text()
+            address_match = re.search(self.patterns['address'], text_content)
+            if address_match:
+                return address_match.group(0)
+            
+            # Look for location in contact information
+            contact_sections = soup.find_all(['div', 'section'], class_=re.compile(r'contact|location|address', re.I))
+            for section in contact_sections:
+                text = section.get_text()
+                # Look for city, state patterns
+                city_state = re.search(r'([A-Za-z\s]+),\s*([A-Z]{2})', text)
+                if city_state:
+                    return city_state.group(0)
+            
+            return None
         
-        # Look for location in contact information
-        contact_sections = soup.find_all(['div', 'section'], class_=re.compile(r'contact|location|address', re.I))
-        for section in contact_sections:
-            text = section.get_text()
-            # Look for city, state patterns
-            city_state = re.search(r'([A-Za-z\s]+),\s*([A-Z]{2})', text)
-            if city_state:
-                return city_state.group(0)
-        
-        return None
+        except Exception as e:
+            print(f"Error extracting location: {e}")
+            return None
     
     def _extract_contact_name(self, soup: BeautifulSoup) -> Optional[str]:
         """Extract primary contact person name."""
-        # Look for common patterns in contact sections
-        contact_sections = soup.find_all(['div', 'section'], class_=re.compile(r'contact|staff|team|leadership', re.I))
+        try:
+            # Look for common patterns in contact sections
+            contact_sections = soup.find_all(['div', 'section'], class_=re.compile(r'contact|staff|team|leadership', re.I))
+            
+            for section in contact_sections:
+                text = section.get_text()
+                # Look for "Contact:" or "Director:" patterns
+                contact_match = re.search(r'(?:Contact|Director|Executive|President):\s*([A-Z][a-z]+\s+[A-Z][a-z]+)', text)
+                if contact_match:
+                    return contact_match.group(1)
+            
+            return None
         
-        for section in contact_sections:
-            text = section.get_text()
-            # Look for "Contact:" or "Director:" patterns
-            contact_match = re.search(r'(?:Contact|Director|Executive|President):\s*([A-Z][a-z]+\s+[A-Z][a-z]+)', text)
-            if contact_match:
-                return contact_match.group(1)
-        
-        return None
+        except Exception as e:
+            print(f"Error extracting contact name: {e}")
+            return None
     
     def _extract_contact_email(self, soup: BeautifulSoup) -> Optional[str]:
         """Extract contact email address."""
-        text_content = soup.get_text()
-        email_match = re.search(self.patterns['email'], text_content)
-        if email_match:
-            return email_match.group(0)
+        try:
+            text_content = soup.get_text()
+            email_match = re.search(self.patterns['email'], text_content)
+            if email_match:
+                return email_match.group(0)
+            
+            # Look for mailto links
+            mailto_links = soup.find_all('a', href=re.compile(r'^mailto:'))
+            for link in mailto_links:
+                email = link['href'].replace('mailto:', '')
+                if '@' in email:
+                    return email
+            
+            return None
         
-        # Look for mailto links
-        mailto_links = soup.find_all('a', href=re.compile(r'^mailto:'))
-        for link in mailto_links:
-            email = link['href'].replace('mailto:', '')
-            if '@' in email:
-                return email
-        
-        return None
+        except Exception as e:
+            print(f"Error extracting contact email: {e}")
+            return None
     
     def _extract_contact_phone(self, soup: BeautifulSoup) -> Optional[str]:
         """Extract contact phone number."""
-        text_content = soup.get_text()
-        phone_match = re.search(self.patterns['phone'], text_content)
-        if phone_match:
-            return phone_match.group(0)
+        try:
+            text_content = soup.get_text()
+            phone_match = re.search(self.patterns['phone'], text_content)
+            if phone_match:
+                return phone_match.group(0)
+            
+            # Look for tel links
+            tel_links = soup.find_all('a', href=re.compile(r'^tel:'))
+            for link in tel_links:
+                phone = link['href'].replace('tel:', '')
+                return phone
+            
+            return None
         
-        # Look for tel links
-        tel_links = soup.find_all('a', href=re.compile(r'^tel:'))
-        for link in tel_links:
-            phone = link['href'].replace('tel:', '')
-            return phone
-        
-        return None
+        except Exception as e:
+            print(f"Error extracting contact phone: {e}")
+            return None
     
     def _extract_ein(self, soup: BeautifulSoup) -> Optional[str]:
         """Extract EIN (Employer Identification Number)."""
-        text_content = soup.get_text()
-        ein_match = re.search(self.patterns['ein'], text_content)
-        if ein_match:
-            return ein_match.group(0)
-        return None
+        try:
+            text_content = soup.get_text()
+            ein_match = re.search(self.patterns['ein'], text_content)
+            if ein_match:
+                return ein_match.group(0)
+            return None
+        
+        except Exception as e:
+            print(f"Error extracting EIN: {e}")
+            return None
     
     def _extract_founded_year(self, soup: BeautifulSoup) -> Optional[int]:
         """Extract organization founding year."""
-        text_content = soup.get_text()
-        year_matches = re.findall(self.patterns['year'], text_content)
+        try:
+            text_content = soup.get_text()
+            year_matches = re.findall(self.patterns['year'], text_content)
+            
+            # Look for founding-related context
+            founding_keywords = ['founded', 'established', 'started', 'created', 'incorporated']
+            
+            for keyword in founding_keywords:
+                if keyword in text_content.lower():
+                    # Find years near the founding keyword
+                    keyword_index = text_content.lower().find(keyword)
+                    for year_match in year_matches:
+                        year_index = text_content.find(year_match)
+                        if abs(keyword_index - year_index) < 100:  # Within 100 characters
+                            try:
+                                return int(year_match)
+                            except ValueError:
+                                continue
+            
+            # If no founding context found, return the earliest year (likely founding year)
+            if year_matches:
+                try:
+                    return min(int(year) for year in year_matches)
+                except ValueError:
+                    pass
+            
+            return None
         
-        # Look for founding-related context
-        founding_keywords = ['founded', 'established', 'started', 'created', 'incorporated']
-        
-        for keyword in founding_keywords:
-            if keyword in text_content.lower():
-                # Find years near the founding keyword
-                keyword_index = text_content.lower().find(keyword)
-                for year_match in year_matches:
-                    year_index = text_content.find(year_match)
-                    if abs(keyword_index - year_index) < 100:  # Within 100 characters
-                        try:
-                            return int(year_match)
-                        except ValueError:
-                            continue
-        
-        # If no founding context found, return the earliest year (likely founding year)
-        if year_matches:
-            try:
-                return min(int(year) for year in year_matches)
-            except ValueError:
-                pass
-        
-        return None
+        except Exception as e:
+            print(f"Error extracting founded year: {e}")
+            return None
     
     def fill_questionnaire_from_website(self, website_url: str, questionnaire: Questionnaire) -> QuestionnaireResponse:
         """
@@ -398,4 +453,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()

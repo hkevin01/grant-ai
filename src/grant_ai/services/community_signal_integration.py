@@ -32,7 +32,7 @@ class CommunitySignal:
 
 
 class CommunitySignalIntegrator:
-    """Integrates community signals (arXiv, NASA/ESA reports) for grant relevance."""
+    """Integrates community signals from arXiv, NASA/ESA reports, and trending research."""
     
     def __init__(self):
         logger.info("Initialized CommunitySignalIntegrator.")
@@ -65,6 +65,21 @@ class CommunitySignalIntegrator:
             'earth observation', 'remote sensing', 'planetary science',
             'autonomous systems', 'space exploration'
         ]
+        
+        self.sources = ['arxiv', 'nasa_reports', 'esa_reports']
+    
+    def fetch_signals(self, keywords: List[str]) -> Dict[str, List[Dict]]:
+        """Fetch signals from all sources matching keywords."""
+        results = {}
+        for source in self.sources:
+            results[source] = self._fetch_source_signals(source, keywords)
+        return results
+    
+    def _fetch_source_signals(self, source: str, keywords: List[str]) -> List[Dict]:
+        """Stub for fetching signals from a source."""
+        # TODO: Implement real fetching logic
+        logger.info(f"Fetching signals from {source} for keywords: {keywords}")
+        return [{'title': f'Sample {source} result', 'keywords': keywords}]
     
     def fetch_arxiv_signals(self, categories: List[str]) -> List[Dict]:
         """Fetch trending papers from arXiv for given categories."""
@@ -481,6 +496,11 @@ class CommunitySignalIntegrator:
         
         logger.info("Recent signals fetched and processed.")
         return signals
+    
+    def analyze_trends(self, signals: dict) -> dict:
+        """Analyze trends from fetched signals."""
+        # Basic placeholder for trend analysis logic
+        return {source: 'Trending' for source in signals}
 
 
 # Integration function

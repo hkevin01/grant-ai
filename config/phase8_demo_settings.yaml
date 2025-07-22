@@ -1,0 +1,27 @@
+# Grant AI - Phase 8 Demo Settings
+
+impact_analysis:
+  enabled: true
+  min_funding_threshold: 10000
+
+proposal_generator:
+  default_template: nasa
+  enable_ai_alignment: true
+
+community_signals:
+  arxiv_monitor_enabled: true
+  categories:
+    - cs.AI
+    - astro-ph.IM
+
+mobile:
+  accessibility_checks: true
+  wireframe_mode: enhanced
+
+i18n:
+  supported_languages:
+    - en
+    - es
+    - fr
+    - de
+  default_language: en

@@ -30,6 +30,7 @@ class FoundationService:
         """Initialize the foundation service."""
         self.data_dir = Path("data/foundations")
         self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.session = get_session()
     
     def add_foundation(self, foundation: Foundation) -> str:
         """Add a new foundation to the database."""

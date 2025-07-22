@@ -194,6 +194,8 @@ class QuestionnaireWidget(QWidget):
         self.questionnaire = None
         self.response = None
         self.question_widgets = {}
+        self.questions: List[Question] = []  # Ensure questions attribute exists
+        self.responses: Dict[str, Any] = {}
         self.setup_ui()
         self.load_questionnaire()
     
