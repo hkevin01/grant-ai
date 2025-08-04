@@ -2,9 +2,9 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Install and Run Grant AI",
+			"label": "Setup and Test Grant AI",
 			"type": "shell",
-			"command": "pip install -e .[dev] && python scripts/setup.py",
+			"command": "python3 -m venv .venv && source .venv/bin/activate && pip install -e .[dev] && python scripts/setup.py",
 			"group": "build",
 			"isBackground": false,
 			"problemMatcher": []

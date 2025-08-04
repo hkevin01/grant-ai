@@ -1,5 +1,5 @@
 """
-Robust web scraping service with comprehensive error handling and recovery.
+Robust web scraping service with comprehensive error handling.
 """
 import logging
 import random
@@ -13,45 +13,46 @@ from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from grant_ai.core.exceptions import NetworkError, ParsingError, RateLimitError
 from grant_ai.models.grant import Grant
+from grant_ai.services.rate_limiter import RateLimiter
 
 
 class RobustWebScraper:
-    """Enhanced web scraper with robust error handling, retry logic, and fallbacks."""
-    
+    """Web scraper with advanced error handling and rate limiting."""
+
     def __init__(self, max_retries: int = 3, backoff_factor: float = 1.0):
-        """
-        Initialize the robust scraper with configurable retry settings.
-        
-        Args:
-            max_retries: Maximum number of retry attempts
-            backoff_factor: Multiplier for delay between retries
-        """
+        """Initialize scraper with configurable settings."""
         self.logger = logging.getLogger(__name__)
         self.max_retries = max_retries
         self.backoff_factor = backoff_factor
-        
-        # Track failed domains to avoid repeated attempts
+
+        # Rate limiter
+        self.rate_limiter = RateLimiter(
+            requests_per_second=2.0,
+            burst_size=5,
+            cooldown_period=300
+        )
+
+        # Track failed domains
         self.failed_domains: Set[str] = set()
-        self.domain_cooldown: Dict[str, float] = {}
-        
-        # Initialize session with robust configuration
+
+        # Initialize session
         self.session = self._create_robust_session()
-        
+
         # User agents for rotation
         self.user_agents = [
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:121.0) Gecko/20100101 Firefox/121.0'
+            'Mozilla/5.0 (Windows NT 10.0) Chrome/120.0',
+            'Mozilla/5.0 (Macintosh) Chrome/120.0',
+            'Mozilla/5.0 (X11; Linux x86_64) Chrome/120.0',
+            'Mozilla/5.0 (Windows NT 10.0) Firefox/121.0',
+            'Mozilla/5.0 (Macintosh) Firefox/121.0'
         ]
-    
+
     def _create_robust_session(self) -> requests.Session:
-        """Create a requests session with robust retry and timeout configuration."""
+        """Create requests session with retry and timeout config."""
         session = requests.Session()
-        
-        # Configure retry strategy
+
         retry_strategy = Retry(
             total=self.max_retries,
             backoff_factor=self.backoff_factor,
@@ -59,350 +60,346 @@ class RobustWebScraper:
             allowed_methods=["HEAD", "GET", "OPTIONS"],
             raise_on_status=False
         )
-        
-        # Mount adapters with retry strategy
+
         adapter = HTTPAdapter(
             max_retries=retry_strategy,
             pool_connections=10,
             pool_maxsize=20
         )
+
         session.mount("http://", adapter)
         session.mount("https://", adapter)
-        
-        # Set reasonable timeouts
-        session.timeout = (10, 30)  # (connect_timeout, read_timeout)
-        
+        session.timeout = (10, 30)
+
         return session
-    
+
     def _rotate_user_agent(self):
         """Rotate user agent to avoid detection."""
         user_agent = random.choice(self.user_agents)
         self.session.headers.update({'User-Agent': user_agent})
-    
+
     def _check_domain_availability(self, url: str) -> bool:
-        """
-        Check if a domain is accessible and not in cooldown.
-        
-        Args:
-            url: URL to check
-            
-        Returns:
-            bool: True if domain is accessible, False otherwise
-        """
+        """Check if domain is accessible."""
         try:
-            parsed = urlparse(url)
-            domain = parsed.netloc
-            
-            # Check if domain is in failed list
+            domain = urlparse(url).netloc
+
             if domain in self.failed_domains:
                 return False
-            
-            # Check cooldown period
-            if domain in self.domain_cooldown:
-                if time.time() - self.domain_cooldown[domain] < 300:  # 5 min cooldown
-                    return False
-                else:
-                    # Remove from cooldown
-                    del self.domain_cooldown[domain]
-            
-            # Test DNS resolution
+
             socket.gethostbyname(domain)
             return True
-            
-        except (socket.gaierror, socket.error, Exception) as e:
-            self.logger.warning(f"Domain check failed for {url}: {e}")
+
+        except Exception as e:
+            self.logger.warning(
+                "Domain check failed for %s: %s",
+                url, str(e)
+            )
             return False
-    
-    def _handle_request_error(self, url: str, error: Exception, attempt: int) -> bool:
-        """
-        Handle request errors with appropriate recovery strategies.
-        
-        Args:
-            url: URL that failed
-            error: Exception that occurred
-            attempt: Current attempt number
-            
-        Returns:
-            bool: True if should retry, False otherwise
-        """
+
+    def _handle_request_error(
+        self,
+        url: str,
+        error: Exception,
+        attempt: int
+    ) -> bool:
+        """Handle request errors with appropriate strategies."""
         domain = urlparse(url).netloc
-        
+
         if isinstance(error, requests.exceptions.ConnectionError):
-            self.logger.warning(f"Connection error for {url} (attempt {attempt}): {error}")
+            self.logger.warning(
+                "Connection error for %s (attempt %d): %s",
+                url, attempt, error
+            )
             if attempt >= self.max_retries:
                 self.failed_domains.add(domain)
-                self.domain_cooldown[domain] = time.time()
+                self.rate_limiter.add_cooldown(domain)
             return attempt < self.max_retries
-        
+
         elif isinstance(error, requests.exceptions.Timeout):
-            self.logger.warning(f"Timeout for {url} (attempt {attempt}): {error}")
+            self.logger.warning(
+                "Timeout for %s (attempt %d): %s",
+                url, attempt, error
+            )
             # Increase timeout for retry
-            self.session.timeout = (self.session.timeout[0] * 1.5, self.session.timeout[1] * 1.5)
+            self.session.timeout = (
+                self.session.timeout[0] * 1.5,
+                self.session.timeout[1] * 1.5
+            )
             return attempt < self.max_retries
-        
+
         elif isinstance(error, requests.exceptions.HTTPError):
             status_code = getattr(error.response, 'status_code', None)
-            self.logger.warning(f"HTTP error {status_code} for {url} (attempt {attempt}): {error}")
-            
+            self.logger.warning(
+                "HTTP error %s for %s (attempt %d): %s",
+                status_code, url, attempt, error
+            )
+
             if status_code == 403:
-                # Forbidden - try rotating user agent
                 self._rotate_user_agent()
-                time.sleep(random.uniform(2, 5))  # Random delay
+                time.sleep(random.uniform(2, 5))
                 return attempt < self.max_retries
-            
+
             elif status_code == 404:
-                # Not found - don't retry
-                self.logger.info(f"URL not found: {url}")
+                self.logger.info("URL not found: %s", url)
                 return False
-            
+
             elif status_code in [429, 503]:
-                # Rate limited or service unavailable - longer delay
-                delay = (2 ** attempt) + random.uniform(1, 3)
-                time.sleep(delay)
+                # Rate limited - add cooldown
+                self.rate_limiter.add_cooldown(
+                    domain,
+                    duration=60 * (2 ** attempt)
+                )
                 return attempt < self.max_retries
-            
-            else:
-                return attempt < self.max_retries
-        
-        else:
-            self.logger.error(f"Unexpected error for {url} (attempt {attempt}): {error}")
+
             return attempt < self.max_retries
-    
-    def fetch_with_fallbacks(self, url: str, fallback_urls: Optional[List[str]] = None) -> Optional[BeautifulSoup]:
-        """
-        Fetch URL content with comprehensive error handling and fallbacks.
-        
-        Args:
-            url: Primary URL to fetch
-            fallback_urls: List of fallback URLs to try if primary fails
-            
-        Returns:
-            BeautifulSoup object if successful, None otherwise
-        """
+
+        else:
+            self.logger.error(
+                "Unexpected error for %s (attempt %d): %s",
+                url, attempt, error
+            )
+            return attempt < self.max_retries
+
+    def fetch_with_fallbacks(
+        self,
+        url: str,
+        fallback_urls: Optional[List[str]] = None
+    ) -> Optional[BeautifulSoup]:
+        """Fetch URL content with error handling and fallbacks."""
         urls_to_try = [url] + (fallback_urls or [])
-        
+
         for current_url in urls_to_try:
+            domain = urlparse(current_url).netloc
+
             if not self._check_domain_availability(current_url):
-                self.logger.info(f"Skipping unavailable domain: {current_url}")
+                self.logger.info("Skipping unavailable: %s", current_url)
                 continue
-            
+
             for attempt in range(1, self.max_retries + 1):
                 try:
-                    # Rotate user agent for each attempt
+                    # Wait for rate limit
+                    self.rate_limiter.wait_if_needed(domain)
+
+                    # Rotate user agent
                     self._rotate_user_agent()
-                    
-                    # Add random delay to avoid being flagged
+
+                    # Add random delay for retries
                     if attempt > 1:
                         delay = random.uniform(1, 3) * attempt
                         time.sleep(delay)
-                    
-                    self.logger.info(f"Fetching {current_url} (attempt {attempt})")
-                    
+
+                    self.logger.info(
+                        "Fetching %s (attempt %d)",
+                        current_url, attempt
+                    )
+
                     response = self.session.get(current_url)
                     response.raise_for_status()
-                    
-                    # Successful response
+
                     if response.content:
                         soup = BeautifulSoup(response.content, 'html.parser')
-                        self.logger.info(f"Successfully fetched {current_url}")
+                        self.logger.info(
+                            "Successfully fetched %s",
+                            current_url
+                        )
+                        self.rate_limiter.adjust_rate(domain, True)
                         return soup
                     else:
-                        self.logger.warning(f"Empty response from {current_url}")
+                        self.logger.warning(
+                            "Empty response from %s",
+                            current_url
+                        )
                         continue
-                
+
                 except Exception as error:
-                    should_retry = self._handle_request_error(current_url, error, attempt)
+                    self.rate_limiter.adjust_rate(domain, False)
+                    should_retry = self._handle_request_error(
+                        current_url, error, attempt
+                    )
                     if not should_retry:
                         break
-            
-            # Reset session timeout for next URL
+
+            # Reset session timeout
             self.session.timeout = (10, 30)
-        
-        self.logger.error(f"Failed to fetch any URL: {urls_to_try}")
+
+        self.logger.error("Failed to fetch any URL: %s", urls_to_try)
         return None
-    
-    def extract_grants_with_selectors(self, soup: BeautifulSoup, selectors: Dict[str, List[str]]) -> List[Grant]:
-        """
-        Extract grants using multiple CSS selectors with fallbacks.
-        
-        Args:
-            soup: BeautifulSoup object to parse
-            selectors: Dictionary of CSS selectors for different grant elements
-            
-        Returns:
-            List of extracted grants
-        """
+
+    def extract_grants_with_selectors(
+        self,
+        soup: BeautifulSoup,
+        selectors: Dict[str, List[str]]
+    ) -> List[Grant]:
+        """Extract grants using multiple CSS selectors."""
         grants = []
-        
+
         try:
-            # Try multiple selectors for grant containers
-            grant_containers = []
-            for selector in selectors.get('containers', []):
-                containers = soup.select(selector)
-                if containers:
-                    grant_containers.extend(containers)
-                    break
-            
-            if not grant_containers:
-                self.logger.warning("No grant containers found with provided selectors")
-                return []
-            
-            for container in grant_containers[:20]:  # Limit to 20 grants
+            # Find all potential grant containers
+            containers = []
+            for container_selector in selectors.get('container', []):
+                containers.extend(soup.select(container_selector))
+
+            # Process each container
+            for container in containers[:10]:  # Limit to avoid overload
                 try:
-                    grant = self._extract_single_grant(container, selectors)
+                    grant = self._extract_single_grant(
+                        container, selectors
+                    )
                     if grant:
                         grants.append(grant)
                 except Exception as e:
-                    self.logger.warning(f"Failed to extract grant from container: {e}")
+                    self.logger.warning(
+                        "Failed to extract grant: %s",
+                        str(e)
+                    )
                     continue
-            
+
         except Exception as e:
-            self.logger.error(f"Error extracting grants: {e}")
-        
+            self.logger.error("Error extracting grants: %s", str(e))
+            raise ParsingError(f"Failed to extract grants: {e}")
+
         return grants
-    
-    def _extract_single_grant(self, container, selectors: Dict[str, List[str]]) -> Optional[Grant]:
-        """Extract a single grant from a container element."""
+
+    def _extract_field(
+        self,
+        container: BeautifulSoup,
+        selectors: List[str],
+        get_href: bool = False
+    ) -> Optional[str]:
+        """Extract a field using multiple selectors."""
+        for selector in selectors:
+            elem = container.select_one(selector)
+            if elem:
+                if get_href and elem.get('href'):
+                    return elem['href']
+                return elem.get_text(strip=True)
+        return None
+
+    def _extract_single_grant(
+        self,
+        container: BeautifulSoup,
+        selectors: Dict[str, List[str]]
+    ) -> Optional[Grant]:
+        """Extract grant details from a single container element."""
         try:
-            # Extract title
-            title = self._extract_text_with_selectors(container, selectors.get('title', []))
+            title = self._extract_field(
+                container,
+                selectors.get('title', [])
+            )
+
             if not title:
                 return None
-            
-            # Extract other fields with fallbacks
-            description = self._extract_text_with_selectors(container, selectors.get('description', []))
-            amount = self._extract_text_with_selectors(container, selectors.get('amount', []))
-            deadline = self._extract_text_with_selectors(container, selectors.get('deadline', []))
-            funder = self._extract_text_with_selectors(container, selectors.get('funder', []))
-            
-            # Create grant object
-            grant = Grant(
-                title=title,
-                description=description or "No description available",
-                funder_name=funder or "Unknown Funder",
-                amount_min=self._parse_amount(amount),
-                deadline=deadline,
-                url="",  # Will be set by caller
-                source="Web Scraping"
+
+            description = self._extract_field(
+                container,
+                selectors.get('description', [])
             )
-            
-            return grant
-            
+
+            amount = self._extract_field(
+                container,
+                selectors.get('amount', [])
+            )
+
+            deadline = self._extract_field(
+                container,
+                selectors.get('deadline', [])
+            )
+
+            link = self._extract_field(
+                container,
+                selectors.get('link', []),
+                get_href=True
+            )
+
+            return Grant(
+                title=title,
+                description=description or "",
+                amount=amount,
+                deadline=deadline,
+                url=link
+            )
+
         except Exception as e:
-            self.logger.warning(f"Error extracting single grant: {e}")
+            self.logger.warning(
+                "Error extracting grant details: %s",
+                str(e)
+            )
             return None
-    
-    def _extract_text_with_selectors(self, container, selectors: List[str]) -> Optional[str]:
-        """Extract text using multiple CSS selectors as fallbacks."""
-        for selector in selectors:
-            try:
-                element = container.select_one(selector)
-                if element:
-                    text = element.get_text(strip=True)
-                    if text:
-                        return text
-            except Exception:
-                continue
-        return None
-    
-    def _parse_amount(self, amount_text: Optional[str]) -> Optional[int]:
-        """Parse amount from text, handling various formats."""
-        if not amount_text:
-            return None
-        
-        try:
-            # Remove common currency symbols and text
-            import re
-            amount_clean = re.sub(r'[^\d,.]', '', amount_text.replace(',', ''))
-            if amount_clean:
-                return int(float(amount_clean))
-        except (ValueError, TypeError):
-            pass
-        
-        return None
-    
-    def health_check(self) -> Dict[str, any]:
-        """
-        Perform a health check of the scraper.
-        
-        Returns:
-            Dictionary with health status information
-        """
-        return {
-            'failed_domains_count': len(self.failed_domains),
-            'failed_domains': list(self.failed_domains),
-            'domains_in_cooldown': len(self.domain_cooldown),
-            'session_active': self.session is not None,
-            'max_retries': self.max_retries,
-            'backoff_factor': self.backoff_factor
-        }
-    
-    def reset_failed_domains(self):
-        """Reset the failed domains list and cooldowns."""
-        self.failed_domains.clear()
-        self.domain_cooldown.clear()
-        self.logger.info("Reset failed domains and cooldowns")
-    
+
     def scrape_grants(
-        self, url: str, selectors: Optional[Dict[str, List[str]]] = None
+        self,
+        url: str,
+        selectors: Optional[Dict[str, List[str]]] = None
     ) -> List[Grant]:
-        """
-        Scrape grants from a URL using intelligent content extraction.
-        
-        Args:
-            url: URL to scrape
-            selectors: Optional custom selectors for grant extraction
-            
-        Returns:
-            List of extracted grants
-        """
+        """Scrape grants with intelligent extraction."""
         try:
-            # Fetch the page content
             soup = self.fetch_with_fallbacks(url)
             if not soup:
-                self.logger.warning(f"Failed to fetch content from {url}")
+                self.logger.warning("Failed to fetch: %s", url)
                 return []
-            
-            # Use provided selectors or intelligent defaults
+
+            # Use provided or default selectors
             if selectors:
-                return self.extract_grants_with_selectors(soup, selectors)
+                return self.extract_grants_with_selectors(
+                    soup, selectors
+                )
             else:
-                # Use intelligent content extraction with default selectors
+                # Default selectors for common patterns
                 default_selectors = {
                     'container': [
-                        '.grant', '.funding', '.opportunity', '.award',
-                        '[class*="grant"]', '[class*="funding"]',
-                        '[class*="opportunity"]',
-                        'article', '.content-item', '.listing-item', '.card',
-                        '.result-item', '.search-result'
+                        '.grant', '.funding', '.opportunity',
+                        '.award', '[class*="grant"]',
+                        '[class*="funding"]', '[class*="opportunity"]',
+                        'article', '.content-item', '.listing-item'
                     ],
                     'title': [
-                        'h1', 'h2', 'h3', 'h4', '.title', '.name', '.heading',
-                        '[class*="title"]', '[class*="name"]',
-                        '[class*="heading"]'
+                        'h1', 'h2', 'h3', 'h4', '.title',
+                        '.name', '.heading', '[class*="title"]'
                     ],
                     'description': [
-                        'p', '.description', '.summary', '.excerpt',
-                        '.content',
-                        '[class*="description"]', '[class*="summary"]', '.text'
+                        'p', '.description', '.summary',
+                        '.excerpt', '.content', '[class*="description"]'
                     ],
                     'amount': [
-                        '.amount', '.funding', '.award', '[class*="amount"]',
-                        '[class*="funding"]', '[class*="money"]',
-                        '[class*="dollar"]'
+                        '.amount', '.funding', '.award',
+                        '[class*="amount"]', '[class*="funding"]'
                     ],
                     'deadline': [
-                        '.deadline', '.due', '.expires', '[class*="deadline"]',
-                        '[class*="due"]', '[class*="expire"]', 'time', '.date'
+                        '.deadline', '.due', '.expires',
+                        '[class*="deadline"]', '[class*="due"]'
                     ],
-                    'link': [
-                        'a[href]', '.link', '[class*="link"]', '.read-more'
-                    ]
+                    'link': ['a[href]', '.link', '[class*="link"]']
                 }
                 return self.extract_grants_with_selectors(
                     soup, default_selectors
                 )
-                
-        except Exception as e:
-            self.logger.error(f"Error scraping grants from {url}: {e}")
+
+        except RateLimitError as e:
+            self.logger.warning("Rate limited: %s", str(e))
             return []
+
+        except NetworkError as e:
+            self.logger.error("Network error: %s", str(e))
+            return []
+
+        except Exception as e:
+            self.logger.error("Error scraping grants: %s", str(e))
+            return []
+
+    def health_check(self) -> Dict:
+        """Get health status of scraper."""
+        return {
+            'failed_domains_count': len(self.failed_domains),
+            'failed_domains': list(self.failed_domains),
+            'session_active': bool(self.session),
+            'rate_limiter_status': {
+                domain: self.rate_limiter.get_domain_status(domain)
+                for domain in self.failed_domains
+            }
+        }
+
+    def reset_failed_domains(self):
+        """Reset failed domains list and rate limiter."""
+        self.failed_domains.clear()
+        for domain in self.failed_domains:
+            self.rate_limiter.adjust_rate(domain, True)

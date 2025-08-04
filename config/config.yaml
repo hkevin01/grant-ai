@@ -1,0 +1,16 @@
+# Grant AI Configuration
+database:
+  url: "sqlite:///data/grants.db"
+  
+scraping:
+  user_agent: "grant-ai-bot/1.0"
+  request_delay: 1.0
+  max_retries: 3
+  
+logging:
+  level: "INFO"
+  file: "logs/grant_ai.log"
+  
+api_keys:
+  # Add API keys here if needed
+  # foundation_api_key: "your_key_here"
