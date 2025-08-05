@@ -801,53 +801,110 @@ def load_coda_profile():
         click.echo(traceback.format_exc())
 
 
-@main.command()
+@main.group()
 def gui():
-    """Launch the PyQt5 GUI application."""
-    try:
-        click.echo("🚀 Launching Grant AI GUI...")
-        click.echo("📝 Setting up environment...")
+    """Launch GUI applications for Grant-AI."""
+    pass
 
+
+@gui.command()
+@click.option('--modern/--classic', default=True,
+              help='Launch modern Material Design interface or classic')
+def launch(modern):
+    """Launch the Grant-AI GUI application."""
+    if modern:
+        click.echo("🚀 Launching Grant-AI Modern Interface...")
+        click.echo("✨ Material Design 3.0 theme loaded")
+
+        try:
+            from grant_ai.gui.modern_ui import create_modern_app
+            app, _ = create_modern_app()
+            click.echo("🎯 Modern interface ready!")
+            app.exec_()
+        except Exception as e:
+            click.echo(f"❌ Failed to launch modern GUI: {e}")
+            click.echo("🔄 Falling back to classic interface...")
+            modern = False
+
+    if not modern:
+        click.echo("🔄 Launching Grant-AI Classic Interface...")
+        try:
+            # Set environment variables to suppress Qt warnings
+            import os
+            os.environ['QT_LOGGING_RULES'] = '*.debug=false;qt.qpa.*=false'
+            os.environ['QT_QPA_PLATFORM'] = 'xcb'
+
+            # Check and update grant database in background
+            click.echo("🔄 Checking for grant database updates...")
+            try:
+                from grant_ai.utils.grant_database_manager import update_grant_database
+                update_grant_database(force_update=False)
+                click.echo("✅ Grant database is up to date")
+            except Exception as e:
+                click.echo(f"⚠️  Grant database update failed: {e}")
+                click.echo("   GUI will continue without database update")
+
+            # Import and launch classic GUI
+            from grant_ai.gui.qt_app import main as gui_main
+
+            click.echo("✅ Environment configured successfully")
+            click.echo("🖥️  Starting classic GUI application...")
+            click.echo()
+            click.echo("💡 Tips:")
+            click.echo("   • Go to 'Organization Profile' tab")
+            click.echo("   • Select 'Coda Mountain Academy' from dropdown")
+            click.echo("   • The profile should load without crashes")
+            click.echo("   • Use Ctrl+C in terminal to close the GUI")
+            click.echo()
+
+            # Launch the GUI
+            gui_main()
+
+        except ImportError as e:
+            click.echo(f"❌ Import error: {e}")
+            click.echo("💡 Make sure PyQt5 is installed: pip install PyQt5")
+            return 1
+        except Exception as e:
+            click.echo(f"❌ Error launching GUI: {e}")
+            import traceback
+            click.echo(traceback.format_exc())
+            return 1
+
+
+@gui.command()
+def modern():
+    """Launch the modern Material Design GUI"""
+    click.echo("🚀 Launching Grant-AI Modern Interface...")
+    click.echo("✨ Material Design 3.0 theme loaded")
+
+    try:
+        from grant_ai.gui.modern_ui import create_modern_app
+        app, _ = create_modern_app()
+        click.echo("🎯 Modern interface ready!")
+        app.exec_()
+    except Exception as e:
+        click.echo(f"❌ Failed to launch modern GUI: {e}")
+        raise click.Abort()
+
+
+@gui.command()
+def classic():
+    """Launch the classic PyQt5 GUI"""
+    click.echo("🔄 Launching Grant-AI Classic Interface...")
+
+    try:
         # Set environment variables to suppress Qt warnings
         import os
         os.environ['QT_LOGGING_RULES'] = '*.debug=false;qt.qpa.*=false'
         os.environ['QT_QPA_PLATFORM'] = 'xcb'
 
-        # Check and update grant database in background
-        click.echo("🔄 Checking for grant database updates...")
-        try:
-            from grant_ai.utils.grant_database_manager import update_grant_database
-            update_grant_database(force_update=False)  # Only update if needed
-            click.echo("✅ Grant database is up to date")
-        except Exception as e:
-            click.echo(f"⚠️  Grant database update failed: {e}")
-            click.echo("   GUI will continue without database update")
-
-        # Import and launch GUI
         from grant_ai.gui.qt_app import main as gui_main
 
-        click.echo("✅ Environment configured successfully")
-        click.echo("🖥️  Starting GUI application...")
-        click.echo()
-        click.echo("💡 Tips:")
-        click.echo("   • Go to 'Organization Profile' tab")
-        click.echo("   • Select 'Coda Mountain Academy' from dropdown")
-        click.echo("   • The profile should load without crashes")
-        click.echo("   • Use Ctrl+C in terminal to close the GUI")
-        click.echo()
-
-        # Launch the GUI
+        click.echo("📱 Classic interface ready!")
         gui_main()
-
-    except ImportError as e:
-        click.echo(f"❌ Import error: {e}")
-        click.echo("💡 Make sure PyQt5 is installed: pip install PyQt5")
-        return 1
     except Exception as e:
-        click.echo(f"❌ Error launching GUI: {e}")
-        import traceback
-        click.echo(traceback.format_exc())
-        return 1
+        click.echo(f"❌ Failed to launch classic GUI: {e}")
+        raise click.Abort()
 
     return 0
 
