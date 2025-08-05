@@ -33,6 +33,9 @@ dependencies = [
     "openpyxl>=3.0.0",
     "scrapy>=2.7.0",
     "selenium>=4.5.0",
+    "scikit-learn>=1.2.0",
+    "textblob>=0.17.0",
+    "numpy>=1.24.0",
 ]
 
 [project.optional-dependencies]

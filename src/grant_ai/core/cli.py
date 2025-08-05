@@ -8,11 +8,14 @@ from typing import Optional
 import click
 
 from ..analysis.grant_researcher import GrantResearcher
+
+# Import AI and Analytics CLI groups
+from ..cli.ai_commands import ai
+from ..cli.analytics_commands import analytics
 from ..models.organization import FocusArea, OrganizationProfile, ProgramType
 from ..services.grant_writing import GrantWritingAssistant
 from ..services.organization_scraper import OrganizationScraper
 from ..services.usaspending_scraper import USASpendingScraper
-from ..utils import load_json_file, save_json_file
 from ..utils.questionnaire_manager import QuestionnaireManager
 from ..utils.reporting import ReportGenerator
 from ..utils.template_manager import TemplateManager
@@ -771,28 +774,27 @@ def load_sample_data():
 def load_coda_profile():
     """Load Coda Mountain Academy profile into the database."""
     try:
-        from grant_ai.models.organization import OrganizationProfile
         from grant_ai.utils.scrape_coda import create_coda_profile
 
         # Create Coda profile
         coda_profile = create_coda_profile()
-        
+
         # Save to database (if database is set up)
-        click.echo(f"✅ Coda Mountain Academy profile created:")
+        click.echo("✅ Coda Mountain Academy profile created:")
         click.echo(f"   Name: {coda_profile.name}")
         click.echo(f"   Location: {coda_profile.location}")
         click.echo(f"   Contact: {coda_profile.contact_email} | {coda_profile.contact_phone}")
         click.echo(f"   Focus Areas: {', '.join([str(area) for area in coda_profile.focus_areas])}")
         click.echo(f"   Programs: {', '.join([str(prog) for prog in coda_profile.program_types])}")
         click.echo(f"   Mission: {coda_profile.description[:100]}...")
-        
+
         # Save to file
         from grant_ai.utils.scrape_coda import save_coda_profile_to_file
         save_coda_profile_to_file()
-        
+
         click.echo("\n✅ Coda profile saved to data/profiles/coda_profile.json")
         click.echo("   You can now use this profile in the GUI!")
-        
+
     except Exception as e:
         click.echo(f"❌ Error loading Coda profile: {e}")
         import traceback
@@ -805,12 +807,12 @@ def gui():
     try:
         click.echo("🚀 Launching Grant AI GUI...")
         click.echo("📝 Setting up environment...")
-        
+
         # Set environment variables to suppress Qt warnings
         import os
         os.environ['QT_LOGGING_RULES'] = '*.debug=false;qt.qpa.*=false'
         os.environ['QT_QPA_PLATFORM'] = 'xcb'
-        
+
         # Check and update grant database in background
         click.echo("🔄 Checking for grant database updates...")
         try:
@@ -820,10 +822,10 @@ def gui():
         except Exception as e:
             click.echo(f"⚠️  Grant database update failed: {e}")
             click.echo("   GUI will continue without database update")
-        
+
         # Import and launch GUI
         from grant_ai.gui.qt_app import main as gui_main
-        
+
         click.echo("✅ Environment configured successfully")
         click.echo("🖥️  Starting GUI application...")
         click.echo()
@@ -833,10 +835,10 @@ def gui():
         click.echo("   • The profile should load without crashes")
         click.echo("   • Use Ctrl+C in terminal to close the GUI")
         click.echo()
-        
+
         # Launch the GUI
         gui_main()
-        
+
     except ImportError as e:
         click.echo(f"❌ Import error: {e}")
         click.echo("💡 Make sure PyQt5 is installed: pip install PyQt5")
@@ -846,7 +848,7 @@ def gui():
         import traceback
         click.echo(traceback.format_exc())
         return 1
-    
+
     return 0
 
 
@@ -868,17 +870,17 @@ def comprehensive(profile_file: str, country: str, state: str, output: Optional[
         # Load organization profile
         with open(profile_file, "r") as f:
             profile_data = json.load(f)
-        
+
         from grant_ai.models.organization import OrganizationProfile
         profile = OrganizationProfile(**profile_data)
-        
+
         click.echo(f"🔍 Comprehensive grant search for {profile.name}...")
         click.echo(f"Location: {state}, {country}")
         click.echo(f"Focus areas: {', '.join([str(fa) for fa in profile.focus_areas])}")
         click.echo()
-        
+
         all_grants = []
-        
+
         # AI Agent discovery (always run)
         click.echo("🤖 Using AI Agent for web search...")
         from grant_ai.utils.ai_grant_agent import AIGrantAgent
@@ -886,7 +888,7 @@ def comprehensive(profile_file: str, country: str, state: str, output: Optional[
         ai_grants = agent.search_grants_for_profile(profile)
         all_grants.extend(ai_grants)
         click.echo(f"   Found {len(ai_grants)} grants via AI Agent")
-        
+
         # Location-specific scrapers
         if country == "USA":
             if state == "West Virginia":
@@ -904,7 +906,7 @@ def comprehensive(profile_file: str, country: str, state: str, output: Optional[
                 all_grants.extend(wv_grants)
                 click.echo(f"   Found {len(wv_grants)} grants via WV Scraper")
                 # Could add other state scrapers here in the future
-        
+
         # Remove duplicates
         seen = set()
         unique_grants = []
@@ -913,14 +915,14 @@ def comprehensive(profile_file: str, country: str, state: str, output: Optional[
             if key not in seen:
                 seen.add(key)
                 unique_grants.append(grant)
-        
+
         # Limit results
         unique_grants = unique_grants[:limit]
-        
+
         click.echo()
         click.echo(f"✅ Comprehensive search found {len(unique_grants)} unique grant opportunities:")
         click.echo()
-        
+
         for i, grant in enumerate(unique_grants, 1):
             # Determine source icon
             if "WV" in grant.source or "West Virginia" in grant.source:
@@ -931,7 +933,7 @@ def comprehensive(profile_file: str, country: str, state: str, output: Optional[
                 source_icon = "🇺🇸"
             else:
                 source_icon = "💰"
-            
+
             click.echo(f"{i}. {source_icon} {grant.title}")
             click.echo(f"   Funder: {grant.funder_name}")
             click.echo(f"   Amount: ${grant.amount_typical:,}")
@@ -940,14 +942,14 @@ def comprehensive(profile_file: str, country: str, state: str, output: Optional[
             click.echo(f"   Eligibility: {', '.join([str(e) for e in grant.eligibility_types])}")
             click.echo(f"   URL: {grant.application_url}")
             click.echo()
-        
+
         # Save results if output specified
         if output:
             results = [grant.model_dump() for grant in unique_grants]
             with open(output, "w") as f:
                 json.dump(results, f, indent=2, default=str)
             click.echo(f"📄 Results saved to: {output}")
-        
+
     except Exception as e:
         click.echo(f"❌ Error during comprehensive search: {e}")
         import traceback
@@ -966,7 +968,7 @@ def update_database():
 
         # Update the database
         update_grant_database(force_update=True)
-        
+
         # Show updated statistics
         stats = get_database_stats()
         click.echo("\n📊 Updated Database Statistics:")
@@ -976,13 +978,13 @@ def update_database():
         click.echo(f"   Foundation grants: {stats.get('foundation_grants', 0)}")
         click.echo(f"   Last update: {stats.get('last_update', 'Unknown')}")
         click.echo(f"   Next update: {stats.get('next_update', 'Unknown')}")
-        
+
     except Exception as e:
         click.echo(f"❌ Error updating database: {e}")
         import traceback
         click.echo(traceback.format_exc())
         return 1
-    
+
     return 0
 
 
@@ -991,7 +993,7 @@ def database_stats():
     """Show current grant database statistics."""
     try:
         from grant_ai.utils.grant_database_manager import get_database_stats
-        
+
         stats = get_database_stats()
         click.echo("📊 Grant Database Statistics:")
         click.echo(f"   Total grants: {stats.get('total_grants', 0)}")
@@ -1000,11 +1002,11 @@ def database_stats():
         click.echo(f"   Foundation grants: {stats.get('foundation_grants', 0)}")
         click.echo(f"   Last update: {stats.get('last_update', 'Never')}")
         click.echo(f"   Next update: {stats.get('next_update', 'Unknown')}")
-        
+
     except Exception as e:
         click.echo(f"❌ Error getting database stats: {e}")
         return 1
-    
+
     return 0
 
 
@@ -1030,12 +1032,12 @@ def assistant():
 def improve_text(text_file: str, enhance: bool, compelling: bool, align: Optional[str], output: Optional[str]):
     """Improve grant writing text using AI prompts."""
     assistant = GrantWritingAssistant()
-    
+
     with open(text_file, 'r') as f:
         text = f.read()
-    
+
     result = None
-    
+
     if enhance:
         result = assistant.enhance_clarity(text)
         click.echo("Enhanced text:")
@@ -1043,7 +1045,7 @@ def improve_text(text_file: str, enhance: bool, compelling: bool, align: Optiona
         click.echo("\nSuggestions:")
         for suggestion in result['suggestions']:
             click.echo(f"  - {suggestion}")
-    
+
     elif compelling:
         result = assistant.make_compelling(text)
         click.echo("Compelling text:")
@@ -1051,7 +1053,7 @@ def improve_text(text_file: str, enhance: bool, compelling: bool, align: Optiona
         click.echo("\nSuggestions:")
         for suggestion in result['suggestions']:
             click.echo(f"  - {suggestion}")
-    
+
     elif align:
         result = assistant.align_with_mission(text, align)
         click.echo("Mission-aligned text:")
@@ -1059,11 +1061,11 @@ def improve_text(text_file: str, enhance: bool, compelling: bool, align: Optiona
         click.echo("\nSuggestions:")
         for suggestion in result['suggestions']:
             click.echo(f"  - {suggestion}")
-    
+
     else:
         click.echo("Please specify an improvement type: --enhance, --compelling, or --align")
         return
-    
+
     if output and result:
         with open(output, 'w') as f:
             json.dump(result, f, indent=2)
@@ -1077,13 +1079,13 @@ def generate_title(abstract: str, output: Optional[str]):
     """Generate compelling grant titles based on abstract."""
     assistant = GrantWritingAssistant()
     titles = assistant.generate_title(abstract)
-    
+
     click.echo("Title options:")
     for i, title in enumerate(titles, 1):
         click.echo(f"\n{i}. {title['title']}")
         click.echo(f"   Explanation: {title['explanation']}")
         click.echo(f"   Strengths: {', '.join(title['strengths'])}")
-    
+
     if output:
         with open(output, 'w') as f:
             json.dump(titles, f, indent=2)
@@ -1097,19 +1099,19 @@ def identify_challenges(aims: str, output: Optional[str]):
     """Identify potential challenges and mitigation strategies."""
     assistant = GrantWritingAssistant()
     challenges = assistant.identify_challenges(aims)
-    
+
     click.echo("Technical challenges:")
     for challenge in challenges['technical_challenges']:
         click.echo(f"  - {challenge}")
-    
+
     click.echo("\nFeasibility concerns:")
     for concern in challenges['feasibility_concerns']:
         click.echo(f"  - {concern}")
-    
+
     click.echo("\nMitigation strategies:")
     for strategy in challenges['mitigation_strategies']:
         click.echo(f"  - {strategy}")
-    
+
     if output:
         with open(output, 'w') as f:
             json.dump(challenges, f, indent=2)
@@ -1124,15 +1126,15 @@ def create_timeline(summary: str, duration: str, output: Optional[str]):
     """Create detailed project timeline."""
     assistant = GrantWritingAssistant()
     timeline = assistant.create_timeline(summary, duration)
-    
+
     click.echo("Project timeline:")
     for period, activity in timeline['timeline'].items():
         click.echo(f"  {period}: {activity}")
-    
+
     click.echo("\nMilestones:")
     for milestone in timeline['milestones']:
         click.echo(f"  - {milestone}")
-    
+
     if output:
         with open(output, 'w') as f:
             json.dump(timeline, f, indent=2)
@@ -1145,17 +1147,17 @@ def create_timeline(summary: str, duration: str, output: Optional[str]):
 def get_template(template_type: str, output: Optional[str]):
     """Get a writing template for a specific grant section."""
     assistant = GrantWritingAssistant()
-    
+
     try:
         template = assistant.get_template(template_type)
         click.echo(f"{template_type.upper()} Template:")
         click.echo(template)
-        
+
         if output:
             with open(output, 'w') as f:
                 f.write(template)
             click.echo(f"\nTemplate saved to: {output}")
-    
+
     except ValueError as e:
         click.echo(f"Error: {e}")
         click.echo("Available templates:")
@@ -1167,7 +1169,7 @@ def get_template(template_type: str, output: Optional[str]):
 def list_templates():
     """List available writing templates."""
     assistant = GrantWritingAssistant()
-    
+
     click.echo("Available writing templates:")
     for template_name in assistant.templates.keys():
         click.echo(f"  - {template_name}")
@@ -1177,7 +1179,7 @@ def list_templates():
 def list_prompts():
     """List available AI prompts for grant writing."""
     assistant = GrantWritingAssistant()
-    
+
     click.echo("Available prompt categories:")
     for category, prompts in assistant.prompts.items():
         click.echo(f"\n{category.upper()}:")
@@ -1197,31 +1199,31 @@ def scrape():
 def organization(website_url: str, output: Optional[str]):
     """Scrape organization information from a website."""
     scraper = OrganizationScraper()
-    
+
     click.echo(f"Scraping organization data from: {website_url}")
-    
+
     try:
         scraped_data = scraper.scrape_organization(website_url)
-        
+
         if not scraped_data:
             click.echo("❌ Failed to scrape organization data")
             return
-        
+
         click.echo("✅ Successfully scraped organization data:")
         click.echo()
-        
+
         for key, value in scraped_data.items():
             if value:
                 if isinstance(value, list):
                     click.echo(f"{key}: {', '.join(value)}")
                 else:
                     click.echo(f"{key}: {value}")
-        
+
         if output:
             with open(output, 'w') as f:
                 json.dump(scraped_data, f, indent=2)
             click.echo(f"\nData saved to: {output}")
-    
+
     except Exception as e:
         click.echo(f"❌ Error scraping website: {e}")
 
@@ -1233,26 +1235,26 @@ def fill_questionnaire(website_url: str, output: Optional[str]):
     """Fill organization questionnaire with data scraped from website."""
     scraper = OrganizationScraper()
     qm = QuestionnaireManager()
-    
+
     click.echo(f"Scraping and filling questionnaire for: {website_url}")
-    
+
     try:
         # Get default questionnaire
         questionnaire = qm.get_default_questionnaire()
-        
+
         # Fill questionnaire with scraped data
         response = scraper.fill_questionnaire_from_website(website_url, questionnaire)
-        
+
         if not response.responses:
             click.echo("❌ Failed to extract questionnaire data")
             return
-        
+
         click.echo("✅ Successfully filled questionnaire:")
         click.echo()
         click.echo(f"Completed: {response.completed}")
         click.echo(f"Questions answered: {len(response.responses)}/{len(questionnaire.questions)}")
         click.echo()
-        
+
         # Show responses
         for question in questionnaire.questions:
             if question.id in response.responses:
@@ -1263,12 +1265,12 @@ def fill_questionnaire(website_url: str, output: Optional[str]):
                     click.echo(f"{question.text}: {value}")
             else:
                 click.echo(f"{question.text}: [Not found]")
-        
+
         if output:
             with open(output, 'w') as f:
                 json.dump(response.dict(), f, indent=2)
             click.echo(f"\nQuestionnaire response saved to: {output}")
-        
+
         # Option to create organization profile
         if click.confirm("\nWould you like to create an organization profile from this data?"):
             profile = qm.convert_response_to_profile(response, questionnaire)
@@ -1279,7 +1281,7 @@ def fill_questionnaire(website_url: str, output: Optional[str]):
                 click.echo(f"✅ Organization profile created: {profile_file}")
             else:
                 click.echo("❌ Failed to create organization profile")
-    
+
     except Exception as e:
         click.echo(f"❌ Error filling questionnaire: {e}")
 
@@ -1291,27 +1293,27 @@ def create_profile(website_url: str, output: Optional[str]):
     """Create organization profile directly from scraped website data."""
     scraper = OrganizationScraper()
     qm = QuestionnaireManager()
-    
+
     click.echo(f"Creating organization profile from: {website_url}")
-    
+
     try:
         # Get default questionnaire
         questionnaire = qm.get_default_questionnaire()
-        
+
         # Fill questionnaire with scraped data
         response = scraper.fill_questionnaire_from_website(website_url, questionnaire)
-        
+
         if not response.responses:
             click.echo("❌ Failed to extract organization data")
             return
-        
+
         # Convert to organization profile
         profile = qm.convert_response_to_profile(response, questionnaire)
-        
+
         if not profile:
             click.echo("❌ Failed to create organization profile")
             return
-        
+
         click.echo("✅ Successfully created organization profile:")
         click.echo()
         click.echo(f"Name: {profile.name}")
@@ -1321,14 +1323,14 @@ def create_profile(website_url: str, output: Optional[str]):
         click.echo(f"Program Types: {', '.join(profile.program_types)}")
         if profile.contact_email:
             click.echo(f"Contact Email: {profile.contact_email}")
-        
+
         # Save profile
         output_file = output or f"{profile.name.lower().replace(' ', '_')}_profile.json"
         with open(output_file, 'w') as f:
             json.dump(profile.dict(), f, indent=2, default=str)
-        
+
         click.echo(f"\n✅ Organization profile saved to: {output_file}")
-    
+
     except Exception as e:
         click.echo(f"❌ Error creating profile: {e}")
 
@@ -1340,58 +1342,58 @@ def batch_scrape(input_file: str, output_dir: Optional[str]):
     """Scrape multiple organizations from a list of URLs."""
     scraper = OrganizationScraper()
     qm = QuestionnaireManager()
-    
+
     # Read URLs from file
     with open(input_file, 'r') as f:
         urls = [line.strip() for line in f if line.strip()]
-    
+
     click.echo(f"Scraping {len(urls)} organizations...")
-    
+
     output_path = Path(output_dir) if output_dir else Path("scraped_profiles")
     output_path.mkdir(exist_ok=True)
-    
+
     successful = 0
     failed = 0
-    
+
     for i, url in enumerate(urls, 1):
         click.echo(f"\n[{i}/{len(urls)}] Scraping: {url}")
-        
+
         try:
             # Get default questionnaire
             questionnaire = qm.get_default_questionnaire()
-            
+
             # Fill questionnaire with scraped data
             response = scraper.fill_questionnaire_from_website(url, questionnaire)
-            
+
             if not response.responses:
                 click.echo("  ❌ Failed to extract data")
                 failed += 1
                 continue
-            
+
             # Convert to organization profile
             profile = qm.convert_response_to_profile(response, questionnaire)
-            
+
             if not profile:
                 click.echo("  ❌ Failed to create profile")
                 failed += 1
                 continue
-            
+
             # Save profile
             profile_file = output_path / f"{profile.name.lower().replace(' ', '_')}_profile.json"
             with open(profile_file, 'w') as f:
                 json.dump(profile.dict(), f, indent=2, default=str)
-            
+
             click.echo(f"  ✅ Created: {profile.name}")
             successful += 1
-            
+
             # Be respectful with requests
             time.sleep(1)
-        
+
         except Exception as e:
             click.echo(f"  ❌ Error: {e}")
             failed += 1
-    
-    click.echo(f"\n✅ Batch scraping complete!")
+
+    click.echo("\n✅ Batch scraping complete!")
     click.echo(f"Successful: {successful}")
     click.echo(f"Failed: {failed}")
     click.echo(f"Profiles saved to: {output_path}")
@@ -1437,7 +1439,6 @@ def foundations():
 @foundations.command()
 def setup():
     """Set up and populate the foundation database."""
-    from datetime import date
 
     from ..core.db import init_db
     from ..models.foundation import (
@@ -1447,13 +1448,13 @@ def setup():
         GeographicScope,
     )
     from ..services.foundation_service import foundation_service
-    
+
     click.echo("Setting up foundation database...")
-    
+
     # Initialize database tables
     init_db()
     click.echo("✅ Database tables created")
-    
+
     # Foundation data
     foundations_data = [
         {
@@ -1462,14 +1463,14 @@ def setup():
             "contact_email": "info@benedum.org",
             "contact_phone": "(412) 288-0360",
             "foundation_type": FoundationType.PRIVATE,
-            "focus_areas": ["education", "economic development", 
+            "focus_areas": ["education", "economic development",
                            "community development"],
             "geographic_scope": GeographicScope.REGIONAL,
             "geographic_focus": ["west virginia", "southwestern pennsylvania"],
             "grant_range_min": 10000,
             "grant_range_max": 500000,
             "application_process": ApplicationProcess.LETTER_OF_INQUIRY,
-            "key_programs": ["Education Excellence", "Economic Development", 
+            "key_programs": ["Education Excellence", "Economic Development",
                            "Community Development"],
             "integration_notes": "Ideal for CODA-type organizations in WV/PA"
         },
@@ -1498,12 +1499,12 @@ def setup():
             "grant_range_min": 50000,
             "grant_range_max": 5000000,
             "application_process": ApplicationProcess.ONLINE_APPLICATION,
-            "key_programs": ["Education and Human Resources", 
+            "key_programs": ["Education and Human Resources",
                            "Computer and Information Science"],
             "integration_notes": "Perfect for STEM/robotics programs"
         }
     ]
-    
+
     added_count = 0
     for foundation_data in foundations_data:
         try:
@@ -1513,7 +1514,7 @@ def setup():
             added_count += 1
         except Exception as e:
             click.echo(f"❌ Error adding {foundation_data['name']}: {e}")
-    
+
     click.echo(f"\n📊 Added {added_count}/{len(foundations_data)} foundations to database")
 
 
@@ -1527,21 +1528,21 @@ def match(organization_name):
     # Load organization profile
     profiles_dir = Path("data/profiles")
     profile_file = profiles_dir / f"{organization_name.lower().replace(' ', '_')}.json"
-    
+
     if not profile_file.exists():
         click.echo(f"❌ Organization profile not found: {profile_file}")
         return
-    
+
     try:
         with open(profile_file, 'r') as f:
             profile_data = json.load(f)
-        
+
         org_profile = OrganizationProfile(**profile_data)
         matches = foundation_service.match_foundations_for_organization(org_profile)
-        
+
         click.echo(f"\n🎯 Found {len(matches)} matching foundations for {org_profile.name}:")
         click.echo("=" * 60)
-        
+
         for i, foundation in enumerate(matches[:10], 1):  # Top 10
             score = getattr(foundation, 'match_score', 0)
             click.echo(f"\n{i}. {foundation.name} (Match Score: {score:.2f})")
@@ -1552,7 +1553,7 @@ def match(organization_name):
                 click.echo(f"   Contact: {foundation.contact_email}")
             if foundation.integration_notes:
                 click.echo(f"   Notes: {foundation.integration_notes}")
-                
+
     except Exception as e:
         click.echo(f"❌ Error matching foundations: {e}")
 
@@ -1565,19 +1566,19 @@ def list():
 
     # Initialize database tables
     init_db()
-    
+
     try:
         foundations = foundation_service.get_all_foundations()
-        
+
         if not foundations:
             click.echo("📋 No foundations found in database")
             msg = "💡 Use 'foundations setup' to populate with defaults"
             click.echo(msg)
             return
-        
+
         click.echo(f"📋 Found {len(foundations)} foundation(s) in database:")
         click.echo("=" * 60)
-        
+
         for i, foundation in enumerate(foundations, 1):
             click.echo(f"\n{i}. {foundation.name}")
             click.echo(f"   Type: {foundation.foundation_type}")
@@ -1589,7 +1590,7 @@ def list():
             click.echo(f"   Geographic: {foundation.geographic_scope}")
             if foundation.contact_email:
                 click.echo(f"   Contact: {foundation.contact_email}")
-                
+
     except Exception as e:
         click.echo(f"❌ Error listing foundations: {e}")
 
@@ -1599,17 +1600,17 @@ def list():
 def search(query):
     """Search foundations by name, focus area, or description."""
     from ..services.foundation_service import foundation_service
-    
+
     try:
         foundations = foundation_service.search_foundations(query)
-        
+
         if not foundations:
             click.echo(f"🔍 No foundations found matching: {query}")
             return
-        
+
         click.echo(f"🔍 Found {len(foundations)} foundation(s) matching '{query}':")
         click.echo("=" * 60)
-        
+
         for i, foundation in enumerate(foundations, 1):
             click.echo(f"\n{i}. {foundation.name}")
             click.echo(f"   Focus: {', '.join(foundation.focus_areas)}")
@@ -1619,7 +1620,7 @@ def search(query):
                 click.echo(f"   Grant Range: ${min_amt:,} - ${max_amt:,}")
             if foundation.integration_notes:
                 click.echo(f"   Notes: {foundation.integration_notes}")
-                
+
     except Exception as e:
         click.echo(f"❌ Error searching foundations: {e}")
 
@@ -1630,21 +1631,21 @@ def search(query):
 def range_search(min_amount, max_amount):
     """Find foundations by grant amount range."""
     from ..services.foundation_service import foundation_service
-    
+
     try:
         foundations = foundation_service.get_foundations_by_grant_range(
             min_amount, max_amount
         )
-        
+
         if not foundations:
             range_str = f"${min_amount:,} - ${max_amount:,}"
             click.echo(f"💰 No foundations found for range: {range_str}")
             return
-        
+
         range_str = f"${min_amount:,} - ${max_amount:,}"
         click.echo(f"💰 Found {len(foundations)} foundation(s) in range {range_str}:")
         click.echo("=" * 60)
-        
+
         for i, foundation in enumerate(foundations, 1):
             min_amt = foundation.grant_range_min
             max_amt = foundation.grant_range_max
@@ -1653,7 +1654,7 @@ def range_search(min_amount, max_amount):
             click.echo(f"   Focus: {', '.join(foundation.focus_areas[:3])}")
             if foundation.contact_email:
                 click.echo(f"   Contact: {foundation.contact_email}")
-                
+
     except Exception as e:
         click.echo(f"❌ Error searching by range: {e}")
 
@@ -1662,32 +1663,32 @@ def range_search(min_amount, max_amount):
 def stats():
     """Show foundation database statistics."""
     from ..services.foundation_service import foundation_service
-    
+
     try:
         stats = foundation_service.get_foundation_statistics()
-        
+
         click.echo("📊 Foundation Database Statistics")
         click.echo("=" * 40)
         click.echo(f"Total Foundations: {stats['total_foundations']}")
         click.echo(f"Total Historical Grants: {stats['total_historical_grants']}")
         total_amount = stats['total_grant_amount']
         click.echo(f"Total Grant Amount: ${total_amount:,}")
-        
+
         if stats['average_grant_min']:
             avg_min = stats['average_grant_min']
             click.echo(f"Average Min Grant: ${avg_min:,}")
         if stats['average_grant_max']:
             avg_max = stats['average_grant_max']
             click.echo(f"Average Max Grant: ${avg_max:,}")
-        
+
         click.echo("\nFoundation Types:")
         for ftype, count in stats['foundation_types'].items():
             click.echo(f"  {ftype}: {count}")
-        
+
         click.echo("\nGeographic Scopes:")
         for scope, count in stats['geographic_scopes'].items():
             click.echo(f"  {scope}: {count}")
-            
+
     except Exception as e:
         click.echo(f"❌ Error getting statistics: {e}")
 
@@ -1697,45 +1698,45 @@ def stats():
 def report(foundation_name):
     """Generate comprehensive report for a foundation."""
     from ..services.foundation_service import foundation_service
-    
+
     try:
         # Search for foundation by name
         foundations = foundation_service.search_foundations(foundation_name)
-        
+
         if not foundations:
             click.echo(f"❌ Foundation not found: {foundation_name}")
             return
-        
+
         if len(foundations) > 1:
             click.echo(f"🔍 Multiple foundations found for '{foundation_name}':")
             for i, f in enumerate(foundations, 1):
                 click.echo(f"  {i}. {f.name}")
             return
-        
+
         foundation = foundations[0]
         report_data = foundation_service.generate_foundation_report(foundation.id)
-        
+
         if not report_data:
             click.echo(f"❌ Could not generate report for {foundation.name}")
             return
-        
+
         click.echo(f"📋 Foundation Report: {foundation.name}")
         click.echo("=" * 60)
-        
+
         # Foundation details
         f_data = report_data['foundation']
         click.echo(f"Website: {f_data.get('website', 'N/A')}")
         click.echo(f"Type: {f_data.get('foundation_type', 'N/A')}")
         click.echo(f"Focus Areas: {', '.join(f_data.get('focus_areas', []))}")
-        
+
         if f_data.get('grant_range_min') and f_data.get('grant_range_max'):
             min_amt = f_data['grant_range_min']
             max_amt = f_data['grant_range_max']
             click.echo(f"Grant Range: ${min_amt:,} - ${max_amt:,}")
-        
+
         # Statistics
         stats = report_data['statistics']
-        click.echo(f"\nGrant History:")
+        click.echo("\nGrant History:")
         click.echo(f"  Total Grants: {stats['total_grants']}")
         click.echo(f"  Total Amount: ${stats['total_amount']:,}")
         if stats['success_rate']:
@@ -1743,7 +1744,7 @@ def report(foundation_name):
             click.echo(f"  Success Rate: {success_pct:.1f}%")
         if stats['last_contact']:
             click.echo(f"  Last Contact: {stats['last_contact']}")
-        
+
         # Recent grants
         grants = report_data['historical_grants']
         if grants:
@@ -1752,7 +1753,7 @@ def report(foundation_name):
                 amount = grant['amount']
                 click.echo(f"  {grant['date']}: {grant['organization']} - ${amount:,}")
                 click.echo(f"    Purpose: {grant['purpose']}")
-        
+
         # Contact history
         contacts = report_data['contact_history']
         if contacts:
@@ -1762,7 +1763,7 @@ def report(foundation_name):
                 click.echo(f"    Purpose: {contact['purpose']}")
                 if contact['outcome']:
                     click.echo(f"    Outcome: {contact['outcome']}")
-                    
+
     except Exception as e:
         click.echo(f"❌ Error generating report: {e}")
 
@@ -1776,35 +1777,35 @@ def report(foundation_name):
 @click.option("--follow-up", is_flag=True, help="Requires follow-up")
 @click.option("--follow-up-date", help="Follow-up date (YYYY-MM-DD)")
 @click.option("--notes", help="Additional notes")
-def add_contact(foundation_name, contact_type, purpose, person, outcome, 
+def add_contact(foundation_name, contact_type, purpose, person, outcome,
                 follow_up, follow_up_date, notes):
     """Add a contact record for a foundation."""
     from datetime import datetime
 
     from ..models.foundation import FoundationContact
     from ..services.foundation_service import foundation_service
-    
+
     try:
         # Find foundation
         foundations = foundation_service.search_foundations(foundation_name)
-        
+
         if not foundations:
             click.echo(f"❌ Foundation not found: {foundation_name}")
             return
-        
+
         if len(foundations) > 1:
             click.echo(f"🔍 Multiple foundations found for '{foundation_name}':")
             for i, f in enumerate(foundations, 1):
                 click.echo(f"  {i}. {f.name}")
             return
-        
+
         foundation = foundations[0]
-        
+
         # Parse follow-up date
         followup_date = None
         if follow_up_date:
             followup_date = datetime.strptime(follow_up_date, "%Y-%m-%d").date()
-        
+
         # Create contact record
         contact = FoundationContact(
             foundation_id=foundation.id,
@@ -1817,14 +1818,14 @@ def add_contact(foundation_name, contact_type, purpose, person, outcome,
             follow_up_date=followup_date,
             notes=notes
         )
-        
+
         contact_id = foundation_service.add_foundation_contact(contact)
         click.echo(f"✅ Added contact record for {foundation.name}")
         click.echo(f"   Type: {contact_type}")
         click.echo(f"   Purpose: {purpose}")
         if follow_up:
             click.echo(f"   Follow-up required: {follow_up_date or 'TBD'}")
-            
+
     except Exception as e:
         click.echo(f"❌ Error adding contact: {e}")
 
@@ -1833,17 +1834,17 @@ def add_contact(foundation_name, contact_type, purpose, person, outcome,
 def deadlines():
     """Show upcoming foundation deadlines and follow-ups."""
     from ..services.foundation_service import foundation_service
-    
+
     try:
         deadlines = foundation_service.get_upcoming_deadlines()
-        
+
         if not deadlines:
             click.echo("📅 No upcoming deadlines or follow-ups")
             return
-        
+
         click.echo(f"📅 Found {len(deadlines)} upcoming deadline(s):")
         click.echo("=" * 50)
-        
+
         for deadline in deadlines:
             click.echo(f"\n🔔 {deadline['foundation_name']}")
             click.echo(f"   Type: {deadline['type']}")
@@ -1851,6 +1852,11 @@ def deadlines():
             click.echo(f"   Purpose: {deadline['purpose']}")
             if deadline['notes']:
                 click.echo(f"   Notes: {deadline['notes']}")
-                
+
     except Exception as e:
         click.echo(f"❌ Error getting deadlines: {e}")
+
+
+# Register AI and Analytics command groups
+main.add_command(ai)
+main.add_command(analytics)
