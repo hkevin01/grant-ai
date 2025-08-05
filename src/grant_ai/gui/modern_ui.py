@@ -109,6 +109,7 @@ class MaterialNavigationRail(QFrame):
         nav_data = [
             ("🏠", "Dashboard", "dashboard"),
             ("🔍", "Search", "search"),
+            ("🤖", "AI Writing", "ai_writing"),
             ("📊", "Analytics", "analytics"),
             ("🏢", "Organizations", "organizations"),
             ("📝", "Applications", "applications"),
@@ -360,6 +361,17 @@ class ModernGrantResearchWindow(QMainWindow):
         search_card = MaterialCard("Grant Search", search_content)
         self.tab_widget.addTab(search_card, "🔍 Search Grants")
 
+        # AI Writing tab
+        try:
+            from .ai_writing_widget import AIWritingAssistantWidget
+            from .material_theme import MaterialTheme
+            ai_writing_widget = AIWritingAssistantWidget(MaterialTheme())
+            self.tab_widget.addTab(ai_writing_widget, "🤖 AI Writing")
+        except ImportError:
+            ai_writing_content = QLabel("AI Writing Assistant requires additional setup")
+            ai_writing_card = MaterialCard("AI Writing Assistant", ai_writing_content)
+            self.tab_widget.addTab(ai_writing_card, "🤖 AI Writing")
+
         # Analytics tab
         analytics_content = QLabel("Analytics and reports will be displayed here")
         analytics_card = MaterialCard("Analytics Dashboard", analytics_content)
@@ -516,19 +528,6 @@ def create_modern_app():
         app = QApplication(sys.argv)
 
     # Apply Material Design theme
-    MaterialTheme.apply_material_palette(app)
-    app.setFont(MaterialTheme.get_font('body_medium'))
-
-    # Create and show main window
-    window = ModernGrantResearchWindow()
-    window.show()
-
-    return app, window
-
-
-if __name__ == "__main__":
-    app, window = create_modern_app()
-    sys.exit(app.exec_())
     MaterialTheme.apply_material_palette(app)
     app.setFont(MaterialTheme.get_font('body_medium'))
 

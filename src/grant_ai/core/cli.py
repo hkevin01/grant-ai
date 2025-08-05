@@ -11,6 +11,7 @@ from ..analysis.grant_researcher import GrantResearcher
 
 # Import AI and Analytics CLI groups
 from ..cli.ai_commands import ai
+from ..cli.ai_writing_commands import ai_writing_commands
 from ..cli.analytics_commands import analytics
 from ..models.organization import FocusArea, OrganizationProfile, ProgramType
 from ..services.grant_writing import GrantWritingAssistant
@@ -1916,4 +1917,5 @@ def deadlines():
 
 # Register AI and Analytics command groups
 main.add_command(ai)
+main.add_command(ai_writing_commands)
 main.add_command(analytics)
