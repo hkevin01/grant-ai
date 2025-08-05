@@ -10,6 +10,7 @@ import asyncio
 import hashlib
 import json
 import logging
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Set
@@ -27,16 +28,27 @@ class GrantMonitoringService:
     def __init__(
         self,
         data_dir: str = "data",
-        min_relevance_score: float = 0.6
+        min_relevance_score: float = 0.6,
+        websocket_enabled: bool = True,
+        rate_limit_interval: int = 60,
+        max_retries: int = 3
     ):
         """Initialize the monitoring service."""
         self.logger = logging.getLogger(__name__)
         self.data_dir = Path(data_dir)
         self.min_relevance_score = min_relevance_score
+        self.websocket_enabled = websocket_enabled
+        self.rate_limit_interval = rate_limit_interval
+        self.max_retries = max_retries
+        self.last_request_time = {}
+        self.retry_counts = {}
 
         # Create monitoring data directory
         self.monitoring_dir = self.data_dir / "monitoring"
         self.monitoring_dir.mkdir(parents=True, exist_ok=True)
+
+        # WebSocket connections
+        self.websocket_clients = set()
 
         # Cache files
         self.cache_file = self.monitoring_dir / "grant_cache.json"
@@ -374,6 +386,9 @@ class GrantMonitoringService:
                 organization.name, len(grants), source
             )
 
+            # Broadcast notification via WebSocket
+            await self._broadcast_websocket_message(notification)
+
         except Exception as e:
             self.logger.error(
                 "Error creating notification: %s", str(e)
@@ -438,6 +453,13 @@ class GrantMonitoringService:
                 notification['source']
             )
 
+            # WebSocket notification (if enabled)
+            if self.websocket_enabled:
+                await self._broadcast_websocket_message({
+                    'type': 'grant_alert',
+                    'data': notification
+                })
+
             # Email notification (if configured)
             if settings.get('email_enabled', False):
                 await self._send_email_notification(notification, settings)
@@ -497,6 +519,55 @@ class GrantMonitoringService:
             print(f"   Description: {grant['description']}")
 
         print("\n" + "="*60 + "\n")
+
+    async def register_websocket(self, websocket) -> None:
+        """Register a new WebSocket client."""
+        self.websocket_clients.add(websocket)
+        self.logger.info("New WebSocket client registered")
+
+    async def unregister_websocket(self, websocket) -> None:
+        """Unregister a WebSocket client."""
+        self.websocket_clients.remove(websocket)
+        self.logger.info("WebSocket client unregistered")
+
+    async def _broadcast_websocket_message(self, message: Dict) -> None:
+        """Broadcast a message to all connected WebSocket clients."""
+        if not self.websocket_enabled or not self.websocket_clients:
+            return
+
+        disconnected = set()
+        for websocket in self.websocket_clients:
+            try:
+                await websocket.send_json(message)
+            except Exception as e:
+                self.logger.error(
+                    "Error sending WebSocket message: %s", str(e)
+                )
+                disconnected.add(websocket)
+
+        # Clean up disconnected clients
+        for websocket in disconnected:
+            await self.unregister_websocket(websocket)
+
+    def _check_rate_limit(self, source: str) -> bool:
+        """Check if a source has exceeded rate limits."""
+        now = time.time()
+        last_request = self.last_request_time.get(source, 0)
+
+        if now - last_request < self.rate_limit_interval:
+            return False
+
+        self.last_request_time[source] = now
+        return True
+
+    def _increment_retry_count(self, source: str) -> bool:
+        """Increment retry count for a source and check max retries."""
+        self.retry_counts[source] = self.retry_counts.get(source, 0) + 1
+
+        if self.retry_counts[source] >= self.max_retries:
+            self.retry_counts[source] = 0
+            return False
+        return True
 
     def _generate_grant_id(self, grant: Grant) -> str:
         """Generate unique ID for grant to track if we've seen it."""
