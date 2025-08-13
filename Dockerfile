@@ -2,7 +2,7 @@
 # Multi-stage build for optimized production image
 
 # Use Python 3.11 slim image as base
-FROM python:3.11-slim as base
+FROM python:3.11-slim AS base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -13,29 +13,36 @@ ENV PYTHONUNBUFFERED=1 \
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (incl. X11/Qt runtime libs for PyQt5)
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     libpq-dev \
     curl \
+    libx11-xcb1 \
+    libxrender1 \
+    libxcb1 \
+    libxcb-render0 \
+    libxcb-shape0 \
+    libxcb-xfixes0 \
+    libxcb-xinerama0 \
+    libxkbcommon-x11-0 \
+    libgl1 \
+    libdbus-1-3 \
+    libfontconfig1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements*.txt ./
+# Copy project metadata for installs in later stages
 COPY pyproject.toml ./
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Development stage
-FROM base as development
+FROM base AS development
+
+# Copy source code first, then install in editable mode
+COPY . .
 
 # Install development dependencies
 RUN pip install --no-cache-dir -e ".[dev]"
-
-# Copy source code
-COPY . .
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app \
@@ -49,10 +56,13 @@ EXPOSE 8000
 CMD ["python", "-m", "grant_ai.core.cli", "gui"]
 
 # Production stage
-FROM base as production
+FROM base AS production
 
 # Copy source code
 COPY . .
+
+# Install package with runtime dependencies
+RUN pip install --no-cache-dir .
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app \
@@ -65,18 +75,18 @@ RUN mkdir -p /app/data /app/logs /app/reports
 # Expose port
 EXPOSE 8000
 
-# Health check
+# Health check (uses curl available from base)
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health')" || exit 1
+    CMD curl -fsS http://localhost:8000/health || exit 1
 
 # Production command
 CMD ["python", "-m", "grant_ai.core.cli"]
 
 # Testing stage
-FROM development as testing
+FROM development AS testing
 
 # Install testing dependencies
 RUN pip install --no-cache-dir pytest pytest-cov pytest-mock
 
 # Run tests
-CMD ["pytest", "tests/", "-v", "--cov=src/grant_ai", "--cov-report=html"] 
+CMD ["pytest", "tests/", "-v", "--cov=src/grant_ai", "--cov-report=html"]

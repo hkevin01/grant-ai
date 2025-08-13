@@ -15,6 +15,53 @@
 			"command": "mkdir -p tests/integration && mv test_*.py tests/integration/ && mv quick_*.py tests/integration/ && mv run_gui_tests.py tests/integration/ && mv validate_scraper.py tests/integration/ || true",
 			"isBackground": false,
 			"group": "build"
+		},
+		{
+			"label": "GUI Check (headless)",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"./run.sh gui-check"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "GUI Check (headless)",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"./run.sh gui-check"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Local GUI Check (headless)",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"python3 -m venv venv && source venv/bin/activate && python -m pip install --upgrade pip && pip install -e '.[dev]' PyQt5 && QT_QPA_PLATFORM=offscreen python - <<'PY'\nimport os\nos.environ['QT_QPA_PLATFORM'] = 'offscreen'\nfrom PyQt5.QtWidgets import QApplication\napp = QApplication([])\nimport grant_ai.gui.qt_app as qt_app\nprint('GUI import OK (local)')\napp.quit()\nPY"
+			],
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "GUI Check (headless) - retry",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"./run.sh gui-check"
+			],
+			"isBackground": false,
+			"group": "build"
 		}
 	]
 }

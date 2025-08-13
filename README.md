@@ -20,6 +20,9 @@ Grant Research AI is a Python project for researching and managing grant applica
 
 ```bash
 ./run.sh setup
+# Launch the GUI (Docker by default)
+./run.sh
+# Or run locally without Docker
 ./run.sh gui
 ```
 
@@ -214,7 +217,10 @@ docker run -p 8000:8000 grant-ai
 # Setup and Launch
 ./run.sh setup                  # First-time setup
 ./run.sh load-data             # Load sample data
-./run.sh gui                   # Launch GUI application
+# Launch GUI application (Docker by default)
+./run.sh                       # uses Docker if available, falls back to local GUI
+# Launch GUI locally only
+./run.sh gui                   # set USE_DOCKER_GUI=1 to force Docker from this command
 
 # Testing and Validation
 ./run.sh test                  # Run all tests
