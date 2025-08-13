@@ -8,6 +8,13 @@
 			"group": "build",
 			"isBackground": false,
 			"problemMatcher": []
+		},
+		{
+			"label": "Move remaining root tests",
+			"type": "shell",
+			"command": "mkdir -p tests/integration && mv test_*.py tests/integration/ && mv quick_*.py tests/integration/ && mv run_gui_tests.py tests/integration/ && mv validate_scraper.py tests/integration/ || true",
+			"isBackground": false,
+			"group": "build"
 		}
 	]
 }

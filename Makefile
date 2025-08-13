@@ -125,7 +125,7 @@ run:
 # Launch the GUI
 gui:
 	@echo "Launching Grant AI GUI..."
-	python launch_gui.py
+	python -m grant_ai.gui.qt_app
 
 # Generate documentation
 docs:

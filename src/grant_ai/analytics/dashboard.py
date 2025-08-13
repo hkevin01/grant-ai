@@ -22,6 +22,7 @@ class AnalyticsDashboard:
     def __init__(self):
         """Initialize the analytics dashboard."""
         self.matcher = EnhancedGrantMatcher()
+
     def summarize_grants(self, grants: List[dict]) -> Dict:
         """Summarize grant statistics for dashboard."""
         total = len(grants)
@@ -30,6 +31,7 @@ class AnalyticsDashboard:
             gtype = grant.get('funding_type', 'unknown')
             by_type[gtype] = by_type.get(gtype, 0) + 1
         return {'total_grants': total, 'by_type': by_type}
+
     def generate_report(self, grants: List[dict]) -> str:
         """Generate a text report for grants analytics."""
         summary = self.summarize_grants(grants)
@@ -37,6 +39,7 @@ class AnalyticsDashboard:
         for gtype, count in summary['by_type'].items():
             lines.append(f"{gtype}: {count}")
         return '\n'.join(lines)
+
     def generate_success_metrics(
         self,
         org: OrganizationProfile,
@@ -52,7 +55,9 @@ class AnalyticsDashboard:
                 'applications_count': 0
             }
 
-        successful = sum(1 for app in applications if app['status'] == 'awarded')
+        successful = sum(
+            1 for app in applications if app['status'] == 'awarded'
+        )
         amounts = [
             app['amount'] for app in applications
             if app['status'] == 'awarded' and app['amount']
@@ -190,8 +195,9 @@ class AnalyticsDashboard:
             'probability': prob,
             'factors': factors,
             'recommendation': 'Apply' if prob >= 0.6 else 'Consider',
-            'confidence': 'High' if prob >= 0.8 else 'Medium'
-                         if prob >= 0.6 else 'Low'
+            'confidence': (
+                'High' if prob >= 0.8 else ('Medium' if prob >= 0.6 else 'Low')
+            )
         }
 
     def generate_recommendations(
@@ -212,8 +218,9 @@ class AnalyticsDashboard:
                 'action': 'Review recent successful applications for patterns'
             })
 
-        # Amount recommendations
-        if metrics['average_amount'] < org.typical_grant_size * 0.5:
+    # Amount recommendations: compare against preferred upper bound
+    min_pref, max_pref = org.preferred_grant_size
+    if metrics['average_amount'] < max_pref * 0.5:
             recommendations.append({
                 'type': 'grant_size',
                 'message': 'Current grants are below target size',
@@ -229,5 +236,4 @@ class AnalyticsDashboard:
                 'action': 'Set goal of 2-3 applications per month'
             })
 
-        return recommendations
         return recommendations
