@@ -5,7 +5,7 @@ import re
 import socket
 import time
 from datetime import datetime
-from typing import List, Optional
+from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
 import requests
@@ -1504,7 +1504,7 @@ class WVGrantScraper:
 
         return grants
 
-    def _get_sample_education_grants(self, source_info: dict
+    def _get_sample_education_grants(self, source_info: dict) -> List[Dict]:
         """Generate sample education grants when scraping fails."""
         sample_grants = [
             {

@@ -7,8 +7,6 @@ from typing import Optional
 
 import click
 
-from ..analysis.grant_researcher import GrantResearcher
-
 # Import AI and Analytics CLI groups
 from ..cli.ai_commands import ai
 from ..cli.ai_writing_commands import ai_writing_commands
@@ -167,7 +165,8 @@ def grants(profile_file: str, min_score: float, limit: Optional[int], output: Op
 
     org = OrganizationProfile(**profile_data)
 
-    # Initialize researcher (would load from database in real implementation)
+    # Lazy import to avoid circular dependency
+    from ..analysis.grant_researcher import GrantResearcher
     researcher = GrantResearcher()
 
     click.echo(f"Searching for grants matching {org.name}...")

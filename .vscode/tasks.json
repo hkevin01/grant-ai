@@ -62,6 +62,139 @@
 			],
 			"isBackground": false,
 			"group": "build"
+		},
+		{
+			"label": "Test CLI Import Fix",
+			"type": "shell",
+			"command": "cd /home/kevin/Projects/grant-ai && python test_cli_import.py",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Test Docker CLI Import Fix",
+			"type": "shell",
+			"command": "cd /home/kevin/Projects/grant-ai && docker build -t grant-ai . && docker run --rm -e DISPLAY=:99 grant-ai python -c \"from grant_ai.cli.ai_commands import ai; print('CLI import successful!')\"",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Test CLI Import Local",
+			"type": "shell",
+			"command": "cd /home/kevin/Projects/grant-ai && PYTHONPATH=/home/kevin/Projects/grant-ai/src python -c \"from grant_ai.cli.ai_commands import ai; print('✅ CLI import successful!')\"",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Install Grant AI Dependencies",
+			"type": "shell",
+			"command": "pip install -e .",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Test CLI Import in Docker",
+			"type": "shell",
+			"command": "docker run --rm grant-ai python -c \"from grant_ai.cli.ai_commands import ai; print('✅ CLI import successful!')\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Rebuild and Test CLI Import",
+			"type": "shell",
+			"command": "docker build --no-cache -t grant-ai . && docker run --rm grant-ai python -c \"from grant_ai.cli.ai_commands import ai; print('✅ CLI import successful!')\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Setup Venv and Test Local Import",
+			"type": "shell",
+			"command": "python3 -m venv .venv && source .venv/bin/activate && pip install -e . && python -c \"from grant_ai.cli.ai_commands import ai; print('✅ Local CLI import successful!')\"",
+			"isBackground": false,
+			"group": "build"
+		},
+		{
+			"label": "Test Local CLI Import Fixed",
+			"type": "shell",
+			"command": "source .venv/bin/activate && python -c \"from grant_ai.cli.ai_commands import ai; print('✅ Local CLI import successful!')\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Install matplotlib and test import",
+			"type": "shell",
+			"command": "source .venv/bin/activate && pip install matplotlib && python -c \"from grant_ai.cli.ai_commands import ai; print('✅ Local CLI import successful!')\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Install seaborn and test import",
+			"type": "shell",
+			"command": "source .venv/bin/activate && pip install seaborn && python -c \"from grant_ai.cli.ai_commands import ai; print('✅ Local CLI import successful!')\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Test Direct ai_commands import",
+			"type": "shell",
+			"command": "source .venv/bin/activate && python -c \"import sys; sys.path.insert(0, 'src'); from grant_ai.cli.ai_commands import ai; print('✅ Direct ai_commands import successful!')\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Install PyQt5 and test complete import",
+			"type": "shell",
+			"command": "source .venv/bin/activate && pip install PyQt5 && python -c \"from grant_ai.cli.ai_commands import ai; print('✅ Complete CLI import successful!')\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Test Complete CLI Import after wv_grants fix",
+			"type": "shell",
+			"command": "source .venv/bin/activate && python -c \"from grant_ai.cli.ai_commands import ai; print('✅ Complete CLI import successful!')\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Test Complete CLI Import after Dict fix",
+			"type": "shell",
+			"command": "source .venv/bin/activate && python -c \"from grant_ai.cli.ai_commands import ai; print('✅ Complete CLI import successful!')\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Reinstall package to clear import cache",
+			"type": "shell",
+			"command": "source .venv/bin/activate && pip install -e . --force-reinstall",
+			"isBackground": false,
+			"group": "install"
+		},
+		{
+			"label": "Test Basic Python",
+			"type": "shell",
+			"command": "source .venv/bin/activate && python -c \"print('Basic Python test successful')\"",
+			"isBackground": false,
+			"group": "test"
+		},
+		{
+			"label": "Clear Python cache",
+			"type": "shell",
+			"command": "find . -name '*.pyc' -delete && find . -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true",
+			"isBackground": false,
+			"group": "clean"
+		},
+		{
+			"label": "Debug __init__.py line 14",
+			"type": "shell",
+			"command": "head -20 src/grant_ai/__init__.py | cat -n",
+			"isBackground": false,
+			"group": "debug"
+		},
+		{
+			"label": "Test CLI import after package reinstall",
+			"type": "shell",
+			"command": "source .venv/bin/activate && python -c \"from grant_ai.cli.ai_commands import ai; print('✅ Complete CLI import successful!')\"",
+			"isBackground": false,
+			"group": "test"
 		}
 	]
 }

@@ -24,7 +24,7 @@ from PyQt5.QtWidgets import (
 )
 
 from grant_ai.gui.material_theme import MaterialStyles, MaterialTheme
-from grant_ai.gui.qt_app import GrantResearchApp
+from grant_ai.gui.qt_app import MainWindow
 
 
 class MaterialCard(QFrame):
@@ -187,7 +187,7 @@ class ModernGrantResearchWindow(QMainWindow):
         super().__init__()
 
         # Initialize the original app logic
-        self.grant_app = GrantResearchApp()
+        self.grant_app = MainWindow()
 
         self.init_ui()
         self.setup_menu_bar()

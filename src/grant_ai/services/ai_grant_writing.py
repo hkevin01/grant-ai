@@ -545,13 +545,14 @@ TOTAL PROJECT COST: $[AMOUNT]"""
     def _generate_fallback_review(self, content: str, review_type: str) -> str:
         """Generate fallback review when AI APIs are not available"""
         word_count = len(content.split())
+        paragraph_count = len(content.split('\n\n'))
 
         basic_feedback = f"""BASIC REVIEW FEEDBACK ({review_type.upper()})
 
 Content Statistics:
 - Word count: {word_count}
 - Character count: {len(content)}
-- Paragraphs: {len(content.split('\n\n'))}
+- Paragraphs: {paragraph_count}
 
 Basic Recommendations:
 1. Review for clarity and conciseness
@@ -560,7 +561,8 @@ Basic Recommendations:
 4. Verify alignment with grant requirements
 5. Consider adding more specific examples
 
-[Note: AI-powered detailed review not available. Please use human reviewers for comprehensive feedback.]"""
+Note: AI-powered detailed review not available. Please use human reviewers for
+comprehensive feedback."""
 
         return basic_feedback
 
