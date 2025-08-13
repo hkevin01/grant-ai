@@ -54,6 +54,8 @@ dev = [
     "pre-commit>=2.20.0",
 ]
 docs = ["sphinx>=5.0.0", "sphinx-rtd-theme>=1.0.0", "myst-parser>=0.18.0"]
+gui = ["PyQt5>=5.15.9"]
+viz = ["matplotlib>=3.7.0", "seaborn>=0.12.0"]
 
 [project.scripts]
 grant-ai = "grant_ai.core.cli:main"
