@@ -24,6 +24,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from grant_ai.models.grant import EligibilityType, FundingType, Grant, GrantStatus
+from grant_ai.utils.headless import fetch_rendered_html
 
 
 class WVGrantScraper:
@@ -690,6 +691,9 @@ class WVGrantScraper:
         for url in urls_to_try:
             try:
                 response = self.session.get(url, timeout=(10, 30))
+                # Some sites block bots; if explicitly forbidden try headless fetch
+                if response.status_code == 403:
+                    raise requests.exceptions.HTTPError("403 Forbidden")
                 response.raise_for_status()
                 soup = BeautifulSoup(response.content, "html.parser")
                 # Find grant containers by common selectors
@@ -705,6 +709,24 @@ class WVGrantScraper:
                     break
             except Exception as e:
                 print(f"Error scraping arts source {url}: {e}")  # noqa: BLE001
+                # Headless fallback when blocked or parsing failed
+                try:
+                    html = fetch_rendered_html(url, timeout=20)
+                    if not html:
+                        continue
+                    soup = BeautifulSoup(html, "html.parser")
+                    containers = soup.find_all(
+                        ["div", "section", "article"],
+                        class_=re.compile(r"grant|funding|opportunity|arts", re.IGNORECASE),
+                    )
+                    for element in containers:
+                        grant = self._parse_arts_grant(element, source_info)
+                        if grant:
+                            grants.append(grant)
+                    if grants:
+                        break
+                except Exception:
+                    continue
         # Add sample grants if scraping fails
         if not grants:
             grants = self._get_sample_education_grants(source_info)
@@ -1028,6 +1050,9 @@ class WVGrantScraper:
         for url in [u for u in urls_to_try if u]:
             try:
                 response = self.session.get(url, timeout=(15, 45))
+                # If forbidden/blocked, try headless fallback
+                if response.status_code == 403:
+                    raise requests.exceptions.HTTPError("403 Forbidden")
                 response.raise_for_status()
                 soup = BeautifulSoup(response.content, "html.parser")
 
@@ -1072,7 +1097,43 @@ class WVGrantScraper:
 
             except requests.exceptions.RequestException as e:  # noqa: BLE001
                 print(f"Request error scraping generic source {url}: {e}")
-                continue
+                # Attempt headless fallback when network request fails or blocked
+                try:
+                    html = fetch_rendered_html(url, timeout=25)
+                    if not html:
+                        continue
+                    soup = BeautifulSoup(html, "html.parser")
+                    grant_keywords = [
+                        "grant",
+                        "funding",
+                        "opportunity",
+                        "program",
+                        "assistance",
+                        "apply",
+                    ]
+                    found_elements = []
+                    for keyword in grant_keywords:
+                        class_elements = soup.find_all(
+                            ["div", "article", "section"], class_=re.compile(keyword, re.IGNORECASE)
+                        )
+                        id_elements = soup.find_all(
+                            ["div", "article", "section"], id=re.compile(keyword, re.IGNORECASE)
+                        )
+                        found_elements.extend(class_elements[:2])
+                        found_elements.extend(id_elements[:2])
+                    headers = soup.find_all(["h1", "h2", "h3", "h4"])
+                    for header in headers:
+                        text = header.get_text().lower()
+                        if any(keyword in text for keyword in grant_keywords):
+                            found_elements.append(header.parent or header)
+                    for element in found_elements[:10]:
+                        grant = self._parse_generic_grant(element, source_info)
+                        if grant:
+                            grants.append(grant)
+                    if grants:
+                        break
+                except Exception:
+                    continue
             except Exception as e:  # noqa: BLE001
                 print(f"Error scraping generic source {url}: {e}")
                 continue
