@@ -42,7 +42,7 @@ def classic():
     try:
         import sys
 
-    from PyQt5.QtWidgets import QApplication  # type: ignore[attr-defined]
+        from PyQt5.QtWidgets import QApplication  # type: ignore[attr-defined]
 
         from grant_ai.gui.qt_app import MainWindow
 
@@ -55,9 +55,12 @@ def classic():
 
         click.echo("📱 Classic interface ready!")
         app.exec_()
+    except ImportError as e:
+        click.echo(f"❌ Missing dependency: {e}")
+        click.echo("💡 Install GUI extras: pip install -e .[gui]")
+        raise click.Abort()
     except Exception as e:
         click.echo(f"❌ Failed to launch classic GUI: {e}")
         raise click.Abort()
 
-        raise click.Abort()
 

@@ -13,24 +13,29 @@ __author__ = "Grant AI Team"
 # from . import analysis, config, gui, models, scrapers, utils
 # from .analysis.grant_researcher import GrantResearcher  # Commented out to avoid circular import
 
-# Core functionality
-from .core import cli, db
+# Keep package import lightweight. Avoid importing heavy optional deps at
+# import time (e.g., analytics pulling in matplotlib). Expose core via lazy
+# __getattr__.
 from .models.ai_company import AICompany
 from .models.grant import Grant
-
-# Main classes for easy access
 from .models.organization import OrganizationProfile
 
 __all__ = [
-    "models",
-    "analysis",
-    "scrapers",
-    "gui",
-    "config",
-    "utils",
-    "cli",
-    "db",
     "OrganizationProfile",
     "Grant",
     "AICompany",
 ]
+
+# Lazy attribute access for optional heavy modules
+
+
+def __getattr__(name: str):  # pragma: no cover - simple lazy import shim
+    if name == "cli":
+        from .core import cli as _cli
+
+        return _cli
+    if name == "db":
+        from .core import db as _db
+
+        return _db
+    raise AttributeError(f"module 'grant_ai' has no attribute {name!r}")

@@ -188,8 +188,19 @@ cd grant-ai
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
+# Install dependencies (with virtualenv to avoid PEP 668 issues)
 pip install -e ".[dev]"
+
+# Optional extras
+# GUI dependencies (PyQt5)
+pip install -e ".[gui]"
+# Visualization extras
+pip install -e ".[viz]"
+
+Note on PEP 668 (externally managed environment): on some Linux distros (Ubuntu/Debian
+Bookworm and derivatives), system Python is marked as externally managed. Always use a
+virtual environment (python -m venv .venv && source .venv/bin/activate) or use the
+provided ./run.sh which creates and uses a venv for you.
 
 # Install pre-commit hooks
 pre-commit install
