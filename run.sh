@@ -161,16 +161,10 @@ PY
 
 	wv-offline)
 		# Deterministic WV scraper run without network
-		ensure_venv
-		# Ensure package is installed for import resolution (non-fatal)
-		pip install -e ".[dev]" >/dev/null 2>&1 || pip install -e . >/dev/null 2>&1 || true
-		python - <<'PY'
-from grant_ai.scrapers.wv_grants import scrape_wv_grants
-grants = scrape_wv_grants(offline=True, max_results=2)
-print(f"Offline WV grants total: {len(grants)}")
-for g in grants[:10]:
-    print(f"- {g.title} | {g.funder_name}")
-PY
+		# No install needed; use source path and dry-run for fast, deterministic output
+		PYTHONPATH="src${PYTHONPATH:+:$PYTHONPATH}" \
+			WV_OFFLINE_DRYRUN=1 \
+			python -u scripts/wv_offline.py
 		;;
 
 	run)

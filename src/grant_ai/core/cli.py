@@ -7,18 +7,47 @@ from typing import Optional
 
 import click
 
-# Import AI and Analytics CLI groups
-from ..cli.ai_commands import ai
-from ..cli.ai_writing_commands import ai_writing_commands
-from ..cli.analytics_commands import analytics
-from ..models.organization import FocusArea, OrganizationProfile, ProgramType
-from ..services.grant_writing import GrantWritingAssistant
-from ..services.organization_scraper import OrganizationScraper
-from ..services.usaspending_scraper import USASpendingScraper
-from ..utils.questionnaire_manager import QuestionnaireManager
-from ..utils.reporting import ReportGenerator
-from ..utils.template_manager import TemplateManager
-from ..utils.tracking_manager import TrackingManager
+# Make ALL imports lazy to avoid heavy dependencies at CLI load time
+
+def _get_organization_models():
+    """Lazy import organization models."""
+    from ..models.organization import FocusArea, OrganizationProfile, ProgramType
+    return FocusArea, OrganizationProfile, ProgramType
+
+def _get_grant_writing_assistant():
+    """Lazy import grant writing assistant."""
+    from ..services.grant_writing import GrantWritingAssistant
+    return GrantWritingAssistant
+
+def _get_organization_scraper():
+    """Lazy import organization scraper."""
+    from ..services.organization_scraper import OrganizationScraper
+    return OrganizationScraper
+
+def _get_usaspending_scraper():
+    """Lazy import USA spending scraper."""
+    from ..services.usaspending_scraper import USASpendingScraper
+    return USASpendingScraper
+
+def _get_questionnaire_manager():
+    """Lazy import questionnaire manager."""
+    from ..utils.questionnaire_manager import QuestionnaireManager
+    return QuestionnaireManager
+
+def _get_reporting():
+    """Lazy import reporting."""
+    from ..utils.reporting import ReportGenerator
+    return ReportGenerator
+
+def _get_template_manager():
+    """Lazy import template manager."""
+    from ..utils.template_manager import TemplateManager
+    return TemplateManager
+
+def _get_tracking_manager():
+    """Lazy import tracking manager."""
+    from ..utils.tracking_manager import TrackingManager
+    return TrackingManager
 
 
 @click.group()
@@ -40,14 +69,12 @@ def profile():
 @click.option(
     "--focus-area",
     multiple=True,
-    type=click.Choice([area.value for area in FocusArea]),
-    help="Organization focus areas",
+    help="Organization focus areas (e.g., music_education, art_education)",
 )
 @click.option(
     "--program-type",
     multiple=True,
-    type=click.Choice([ptype.value for ptype in ProgramType]),
-    help="Program types offered",
+    help="Program types offered (e.g., after_school, summer_camps)",
 )
 @click.option("--budget", type=int, help="Annual budget in USD")
 @click.option("--location", help="Primary location")
@@ -1914,7 +1941,28 @@ def deadlines():
         click.echo(f"❌ Error getting deadlines: {e}")
 
 
-# Register AI and Analytics command groups
-main.add_command(ai)
-main.add_command(ai_writing_commands)
-main.add_command(analytics)
+# Register AI and Analytics command groups with lazy imports
+def _register_ai_commands():
+    from ..cli.ai_commands import ai
+    from ..cli.ai_writing_commands import ai_writing_commands
+    main.add_command(ai)
+    main.add_command(ai_writing_commands)
+
+
+def _register_analytics():
+    from ..cli.analytics_commands import analytics
+    main.add_command(analytics)
+
+
+# Register command groups on first access
+try:
+    _register_ai_commands()
+except ImportError:
+    # Skip AI commands if dependencies not available
+    pass
+
+try:
+    _register_analytics()
+except ImportError:
+    # Skip analytics if dependencies not available
+    pass

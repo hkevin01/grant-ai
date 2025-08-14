@@ -16,14 +16,15 @@ __author__ = "Grant AI Team"
 # Keep package import lightweight. Avoid importing heavy optional deps at
 # import time (e.g., analytics pulling in matplotlib). Expose core via lazy
 # __getattr__.
-from .models.ai_company import AICompany
-from .models.grant import Grant
-from .models.organization import OrganizationProfile
+
+# Remove direct imports to make package import lightweight
+# from .models.ai_company import AICompany
+# from .models.grant import Grant
+# from .models.organization import OrganizationProfile
 
 __all__ = [
-    "OrganizationProfile",
-    "Grant",
-    "AICompany",
+    # Removed exports to keep package import lightweight
+    # Items can be imported directly from submodules as needed
 ]
 
 # Lazy attribute access for optional heavy modules
